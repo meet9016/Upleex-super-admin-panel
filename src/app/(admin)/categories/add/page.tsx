@@ -27,6 +27,7 @@ const initialCategories = [
   { id: 4, name: "Books", image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=100&h=100&fit=crop", count: 45, status: "Active" },
 ];
 
+
 interface CategoryRow {
   id: number;
   name: string;
