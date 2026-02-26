@@ -31,6 +31,7 @@ export function DataTable<TData>({
   height = "100%",
   rowSelection = "multiple",
 }: DataTableProps<TData>) {
+  console.log("🚀 ~ DataTable ~ rowData:", rowData)
   return (
     <div 
       className={cn("ag-theme-quartz w-full", className)} 

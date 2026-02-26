@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Loader2, Search, Edit, Trash } from "lucide-react";
+import { Plus, Loader2, Edit, Trash } from "lucide-react";
+import { MdSearch } from "react-icons/md";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,64 +14,188 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ColDef } from "ag-grid-community";
 import { DataTable } from "@/components/ui/DataTable";
 import { cn } from "@/lib/utils";
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  image: z.any().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
 
-const initialCategories = [
-  { id: 1, name: "Electronics", image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=100&h=100&fit=crop", count: 124, status: "Active" },
-  { id: 2, name: "Fashion", image: "https://images.unsplash.com/photo-1445205170230-053b830c6050?w=100&h=100&fit=crop", count: 85, status: "Active" },
-  { id: 3, name: "Home & Garden", image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=100&h=100&fit=crop", count: 62, status: "Inactive" },
-  { id: 4, name: "Books", image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=100&h=100&fit=crop", count: 45, status: "Active" },
-];
-
-
 interface CategoryRow {
-  id: number;
-  name: string;
-  image: string;
-  count: number;
-  status: string;
+  _id: string;
+  id?: string;
+  categories_name: string;
+  categories_id?: string;
+  image?: string;
+  subcategories?: any[];
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
 }
 
 export default function AddCategoryPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState(initialCategories);
+  const [isFetching, setIsFetching] = useState(false);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const debouncedSearch = useDebounce(searchText, 600);
+
+  // Fetch categories with search
+  const fetchCategories = async (search?: string) => {
+    setIsFetching(true);
+    try {
+      const params: any = {};
+      
+      if (search) params.search = search;
+      
+      console.log("🚀 ~ API Request Params:", params);
+      
+      const res = await api.get(endPointApi.getCategoryList, { params });
+      console.log("🚀 ~ API Response:", res);
+      
+      if (res?.data?.success && res?.data?.data) {
+        setCategories(res.data.data);
+      } else if (res?.data?.data) {
+        setCategories(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error("Failed to fetch categories");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Search effect
+  useEffect(() => {
+    fetchCategories(debouncedSearch);
+  }, [debouncedSearch]);
+
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return "";
+    
+    if (imagePath.startsWith('http')) return imagePath;
+    
+    if (imagePath.startsWith('/uploads')) {
+      return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
+    }
+    
+    return imagePath;
+  };
 
   const columnDefs: ColDef<CategoryRow>[] = [
     { 
-      field: "name", 
+      field: "categories_name", 
       headerName: "Category Name", 
       flex: 1,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' } 
     },
-    { 
+    {
       field: "image", 
       headerName: "Image", 
       width: 100,
+      cellRenderer: (params: { value: string }) => {
+        const imageUrl = getImageUrl(params.value);
+        
+        return (
+          <div className="flex items-center h-full">
+            <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
+              {imageUrl ? (
+                <img 
+                  src={imageUrl} 
+                  alt="Category" 
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    if (!e.currentTarget.src.includes('no-image')) {
+                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f1f5f9'/%3E%3Ctext x='20' y='20' font-family='Arial' font-size='10' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo img%3C/text%3E%3C/svg%3E";
+                    }
+                  }}
+                />
+              ) : (
+                <div className="h-full w-full bg-slate-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+                    <rect width="40" height="40" fill="#f1f5f9"/>
+                    <text x="20" y="20" fontFamily="Arial" fontSize="10" fill="#94a3b8" textAnchor="middle" dominantBaseline="middle">
+                      No img
+                    </text>
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      field: "subcategories",
+      headerName: "Sub Categories",
+      width: 130,
+      valueGetter: (params) => params.data?.subcategories?.length || 0,
+      cellStyle: { textAlign: "center" }
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 100,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full">
-          <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
-            <img src={params.value} alt="Category" className="h-full w-full object-cover" />
-          </div>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            params.value === 'Active' 
+              ? 'bg-green-100 text-green-700' 
+              : 'bg-yellow-100 text-yellow-700'
+          }`}>
+            {params.value || 'Active'}
+          </span>
         </div>
       )
+    },
+    {
+      field: "created_at",
+      headerName: "Created",
+      width: 120,
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : 'N/A',
+      cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
       width: 110,
       sortable: false,
       filter: false,
-      cellRenderer: () => (
+      cellRenderer: (params: any) => (
         <div className="flex items-center justify-start gap-2 h-full">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+            onClick={() => handleEdit(params.data)}
+          >
             <Edit size={16} />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            onClick={() => handleDelete(params.data)}
+          >
             <Trash size={16} />
           </Button>
         </div>
@@ -81,26 +207,121 @@ export default function AddCategoryPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
   });
 
+  const watchImage = watch('image');
+
+  useEffect(() => {
+    if (watchImage && watchImage[0]) {
+      const file = watchImage[0];
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewImage(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setPreviewImage(null);
+    }
+  }, [watchImage]);
+
   const onSubmit = async (data: CategoryFormValues) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const newCategory = {
-      id: categories.length + 1,
-      name: data.name,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop",
-      description: data.description,
-      count: 0,
-      status: "Active"
-    };
-    setCategories([newCategory, ...categories]);
-    setIsLoading(false);
+    try {
+      const formData = new FormData();
+      formData.append("categories_name", data.name);
+      
+      if (data.image && data.image[0]) {
+        formData.append("image", data.image[0]);
+      }
+
+      let res;
+      if (editingId) {
+        res = await api.put(
+          `${endPointApi.updateCategory}/${editingId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        
+        if (res?.data) {
+          toast.success('Category updated successfully');
+          setEditingId(null);
+        }
+      } else {
+        res = await api.post(
+          endPointApi.postCategoryList,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        
+        if (res?.data?.success || res?.data?.status === 200) {
+          toast.success(res?.data?.message || 'Category created successfully');
+        }
+      }
+
+      if (res?.data) {
+        reset();
+        setPreviewImage(null);
+        await fetchCategories(debouncedSearch);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(
+        error?.response?.data?.message || 
+        (editingId ? 'Failed to update category' : 'Failed to create category')
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEdit = (category: CategoryRow) => {
+    const id = category._id || category.categories_id;
+    setEditingId(String(id));
+    setValue('name', category.categories_name || '');
+    setValue('image', '');
+    setPreviewImage(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (category: CategoryRow) => {
+    if (confirm("Are you sure you want to delete this category?")) {
+      try {
+        const id = category._id || category.categories_id;
+        // Add delete API endpoint when available
+        toast.success("Delete functionality coming soon");
+        // await api.delete(`${endPointApi.deleteCategory}/${id}`);
+        // await fetchCategories(debouncedSearch);
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        toast.error("Failed to delete category");
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setPreviewImage(null);
     reset();
   };
+
+  const handleClearSearch = () => {
+    setSearchText("");
+  };
+
+  const currentEditingCategory = editingId 
+    ? categories.find(c => c._id === editingId || c.categories_id === editingId)
+    : null;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -114,48 +335,107 @@ export default function AddCategoryPage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-24 border-slate-100 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">Add New Category</CardTitle>
+              <CardTitle className="text-lg">
+                {editingId ? 'Edit Category' : 'Add New Category'}
+              </CardTitle>
               <CardDescription>
-                Create a top-level category for organization.
+                {editingId 
+                  ? 'Update the category details' 
+                  : 'Create a top-level category for organization.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-semibold text-slate-700">Name</label>
+                  <label htmlFor="name" className="text-sm font-semibold text-slate-700">
+                    Name
+                  </label>
                   <Input
                     id="name"
-                    placeholder="e.g. Smartphones"
+                    placeholder="e.g. Electronics"
                     className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("name")}
                     error={errors.name?.message}
                   />
                 </div>
+                
+                {/* Image Upload Field */}
                 <div className="space-y-2">
-                  <label htmlFor="description" className="text-sm font-semibold text-slate-700">Description</label>
-                  <textarea
-                    id="description"
-                    className="flex min-h-[100px] w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
-                    placeholder="Briefly describe what goes here..."
-                    {...register("description")}
-                  />
-                  {errors.description && (
-                    <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+                  <label htmlFor="image" className="text-sm font-semibold text-slate-700">
+                    Category Image
+                  </label>
+                  
+                  {editingId && currentEditingCategory?.image && !previewImage && (
+                    <div className="mb-3">
+                      <p className="text-xs text-slate-500 mb-2">Current Image:</p>
+                      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
+                        <img 
+                          src={getImageUrl(currentEditingCategory.image)}
+                          alt="Current category"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23f1f5f9'/%3E%3Ctext x='48' y='48' font-family='Arial' font-size='12' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
+                          }}
+                        />
+                      </div>
+                    </div>
                   )}
+
+                  {previewImage && (
+                    <div className="mb-3">
+                      <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
+                      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
+                        <img 
+                          src={previewImage}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+                    {...register("image")}
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {editingId 
+                      ? 'Upload a new image to replace the existing one' 
+                      : 'Upload an image for the category (JPEG, PNG, etc.)'}
+                  </p>
                 </div>
-                <Button type="submit" className="w-full h-11 rounded-xl shadow-lg shadow-primary/20" disabled={isLoading}>
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 rounded-xl shadow-lg shadow-primary/20" 
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
+                      {editingId ? 'Updating...' : 'Adding...'}
                     </>
                   ) : (
                     <>
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Category
+                      {editingId ? 'Update Category' : 'Add Category'}
                     </>
                   )}
                 </Button>
+                
+                {editingId && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full h-10 mt-2" 
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel Edit
+                  </Button>
+                )}
               </form>
             </CardContent>
           </Card>
@@ -166,20 +446,74 @@ export default function AddCategoryPage() {
           <Card className="border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <CardTitle className="text-lg">Category List</CardTitle>
-                <div className="flex items-center gap-2">
+                <div>
+                  <CardTitle className="text-lg">
+                    Category List
+                  </CardTitle>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Total: {categories.length} categories
+                    {searchText && ` • Searching: "${searchText}"`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Search Input */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                    <Input placeholder="Search..." className="pl-9 h-9 w-48 bg-white border-slate-100 text-xs rounded-lg" />
+                    <input
+                      type="text"
+                      placeholder="Search categories..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  w-64 text-sm"
+                    />
+                    <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    {searchText && (
+                      <button
+                        onClick={handleClearSearch}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              <DataTable
-                rowData={categories}
-                columnDefs={columnDefs}
-              />
+              {isFetching ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+                    <p className="text-sm text-slate-500">
+                      {searchText ? 'Searching...' : 'Loading categories...'}
+                    </p>
+                  </div>
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                  <div className="text-center">
+                    <p className="text-slate-500 mb-2">
+                      {searchText
+                        ? `No categories found matching "${searchText}"`
+                        : 'No categories found'}
+                    </p>
+                    {searchText && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleClearSearch}
+                        className="text-xs"
+                      >
+                        Clear Search
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <DataTable
+                  rowData={categories}
+                  columnDefs={columnDefs}
+                />
+              )}
             </CardContent>
           </Card>
         </div>

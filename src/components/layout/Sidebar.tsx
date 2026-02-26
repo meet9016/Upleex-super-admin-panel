@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import Image from "next/image";
 
 const menuItems = [
   { group: "Analytics", items: [
@@ -50,20 +51,17 @@ export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: Sid
     >
       <div className="flex h-16 items-center justify-between px-6 border-b">
         {(!isCollapsed || isMobile) && (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center">
-              <div className="flex flex-col">
-                <div className="h-3 w-6 bg-[#18181b] rounded-t-sm relative">
-                  <div className="absolute top-0 left-0 h-full w-2 bg-[#7c3aed] rounded-tl-sm"></div>
-                </div>
-                <div className="h-3 w-6 bg-[#18181b] rounded-b-sm"></div>
-              </div>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-[#18181b] overflow-hidden">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-400">upleex</span>
-            </span>
-          </div>
-        )}
+  <div className="flex items-center gap-2">
+    <Image
+      src="/logo.png"
+      alt="Upleex Logo"
+      width={120}
+      height={40}
+      priority
+      className="object-contain"
+    />
+  </div>
+)}
         {!isMobile && (
           <Button
             variant="ghost"
