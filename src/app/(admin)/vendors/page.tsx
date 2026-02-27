@@ -187,9 +187,6 @@ export default function VendorsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-slate-900">Vendor Requests</h2>
-                    <p className="text-muted-foreground mt-1 text-slate-500">
-                        Review and manage vendor KYC applications.
-                    </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Button
@@ -205,16 +202,6 @@ export default function VendorsPage() {
 
             <div className="grid gap-6">
                 <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
-                    <CardHeader className="bg-white border-b border-slate-50 pb-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="text-xl font-bold text-slate-800">All Vendors</CardTitle>
-                                <CardDescription>
-                                    List of all vendors registered in the system.
-                                </CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
                     <CardContent className="p-0">
                         <div className="h-[600px] w-full relative">
                             {isLoading ? (

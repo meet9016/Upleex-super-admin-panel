@@ -387,7 +387,6 @@ const columnDefs: ColDef<BlogRow>[] = [
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Blog Management</h2>
-          <p className="text-muted-foreground mt-1 text-slate-500">Create and manage your blog posts.</p>
         </div>
       </div>
 
@@ -399,11 +398,6 @@ const columnDefs: ColDef<BlogRow>[] = [
               <CardTitle className="text-lg">
                 {editingId ? 'Edit Blog Post' : 'New Blog Post'}
               </CardTitle>
-              <CardDescription>
-                {editingId 
-                  ? 'Update your blog post details' 
-                  : 'Create a new article for your audience.'}
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
