@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Bell, Search, User, Menu, Globe } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +10,17 @@ interface NavbarProps {
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
+ const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user_info");
+
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUserName(parsedUser?.admin?.name || "");
+    }
+  }, []);
+  
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center border-b bg-white/80 px-4 backdrop-blur-md lg:px-8 border-slate-100">
       <Button
@@ -47,7 +58,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
         <div className="flex items-center gap-3 pr-2 group cursor-pointer">
           <div className="hidden text-right md:block">
-            <p className="text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors leading-none">Admin User</p>
+            <p className="text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors leading-none"> {userName}</p>
             <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-1">Super Admin</p>
           </div>
           <div className="relative">

@@ -1,23 +1,26 @@
-import React from "react";
-import { 
-  Users, 
-  ShoppingBag, 
-  TrendingUp, 
+"use client";
+
+import React, { useEffect, useState } from "react";
+import {
+  Users,
+  ShoppingBag,
+  TrendingUp,
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
   MoreHorizontal
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 const stats = [
   {
@@ -67,6 +70,21 @@ const recentOrders = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
@@ -146,11 +164,10 @@ export default function DashboardPage() {
                     <TableCell>{order.product}</TableCell>
                     <TableCell>{order.amount}</TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        order.status === "Completed" ? "bg-green-100 text-green-800" :
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${order.status === "Completed" ? "bg-green-100 text-green-800" :
                         order.status === "Processing" ? "bg-blue-100 text-blue-800" :
-                        "bg-yellow-100 text-yellow-800"
-                      }`}>
+                          "bg-yellow-100 text-yellow-800"
+                        }`}>
                         {order.status}
                       </span>
                     </TableCell>
@@ -160,7 +177,7 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
-        
+
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>

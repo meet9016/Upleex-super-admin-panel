@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const menuItems = [
   {
@@ -48,6 +49,13 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    router.push("/login");
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_info");
+  };
 
   return (
     <aside
@@ -140,7 +148,7 @@ export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: Sid
             {(!isCollapsed || isMobile) && <span>Settings</span>}
           </Link>
           <button
-            onClick={isMobile ? onToggle : undefined}
+            onClick={handleLogout}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-all w-full text-left group",
               isCollapsed && !isMobile && "justify-center px-2"
