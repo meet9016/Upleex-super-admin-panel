@@ -4,6 +4,17 @@ export interface EndPointApi {
     register: string;
     logout: string;
 
+    // Admin Auth
+    adminLogin: string;
+    adminRegister: string;
+
+    // Vendor Management
+    getVendorList: string;
+    updateVendorStatus: string;
+
+    // Dropdowns
+    getDropdowns: string;
+
     // Categories CRUD
     getCategoryList: string;
     postCategoryList: string;
@@ -31,12 +42,22 @@ export interface EndPointApi {
     deleteFAQ: string;
 }
 
-// Define and export the API endpoint object
 const endPointApi: EndPointApi = {
     sendOtp: 'vendor/auth/send-otp',
     login: 'vendor/auth/vendor-login',
     register: 'auth/register',
     logout: 'auth/logout',
+
+    // Admin Auth
+    adminLogin: 'admin/login',
+    adminRegister: 'admin/register',
+
+    // Vendor Management
+    getVendorList: 'vendor-kyc',
+    updateVendorStatus: 'change-status',
+
+    // Dropdowns
+    getDropdowns: 'dropdowns',
 
     // Categories CRUD
     getCategoryList: 'categories/getall',

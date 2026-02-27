@@ -36,34 +36,34 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #09090b;
 
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #09090b;
 
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover-foreground: #09090b;
 
-  --primary: #7c3aed;
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
 
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
 
   --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #fafafa;
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #7c3aed;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #4f46e5;
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -76,7 +76,7 @@
   --popover: #0f172a;
   --popover-foreground: #f8fafc;
 
-  --primary: #6366f1;
+  --primary: #3641f5;
   --primary-foreground: #ffffff;
 
   --secondary: #1e293b;
@@ -93,7 +93,7 @@
 
   --border: #334155;
   --input: #334155;
-  --ring: #6366f1;
+  --ring: #3641f5;
 }
 
 @layer base {
@@ -103,11 +103,11 @@
 
   /* AG Grid Custom Branding */
   .ag-theme-quartz {
-    --ag-primary-color: #7c3aed;
+    --ag-primary-color: #465fff;
     --ag-header-background-color: #f8fafc;
     --ag-header-foreground-color: #475569;
-    --ag-row-hover-color: #f1f5f9;
-    --ag-selected-row-parent-background-color: #f5f3ff;
+    --ag-row-hover-color: #ecf3ff;
+    --ag-selected-row-parent-background-color: #ecf3ff;
     --ag-font-family: inherit;
     --ag-font-size: 13px;
     --ag-border-color: #f1f5f9;
@@ -129,4 +129,10 @@
     background-color: var(--background);
     color: var(--foreground);
   }
+
+  .btn-primary {
+    @apply px-6 py-2.5 text-white font-semibold rounded-xl shadow-md transition-all duration-300 active:scale-95;
+    background: linear-gradient(to right, #6366f1, #0ea5e9);
+  }
+
 }

@@ -343,7 +343,7 @@ export default function FAQPage() {
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
-                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20" 
+                    className="flex-1 h-11 rounded-xl btn-primary" 
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (

@@ -526,7 +526,6 @@ export default function AddSubCategoryPage() {
                     id="image"
                     type="file"
                     accept="image/*"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                     {...register("image")}
                   />
                   <p className="text-xs text-slate-500 mt-1">
@@ -539,7 +538,7 @@ export default function AddSubCategoryPage() {
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
-                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20" 
+                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary" 
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Loader2, Edit, Trash } from "lucide-react";
+import { Plus, Loader2, Edit, Trash, X } from "lucide-react";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 
@@ -53,6 +53,11 @@ export default function AddCategoryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  // Delete popup states
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const debouncedSearch = useDebounce(searchText, 600);
 
   // Fetch categories with search
@@ -60,14 +65,14 @@ export default function AddCategoryPage() {
     setIsFetching(true);
     try {
       const params: any = {};
-      
+
       if (search) params.search = search;
-      
+
       console.log("🚀 ~ API Request Params:", params);
-      
+
       const res = await api.get(endPointApi.getCategoryList, { params });
       console.log("🚀 ~ API Response:", res);
-      
+
       if (res?.data?.success && res?.data?.data) {
         setCategories(res.data.data);
       } else if (res?.data?.data) {
@@ -92,37 +97,37 @@ export default function AddCategoryPage() {
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "";
-    
+
     if (imagePath.startsWith('http')) return imagePath;
-    
+
     if (imagePath.startsWith('/uploads')) {
       return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
     }
-    
+
     return imagePath;
   };
 
   const columnDefs: ColDef<CategoryRow>[] = [
-    { 
-      field: "categories_name", 
-      headerName: "Category Name", 
+    {
+      field: "categories_name",
+      headerName: "Category Name",
       flex: 1,
-      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' } 
+      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
-      field: "image", 
-      headerName: "Image", 
+      field: "image",
+      headerName: "Image",
       width: 100,
       cellRenderer: (params: { value: string }) => {
         const imageUrl = getImageUrl(params.value);
-        
+
         return (
           <div className="flex items-center h-full">
             <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
               {imageUrl ? (
-                <img 
-                  src={imageUrl} 
-                  alt="Category" 
+                <img
+                  src={imageUrl}
+                  alt="Category"
                   className="h-full w-full object-cover"
                   onError={(e) => {
                     if (!e.currentTarget.src.includes('no-image')) {
@@ -133,7 +138,7 @@ export default function AddCategoryPage() {
               ) : (
                 <div className="h-full w-full bg-slate-100 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-                    <rect width="40" height="40" fill="#f1f5f9"/>
+                    <rect width="40" height="40" fill="#f1f5f9" />
                     <text x="20" y="20" fontFamily="Arial" fontSize="10" fill="#94a3b8" textAnchor="middle" dominantBaseline="middle">
                       No img
                     </text>
@@ -158,11 +163,10 @@ export default function AddCategoryPage() {
       width: 100,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            params.value === 'Active' 
-              ? 'bg-green-100 text-green-700' 
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${params.value === 'Active'
+              ? 'bg-green-100 text-green-700'
               : 'bg-yellow-100 text-yellow-700'
-          }`}>
+            }`}>
             {params.value || 'Active'}
           </span>
         </div>
@@ -182,19 +186,19 @@ export default function AddCategoryPage() {
       filter: false,
       cellRenderer: (params: any) => (
         <div className="flex items-center justify-start gap-2 h-full">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
             onClick={() => handleEdit(params.data)}
           >
             <Edit size={16} />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-            onClick={() => handleDelete(params.data)}
+            onClick={() => handleDeleteClick(params.data)}
           >
             <Trash size={16} />
           </Button>
@@ -232,7 +236,7 @@ export default function AddCategoryPage() {
     try {
       const formData = new FormData();
       formData.append("categories_name", data.name);
-      
+
       if (data.image && data.image[0]) {
         formData.append("image", data.image[0]);
       }
@@ -248,7 +252,7 @@ export default function AddCategoryPage() {
             },
           }
         );
-        
+
         if (res?.data) {
           toast.success('Category updated successfully');
           setEditingId(null);
@@ -263,7 +267,7 @@ export default function AddCategoryPage() {
             },
           }
         );
-        
+
         if (res?.data?.success || res?.data?.status === 200) {
           toast.success(res?.data?.message || 'Category created successfully');
         }
@@ -277,7 +281,7 @@ export default function AddCategoryPage() {
     } catch (error: any) {
       console.error("Error:", error);
       toast.error(
-        error?.response?.data?.message || 
+        error?.response?.data?.message ||
         (editingId ? 'Failed to update category' : 'Failed to create category')
       );
     } finally {
@@ -294,19 +298,39 @@ export default function AddCategoryPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (category: CategoryRow) => {
-    if (confirm("Are you sure you want to delete this category?")) {
-      try {
-        const id = category._id || category.categories_id;
-        // Add delete API endpoint when available
-        toast.success("Delete functionality coming soon");
-        // await api.delete(`${endPointApi.deleteCategory}/${id}`);
-        // await fetchCategories(debouncedSearch);
-      } catch (error) {
-        console.error("Error deleting category:", error);
-        toast.error("Failed to delete category");
-      }
+  // Delete click handler - opens popup
+  const handleDeleteClick = (category: CategoryRow) => {
+    setCategoryToDelete(category);
+    setShowDeletePopup(true);
+  };
+
+  // Confirm delete handler
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const id = categoryToDelete._id || categoryToDelete.categories_id;
+
+      await api.delete(`${endPointApi.deleteCategory}/${id}`);
+      toast.success("Category deleted successfully");
+      await fetchCategories(debouncedSearch);
+
+      // Close popup
+      setShowDeletePopup(false);
+      setCategoryToDelete(null);
+    } catch (error: any) {
+      console.error("Error deleting category:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete category");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  // Cancel delete handler
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setCategoryToDelete(null);
   };
 
   const handleCancelEdit = () => {
@@ -319,7 +343,7 @@ export default function AddCategoryPage() {
     setSearchText("");
   };
 
-  const currentEditingCategory = editingId 
+  const currentEditingCategory = editingId
     ? categories.find(c => c._id === editingId || c.categories_id === editingId)
     : null;
 
@@ -339,8 +363,8 @@ export default function AddCategoryPage() {
                 {editingId ? 'Edit Category' : 'Add New Category'}
               </CardTitle>
               <CardDescription>
-                {editingId 
-                  ? 'Update the category details' 
+                {editingId
+                  ? 'Update the category details'
                   : 'Create a top-level category for organization.'}
               </CardDescription>
             </CardHeader>
@@ -358,18 +382,17 @@ export default function AddCategoryPage() {
                     error={errors.name?.message}
                   />
                 </div>
-                
+
                 {/* Image Upload Field */}
                 <div className="space-y-2">
                   <label htmlFor="image" className="text-sm font-semibold text-slate-700">
                     Category Image
                   </label>
-                  
+
                   {editingId && currentEditingCategory?.image && !previewImage && (
                     <div className="mb-3">
-                      <p className="text-xs text-slate-500 mb-2">Current Image:</p>
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img 
+                        <img
                           src={getImageUrl(currentEditingCategory.image)}
                           alt="Current category"
                           className="w-full h-full object-cover"
@@ -385,7 +408,7 @@ export default function AddCategoryPage() {
                     <div className="mb-3">
                       <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img 
+                        <img
                           src={previewImage}
                           alt="Preview"
                           className="w-full h-full object-cover"
@@ -393,24 +416,23 @@ export default function AddCategoryPage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <Input
                     id="image"
                     type="file"
                     accept="image/*"
-                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                     {...register("image")}
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    {editingId 
-                      ? 'Upload a new image to replace the existing one' 
+                    {editingId
+                      ? 'Upload a new image to replace the existing one'
                       : 'Upload an image for the category (JPEG, PNG, etc.)'}
                   </p>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-11 rounded-xl shadow-lg shadow-primary/20" 
+                <Button
+                  type="submit"
+                  className="w-full h-11 rounded-xl btn-primary"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -425,12 +447,12 @@ export default function AddCategoryPage() {
                     </>
                   )}
                 </Button>
-                
+
                 {editingId && (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="w-full h-10 mt-2" 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-10 mt-2"
                     onClick={handleCancelEdit}
                   >
                     Cancel Edit
@@ -463,7 +485,7 @@ export default function AddCategoryPage() {
                       placeholder="Search categories..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500  w-64 text-sm"
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
                     />
                     <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     {searchText && (
@@ -497,9 +519,9 @@ export default function AddCategoryPage() {
                         : 'No categories found'}
                     </p>
                     {searchText && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleClearSearch}
                         className="text-xs"
                       >
@@ -518,6 +540,75 @@ export default function AddCategoryPage() {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && categoryToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Category</h3>
+              <button
+                onClick={handleCancelDelete}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center space-x-4 mb-4">
+                {categoryToDelete.image && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+                    <img
+                      src={getImageUrl(categoryToDelete.image)}
+                      alt={categoryToDelete.categories_name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f1f5f9'/%3E%3Ctext x='32' y='32' font-family='Arial' font-size='10' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo img%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
+                  </div>
+                )}
+                <div>
+                  <p className="text-gray-700">
+                    Are you sure you want to delete <span className="font-semibold">"{categoryToDelete.categories_name}"</span>?
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    This action cannot be undone. All subcategories under this category will also be affected.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelDelete}
+                className="px-6"
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-6 bg-red-600 hover:bg-red-700 text-white"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Category'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
