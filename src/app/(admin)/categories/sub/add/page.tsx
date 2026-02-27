@@ -428,7 +428,6 @@ export default function AddSubCategoryPage() {
 
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
-        <p className="text-muted-foreground mt-1 text-slate-500">Manage deeper levels of your product hierarchy.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -442,11 +441,6 @@ export default function AddSubCategoryPage() {
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
               </div>
-              <CardDescription>
-                {editingSubCategory 
-                  ? "Update the selected sub-category" 
-                  : "Link a new sub-category to a parent."}
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
