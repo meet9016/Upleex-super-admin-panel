@@ -470,7 +470,6 @@ export default function AddSubCategoryPage() {
 
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
-        <p className="text-muted-foreground mt-1 text-slate-500">Manage deeper levels of your product hierarchy.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -480,7 +479,7 @@ export default function AddSubCategoryPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">
+                <CardTitle className="text-lg">Z
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
               </div>

@@ -366,7 +366,6 @@ export default function AddCategoryPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Categories</h2>
-        <p className="text-muted-foreground mt-1 text-slate-500">Manage your product categories and hierarchy.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -377,11 +376,6 @@ export default function AddCategoryPage() {
               <CardTitle className="text-lg">
                 {editingId ? 'Edit Category' : 'Add New Category'}
               </CardTitle>
-              <CardDescription>
-                {editingId
-                  ? 'Update the category details'
-                  : 'Create a top-level category for organization.'}
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

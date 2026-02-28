@@ -426,7 +426,6 @@ export default function BlogPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Blog Management</h2>
-          <p className="text-muted-foreground mt-1 text-slate-500">Create and manage your blog posts.</p>
         </div>
       </div>
 
