@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Plus, Loader2, Edit, Trash, X } from "lucide-react";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
+import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -110,24 +111,17 @@ export default function AddCategoryPage() {
   const columnDefs: ColDef<CategoryRow>[] = [
     {
       field: "categories_name",
-      headerName: "Category Name",
-      flex: 1,
-      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
-    },
-    {
-      field: "image",
-      headerName: "Image",
-      width: 100,
-      cellRenderer: (params: { value: string }) => {
-        const imageUrl = getImageUrl(params.value);
-
+      headerName: "Category",
+      flex: 2,
+      cellRenderer: (params: any) => {
+        const imageUrl = getImageUrl(params.data.image);
         return (
-          <div className="flex items-center h-full">
-            <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
+          <div className="flex items-center gap-3 h-full py-2">
+            <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
               {imageUrl ? (
                 <img
                   src={imageUrl}
-                  alt="Category"
+                  alt={params.value}
                   className="h-full w-full object-cover"
                   onError={(e) => {
                     if (!e.currentTarget.src.includes('no-image')) {
@@ -146,6 +140,7 @@ export default function AddCategoryPage() {
                 </div>
               )}
             </div>
+            <span className="font-semibold text-slate-900">{params.value}</span>
           </div>
         );
       }
@@ -164,8 +159,8 @@ export default function AddCategoryPage() {
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${params.value === 'Active'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-yellow-100 text-yellow-700'
+            ? 'bg-green-100 text-green-700'
+            : 'bg-yellow-100 text-yellow-700'
             }`}>
             {params.value || 'Active'}
           </span>
@@ -189,7 +184,7 @@ export default function AddCategoryPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
             onClick={() => handleEdit(params.data)}
           >
             <Edit size={16} />
@@ -197,7 +192,7 @@ export default function AddCategoryPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
             onClick={() => handleDeleteClick(params.data)}
           >
             <Trash size={16} />
@@ -219,6 +214,26 @@ export default function AddCategoryPage() {
   });
 
   const watchImage = watch('image');
+
+  const onDrop = React.useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        setValue('image', acceptedFiles, { shouldValidate: true });
+        const file = acceptedFiles[0];
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewImage(objectUrl);
+      }
+    },
+    [setValue]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg', '.webp'],
+    },
+    maxFiles: 1,
+  });
 
   useEffect(() => {
     if (watchImage && watchImage[0]) {
@@ -405,7 +420,7 @@ export default function AddCategoryPage() {
                   )}
 
                   {previewImage && (
-                    <div className="mb-3">
+                    <div className="mb-3 relative inline-block">
                       <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
                         <img
@@ -414,15 +429,47 @@ export default function AddCategoryPage() {
                           className="w-full h-full object-cover"
                         />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPreviewImage(null);
+                          setValue('image', undefined);
+                        }}
+                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
                   )}
 
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    {...register("image")}
-                  />
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      "border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      isDragActive ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+                      errors.image ? "border-red-500 bg-red-50" : ""
+                    )}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="bg-slate-100 p-2 rounded-full mb-2">
+                      <Plus className="h-5 w-5 text-slate-500" />
+                    </div>
+                    {isDragActive ? (
+                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-slate-700">
+                          Click or drag image to upload
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          SVG, PNG, JPG or GIF (max. 5MB)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {errors.image && (
+                    <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
+                  )}
                   <p className="text-xs text-slate-500 mt-1">
                     {editingId
                       ? 'Upload a new image to replace the existing one'

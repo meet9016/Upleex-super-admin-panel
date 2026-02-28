@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Loader2, Search, Edit, Trash, Layers } from "lucide-react";
+import { Plus, Loader2, Search, Edit, Trash, Layers, X } from "lucide-react";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
+import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { DataTable } from "@/components/ui/DataTable";
 import { ColDef } from "ag-grid-community";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 
@@ -68,6 +71,11 @@ export default function AddSubCategoryPage() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Delete popup states
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [subCategoryToDelete, setSubCategoryToDelete] = useState<SubCategoryRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const debouncedSearch = useDebounce(searchText, 600);
 
   const {
@@ -76,12 +84,37 @@ export default function AddSubCategoryPage() {
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<SubCategoryFormValues>({
     resolver: zodResolver(subCategorySchema),
+    defaultValues: {
+      categoryId: "",
+      name: "",
+    }
   });
 
   const watchImage = watch('image');
+
+  const onDrop = React.useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        setValue('image', acceptedFiles, { shouldValidate: true });
+        const file = acceptedFiles[0];
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewImage(objectUrl);
+      }
+    },
+    [setValue]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg', '.webp'],
+    },
+    maxFiles: 1,
+  });
 
   // Image preview
   useEffect(() => {
@@ -124,10 +157,10 @@ export default function AddSubCategoryPage() {
     try {
       setIsFetching(true);
       const res = await api.get(endPointApi.getCategoryList);
-      
+
       if (res.data?.data) {
         setCategories(res.data.data);
-        
+
         // Extract all subcategories from categories
         const allSubCategories: SubCategoryRow[] = [];
         res.data.data.forEach((category: Category) => {
@@ -160,24 +193,24 @@ export default function AddSubCategoryPage() {
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder-image.jpg";
-    
+
     if (imagePath.startsWith('http')) return imagePath;
-    
+
     if (imagePath.startsWith('/uploads')) {
       return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
     }
-    
+
     return "/placeholder-image.jpg";
   };
 
   const onSubmit = async (data: SubCategoryFormValues) => {
     try {
       setIsLoading(true);
-      
+
       const formData = new FormData();
-      formData.append("categoryId", data.categoryId);
+      formData.append("id", data.categoryId);
       formData.append("name", data.name);
-      
+
       // Add image if selected
       if (data.image && data.image[0]) {
         formData.append("image", data.image[0]);
@@ -194,7 +227,7 @@ export default function AddSubCategoryPage() {
           type: 'success',
           message: 'Sub-category created successfully'
         });
-        
+
         // Refresh the list
         fetchCategories();
         reset();
@@ -225,11 +258,11 @@ export default function AddSubCategoryPage() {
 
     try {
       setIsLoading(true);
-      
+
       const formData = new FormData();
       formData.append("id", data.categoryId);
       formData.append("name", data.name);
-      
+
       // Add image if selected
       if (data.image && data.image[0]) {
         formData.append("image", data.image[0]);
@@ -250,7 +283,7 @@ export default function AddSubCategoryPage() {
           type: 'success',
           message: 'Sub-category updated successfully'
         });
-        
+
         // Refresh the list
         fetchCategories();
         setEditingSubCategory(null);
@@ -268,20 +301,28 @@ export default function AddSubCategoryPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this sub-category?")) return;
+  // Delete click handler - opens popup
+  const handleDeleteClick = (subCategory: SubCategoryRow) => {
+    setSubCategoryToDelete(subCategory);
+    setShowDeletePopup(true);
+  };
 
+  // Confirm delete handler
+  const handleConfirmDelete = async () => {
+    if (!subCategoryToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const res = await api.delete(`${endPointApi.deleteSubCategory}/${id}`);
+      const res = await api.delete(`${endPointApi.deleteSubCategory}/${subCategoryToDelete.id}`);
 
       if (res.data) {
         setNotification({
           type: 'success',
           message: 'Sub-category deleted successfully'
         });
-        
-        // Refresh the list
         fetchCategories();
+        setShowDeletePopup(false);
+        setSubCategoryToDelete(null);
       }
     } catch (error: any) {
       console.error("Error deleting subcategory:", error);
@@ -289,7 +330,15 @@ export default function AddSubCategoryPage() {
         type: 'error',
         message: error.response?.data?.message || 'Failed to delete sub-category'
       });
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  // Cancel delete handler
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setSubCategoryToDelete(null);
   };
 
   const handleClearSearch = () => {
@@ -297,46 +346,40 @@ export default function AddSubCategoryPage() {
   };
 
   // Filter subcategories based on search
-  const filteredSubCategories = subCategories.filter(sub => 
+  const filteredSubCategories = subCategories.filter(sub =>
     sub.name.toLowerCase().includes(searchText.toLowerCase()) ||
     sub.parent.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const columnDefs: ColDef<SubCategoryRow>[] = [
-    { 
-      field: "name", 
-      headerName: "Name", 
-      flex: 1,
-      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' } 
-    },
-    { 
-      field: "parent", 
-      headerName: "Main Category", 
-      flex: 1,
-      cellStyle: { color: "#64748b", display: 'flex', alignItems: 'center' }
-    },
     {
-      headerName: "Image",
-      width: 100,
-      cellRenderer: (params: { value: string }) => {
-        const imageUrl = getImageUrl(params.value);
+      field: "name",
+      headerName: "Sub Category",
+      flex: 2,
+      cellRenderer: (params: { data: SubCategoryRow }) => {
+        const imageUrl = getImageUrl(params.data.image);
 
         return (
-          <div className="flex items-center h-full">
-            <div className="h-10 w-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm">
-              <img 
-                src={imageUrl}
-                alt="Sub Category" 
-                className="h-full w-full object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (!target.src.includes('placeholder-image.jpg')) {
-                    target.src = "/placeholder-image.jpg";
-                  }
-                }}
-              />
+          <div className="flex items-center gap-3 h-full py-2">
+            <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110 bg-slate-100">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={params.data.name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.includes('placeholder-image.jpg')) {
+                      target.src = "/placeholder-image.jpg";
+                    }
+                  }}
+                />
+              ) : (
+                <span className="text-xs text-slate-400">No img</span>
+              )}
             </div>
+            <span className="font-semibold text-slate-900">{params.data.name}</span>
           </div>
         );
       }
@@ -355,19 +398,19 @@ export default function AddSubCategoryPage() {
       filter: false,
       cellRenderer: (params: { data: SubCategoryRow }) => (
         <div className="flex items-center justify-start gap-2 h-full">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
             onClick={() => handleEdit(params.data)}
           >
             <Edit size={16} />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-            onClick={() => handleDelete(params.data.id)}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
+            onClick={() => handleDeleteClick(params.data)}
           >
             <Trash size={16} />
           </Button>
@@ -390,7 +433,7 @@ export default function AddSubCategoryPage() {
     reset();
   };
 
-  const currentEditingCategory = editingSubCategory 
+  const currentEditingCategory = editingSubCategory
     ? categories.find(c => c.categories_id === editingSubCategory.parentId)
     : null;
 
@@ -398,10 +441,9 @@ export default function AddSubCategoryPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Notification */}
       {notification && (
-        <div 
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all transform animate-in slide-in-from-top-2 ${
-            notification.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
-          }`}
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all transform animate-in slide-in-from-top-2 ${notification.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
         >
           <div className="flex items-center gap-2">
             {notification.type === 'success' ? (
@@ -443,8 +485,8 @@ export default function AddSubCategoryPage() {
                 </CardTitle>
               </div>
               <CardDescription>
-                {editingSubCategory 
-                  ? "Update the selected sub-category" 
+                {editingSubCategory
+                  ? "Update the selected sub-category"
                   : "Link a new sub-category to a parent."}
               </CardDescription>
             </CardHeader>
@@ -454,24 +496,30 @@ export default function AddSubCategoryPage() {
                   <label htmlFor="categoryId" className="text-sm font-semibold text-slate-700">
                     Parent Category
                   </label>
-                  <select
-                    id="categoryId"
-                    className="flex h-11 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                    {...register("categoryId")}
-                    disabled={isFetching}
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.categories_id} value={cat.categories_id}>
-                        {cat.categories_name}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <SearchableDropdown
+                        options={categories.map((cat) => ({
+                          label: cat.categories_name,
+                          value: String(cat.categories_id),
+                        }))}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select parent category..."
+                        searchable={true}
+                        error={!!errors.categoryId}
+                        disabled={isFetching}
+                        usePortal={true}
+                      />
+                    )}
+                  />
                   {errors.categoryId && (
                     <p className="text-xs text-red-500 mt-1">{errors.categoryId.message}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <label htmlFor="name" className="text-sm font-semibold text-slate-700">
                     Sub Category Name
@@ -484,19 +532,18 @@ export default function AddSubCategoryPage() {
                     error={errors.name?.message}
                   />
                 </div>
-
                 {/* Image Upload Field */}
                 <div className="space-y-2">
                   <label htmlFor="image" className="text-sm font-semibold text-slate-700">
                     Sub Category Image
                   </label>
-                  
+
                   {/* Show current image when editing */}
                   {editingSubCategory && editingSubCategory.image && !previewImage && (
                     <div className="mb-3">
                       <p className="text-xs text-slate-500 mb-2">Current Image:</p>
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img 
+                        <img
                           src={getImageUrl(editingSubCategory.image)}
                           alt="Current sub-category"
                           className="w-full h-full object-cover"
@@ -510,35 +557,67 @@ export default function AddSubCategoryPage() {
 
                   {/* Show preview of new image */}
                   {previewImage && (
-                    <div className="mb-3">
+                    <div className="mb-3 relative inline-block">
                       <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img 
+                        <img
                           src={previewImage}
                           alt="Preview"
                           className="w-full h-full object-cover"
                         />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPreviewImage(null);
+                          setValue('image', undefined);
+                        }}
+                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
                   )}
 
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    {...register("image")}
-                  />
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      "border-2 border-dotted rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
+                      errors.image ? "border-red-500 bg-red-50" : ""
+                    )}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="bg-slate-100 p-2 rounded-full mb-2">
+                      <Plus className="h-5 w-5 text-slate-500" />
+                    </div>
+                    {isDragActive ? (
+                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-slate-700">
+                          Click or drag image to upload
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          SVG, PNG, JPG or GIF (max. 5MB)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {errors.image && (
+                    <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
+                  )}
                   <p className="text-xs text-slate-500 mt-1">
-                    {editingSubCategory 
-                      ? 'Upload a new image to replace the existing one' 
+                    {editingSubCategory
+                      ? 'Upload a new image to replace the existing one'
                       : 'Upload an image for the sub-category (JPEG, PNG, etc.)'}
                   </p>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary" 
+                  <Button
+                    type="submit"
+                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary"
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
@@ -553,9 +632,9 @@ export default function AddSubCategoryPage() {
                       </>
                     )}
                   </Button>
-                  
+
                   {editingSubCategory && (
-                    <Button 
+                    <Button
                       type="button"
                       variant="outline"
                       className="h-11 rounded-xl"
@@ -589,7 +668,7 @@ export default function AddSubCategoryPage() {
                       placeholder="Search sub-categories..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500dark:text-white w-64 text-sm"
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-64 text-sm"
                     />
                     <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     {searchText && (
@@ -623,9 +702,9 @@ export default function AddSubCategoryPage() {
                         : 'No sub-categories found'}
                     </p>
                     {searchText && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleClearSearch}
                         className="text-xs"
                       >
@@ -644,6 +723,68 @@ export default function AddSubCategoryPage() {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && subCategoryToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Sub-Category</h3>
+              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center space-x-4 mb-4">
+                {subCategoryToDelete?.image && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+                    <img 
+                      src={getImageUrl(subCategoryToDelete.image)} 
+                      alt={subCategoryToDelete.name} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => { 
+                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f1f5f9'/%3E%3Ctext x='32' y='32' font-family='Arial' font-size='10' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo img%3C/text%3E%3C/svg%3E"; 
+                      }} 
+                    />
+                  </div>
+                )}
+                <div>
+                  <p className="text-gray-700">
+                    Are you sure you want to delete <span className="font-semibold">"{subCategoryToDelete?.name}"</span>?
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancelDelete} 
+                className="px-6" 
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleConfirmDelete} 
+                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Sub-Category'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

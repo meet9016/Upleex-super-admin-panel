@@ -7,12 +7,14 @@ import * as z from "zod";
 import { Plus, Edit, Trash, Loader2, Calendar, X } from "lucide-react";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
+import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { DataTable } from "@/components/ui/DataTable";
 import { ColDef } from "ag-grid-community";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 
@@ -52,6 +54,9 @@ export default function BlogPage() {
   const [searchText, setSearchText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState<BlogRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -67,6 +72,26 @@ export default function BlogPage() {
   });
 
   const watchImage = watch('image');
+
+  const onDrop = React.useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        setValue('image', acceptedFiles, { shouldValidate: true });
+        const file = acceptedFiles[0];
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewImage(objectUrl);
+      }
+    },
+    [setValue]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg', '.webp'],
+    },
+    maxFiles: 1,
+  });
 
   // Image preview
   useEffect(() => {
@@ -100,10 +125,10 @@ export default function BlogPage() {
       setIsFetching(true);
       const params: any = {};
       if (search) params.search = search;
-      
+
       const res = await api.get(endPointApi.getAllBlogs, { params });
       console.log("🚀 ~ fetchBlogs ~ res:", res);
-      
+
       // Check the response structure from your backend
       if (res.data?.data) {
         // Your backend transforms the data in getAllBlogs
@@ -121,13 +146,13 @@ export default function BlogPage() {
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return null;
-    
+
     if (imagePath.startsWith('http')) return imagePath;
-    
+
     if (imagePath.startsWith('/uploads')) {
       return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
     }
-    
+
     return imagePath;
   };
 
@@ -139,7 +164,7 @@ export default function BlogPage() {
           "Content-Type": "multipart/form-data",
         },
       });
-      
+
       if (res.data) {
         toast.success('Blog created successfully');
         return true;
@@ -164,7 +189,7 @@ export default function BlogPage() {
           },
         }
       );
-      
+
       if (res.data) {
         toast.success('Blog updated successfully');
         return true;
@@ -181,7 +206,7 @@ export default function BlogPage() {
   const deleteBlog = async (id: string) => {
     try {
       const res = await api.delete(`${endPointApi.deleteBlog}/${id}`);
-      
+
       if (res.data) {
         toast.success('Blog deleted successfully');
         return true;
@@ -197,13 +222,13 @@ export default function BlogPage() {
   const onSubmit = async (data: BlogFormValues) => {
     try {
       setIsLoading(true);
-      
+
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("sort_description", data.sort_description);
       formData.append("long_description", data.long_description);
       formData.append("date", data.date);
-      
+
       if (data.image && data.image[0]) {
         formData.append("image", data.image[0]);
       }
@@ -237,20 +262,20 @@ export default function BlogPage() {
       // Fetch full blog details for editing
       const res = await api.get(`${endPointApi.getBlogById}/${blog.id}`);
       console.log("🚀 ~ handleEdit ~ res:", res);
-      
+
       if (res.data?.blog_data) {
         const blogData = res.data.blog_data;
         setEditingId(blogData.id);
         setValue("title", blogData.title);
         setValue("sort_description", blogData.description);
         setValue("long_description", blogData.long_description || "");
-        
+
         // Convert DD-MM-YYYY to YYYY-MM-DD for input
         if (blogData.blog_date) {
           const [day, month, year] = blogData.blog_date.split('-');
           setValue("date", `${year}-${month}-${day}`);
         }
-        
+
         setValue("image", "");
         setPreviewImage(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -263,13 +288,27 @@ export default function BlogPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this blog?")) return;
+  const handleDeleteClick = (blog: BlogRow) => {
+    setBlogToDelete(blog);
+    setShowDeletePopup(true);
+  };
 
-    const success = await deleteBlog(id);
+  const handleConfirmDelete = async () => {
+    if (!blogToDelete) return;
+
+    setIsDeleting(true);
+    const success = await deleteBlog(blogToDelete.id);
     if (success) {
+      setShowDeletePopup(false);
+      setBlogToDelete(null);
       await fetchBlogs(debouncedSearch);
     }
+    setIsDeleting(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setBlogToDelete(null);
   };
 
   const handleClearSearch = () => {
@@ -296,7 +335,7 @@ export default function BlogPage() {
   // Custom Image Component to prevent infinite loop
   const SafeImage = ({ src, alt, className }: { src: string | null; alt: string; className: string }) => {
     const [imgError, setImgError] = useState(false);
-    
+
     if (!src || imgError) {
       return (
         <div className={`${className} bg-slate-100 flex items-center justify-center border border-slate-200`}>
@@ -304,9 +343,9 @@ export default function BlogPage() {
         </div>
       );
     }
-    
+
     return (
-      <img 
+      <img
         src={src}
         alt={alt}
         className={className}
@@ -316,71 +355,71 @@ export default function BlogPage() {
     );
   };
 
-const columnDefs: ColDef<BlogRow>[] = [
-  {
-    headerName: "Blog Post",
-    flex: 2,
-    cellRenderer: (params: { data: BlogRow }) => {
-      const imageUrl = getImageUrl(params.data.image);
-      
-      return (
-        <div className="flex items-center gap-4 h-full py-2">
-          <div className="flex-shrink-0">
-            <SafeImage 
-              src={imageUrl}
-              alt={params.data.title}
-              className="w-16 h-16 rounded-lg object-cover border border-slate-200 shadow-sm"
-            />
+  const columnDefs: ColDef<BlogRow>[] = [
+    {
+      headerName: "Blog Post",
+      flex: 2,
+      cellRenderer: (params: { data: BlogRow }) => {
+        const imageUrl = getImageUrl(params.data.image);
+
+        return (
+          <div className="flex items-center gap-4 h-full py-2">
+            <div className="flex-shrink-0">
+              <SafeImage
+                src={imageUrl}
+                alt={params.data.title}
+                className="w-16 h-16 rounded-lg object-cover border border-slate-200 shadow-sm"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold text-slate-900 text-base">
+                {params.data.title}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-slate-900 text-base">
-              {params.data.title}
-            </span>
-          </div>
+        );
+      }
+    },
+    {
+      field: "blog_date",
+      headerName: "Date",
+      width: 120,
+      cellRenderer: (params: { value: string }) => (
+        <div className="flex items-center h-full gap-1.5">
+          <Calendar size={14} className="text-slate-400" />
+          <span className="text-sm text-slate-600">
+            {params.value}
+          </span>
         </div>
-      );
+      )
+    },
+    {
+      headerName: "Action",
+      width: 120,
+      sortable: false,
+      filter: false,
+      cellRenderer: (params: { data: BlogRow }) => (
+        <div className="flex items-center justify-end gap-2 h-full pr-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
+            onClick={() => handleEdit(params.data)}
+          >
+            <Edit size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
+            onClick={() => handleDeleteClick(params.data)}
+          >
+            <Trash size={16} />
+          </Button>
+        </div>
+      )
     }
-  },
-  {
-    field: "blog_date",
-    headerName: "Date",
-    width: 120,
-    cellRenderer: (params: { value: string }) => (
-      <div className="flex items-center h-full gap-1.5">
-        <Calendar size={14} className="text-slate-400" />
-        <span className="text-sm text-slate-600">
-          {params.value}
-        </span>
-      </div>
-    )
-  },
-  {
-    headerName: "Action",
-    width: 120,
-    sortable: false,
-    filter: false,
-    cellRenderer: (params: { data: BlogRow }) => (
-      <div className="flex items-center justify-end gap-2 h-full pr-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
-          onClick={() => handleEdit(params.data)}
-        >
-          <Edit size={16} />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-          onClick={() => handleDelete(params.data.id)}
-        >
-          <Trash size={16} />
-        </Button>
-      </div>
-    )
-  }
-];
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -400,8 +439,8 @@ const columnDefs: ColDef<BlogRow>[] = [
                 {editingId ? 'Edit Blog Post' : 'New Blog Post'}
               </CardTitle>
               <CardDescription>
-                {editingId 
-                  ? 'Update your blog post details' 
+                {editingId
+                  ? 'Update your blog post details'
                   : 'Create a new article for your audience.'}
               </CardDescription>
             </CardHeader>
@@ -414,7 +453,7 @@ const columnDefs: ColDef<BlogRow>[] = [
                   <Input
                     id="title"
                     placeholder="Enter post title"
-                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("title")}
                     error={errors.title?.message}
                   />
@@ -427,7 +466,10 @@ const columnDefs: ColDef<BlogRow>[] = [
                   <textarea
                     id="sort_description"
                     rows={3}
-                    className="flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans"
+                    className={cn(
+                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans",
+                      errors.sort_description ? "border-red-500 focus-visible:ring-red-500/20" : ""
+                    )}
                     placeholder="Brief overview of the post..."
                     {...register("sort_description")}
                   />
@@ -443,7 +485,10 @@ const columnDefs: ColDef<BlogRow>[] = [
                   <textarea
                     id="long_description"
                     rows={5}
-                    className="flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans"
+                    className={cn(
+                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans",
+                      errors.long_description ? "border-red-500 focus-visible:ring-red-500/20" : ""
+                    )}
                     placeholder="Detailed content of the post..."
                     {...register("long_description")}
                   />
@@ -459,7 +504,7 @@ const columnDefs: ColDef<BlogRow>[] = [
                   <Input
                     id="date"
                     type="date"
-                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("date")}
                     error={errors.date?.message}
                   />
@@ -470,13 +515,13 @@ const columnDefs: ColDef<BlogRow>[] = [
                   <label htmlFor="blog-image" className="text-sm font-semibold text-slate-700">
                     Featured Image
                   </label>
-                  
+
                   {/* Show current image when editing */}
                   {editingId && !previewImage && (
                     <div className="mb-3">
                       <p className="text-xs text-slate-500 mb-2">Current Image:</p>
                       <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <SafeImage 
+                        <SafeImage
                           src={getImageUrl(blogs.find(b => b.id === editingId)?.image || '')}
                           alt="Current blog"
                           className="w-full h-full object-cover"
@@ -487,49 +532,67 @@ const columnDefs: ColDef<BlogRow>[] = [
 
                   {/* Show preview of new image */}
                   {previewImage && (
-                    <div className="mb-3">
+                    <div className="mb-3 relative inline-block">
                       <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
                       <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <img 
+                        <img
                           src={previewImage}
                           alt="Preview"
                           className="w-full h-full object-cover"
                         />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPreviewImage(null);
+                          setValue('image', undefined);
+                        }}
+                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
+                      >
+                        <X size={14} />
+                      </button>
                     </div>
                   )}
-                  
-                  <div className="relative">
-                    <div 
-                      className="border-2 border-dashed border-slate-200 rounded-xl p-6 transition-all hover:bg-slate-50 hover:border-primary/30 flex flex-col items-center justify-center cursor-pointer group"
-                      onClick={handleImageClick}
-                    >
-                      <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center mb-2 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                        <Plus className="h-5 w-5 text-slate-400 group-hover:text-primary" />
-                      </div>
-                      <p className="text-xs font-semibold text-slate-600">Click to upload image</p>
-                      <p className="text-[10px] text-slate-400 mt-1">SVG, PNG, JPG (max. 5MB)</p>
+
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      "border-2 border-dotted rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
+                      errors.image ? "border-red-500 bg-red-50" : ""
+                    )}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="bg-slate-100 p-2 rounded-full mb-2">
+                      <Plus className="h-5 w-5 text-slate-500" />
                     </div>
-                    
-                    <input
-                      id="blog-image"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
+                    {isDragActive ? (
+                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-slate-700">
+                          Click or drag image to upload
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          SVG, PNG, JPG (max. 5MB)
+                        </p>
+                      </div>
+                    )}
                   </div>
+                  {errors.image && (
+                    <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
+                  )}
                   <p className="text-xs text-slate-500 mt-1">
-                    {editingId 
-                      ? 'Upload a new image to replace the existing one' 
+                    {editingId
+                      ? 'Upload a new image to replace the existing one'
                       : 'Upload an image for the blog post (JPEG, PNG, etc.)'}
                   </p>
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 h-11 rounded-xl btn-primary" 
+                  <Button
+                    type="submit"
+                    className="flex-1 h-11 rounded-xl btn-primary"
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
@@ -544,9 +607,9 @@ const columnDefs: ColDef<BlogRow>[] = [
                       </>
                     )}
                   </Button>
-                  
+
                   {editingId && (
-                    <Button 
+                    <Button
                       type="button"
                       variant="outline"
                       className="h-11 rounded-xl"
@@ -614,9 +677,9 @@ const columnDefs: ColDef<BlogRow>[] = [
                         : 'No blogs found'}
                     </p>
                     {searchText && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleClearSearch}
                         className="text-xs"
                       >
@@ -635,6 +698,65 @@ const columnDefs: ColDef<BlogRow>[] = [
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && blogToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Blog Post</h3>
+              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center space-x-4 mb-4">
+                {blogToDelete?.image && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
+                    <SafeImage
+                      src={getImageUrl(blogToDelete.image)}
+                      alt={blogToDelete.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div>
+                  <p className="text-gray-700">
+                    Are you sure you want to delete <span className="font-semibold">"{blogToDelete?.title}"</span>?
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancelDelete} 
+                className="px-6" 
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleConfirmDelete} 
+                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Blog'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

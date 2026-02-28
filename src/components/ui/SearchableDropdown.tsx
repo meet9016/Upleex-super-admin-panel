@@ -1,0 +1,223 @@
+'use client';
+
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { ChevronDown } from "lucide-react";
+import { Input } from "./Input";
+
+type Option = {
+    label: string;
+    value: string;
+    image?: string;
+};
+
+type Props = {
+    options: Option[];
+    value: string | null;
+    placeholder?: string;
+    onChange: (value: string) => void;
+    error?: boolean;
+    errorMessage?: string;
+    searchable?: boolean;
+    onScrollNearBottom?: () => void;
+    footer?: React.ReactNode;
+    onSearch?: (value: string) => void;
+    usePortal?: boolean;
+    disabled?: boolean;
+};
+
+export default function SearchableDropdown({
+    options,
+    value,
+    placeholder = "Select option",
+    onChange,
+    error = false,
+    errorMessage,
+    searchable = false,
+    onScrollNearBottom,
+    footer,
+    usePortal = false,
+    onSearch,
+    disabled = false,
+}: Props) {
+    const ref = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [portalStyle, setPortalStyle] = useState<React.CSSProperties>();
+
+    const selectedOption = options.find(o => o.value === value);
+
+    useEffect(() => {
+        if (disabled) setOpen(false);
+    }, [disabled]);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            const target = e.target as Node;
+            if (
+                !ref.current?.contains(target) &&
+                !dropdownRef.current?.contains(target)
+            ) {
+                setOpen(false);
+                setSearch("");
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const filteredOptions = searchable
+        ? options.filter(o =>
+            o.label.toLowerCase().includes(search.toLowerCase())
+        )
+        : options;
+
+    useEffect(() => {
+        if (!open || !searchable) return;
+        searchInputRef.current?.focus();
+    }, [open, searchable]);
+
+    const updatePortalPosition = () => {
+        if (!ref.current) return;
+        const r = ref.current.getBoundingClientRect();
+        setPortalStyle({
+            position: "fixed",
+            top: r.bottom + 4,
+            left: r.left,
+            width: r.width,
+            zIndex: 9999,
+        });
+    };
+
+    useEffect(() => {
+        if (!usePortal || !open) return;
+        updatePortalPosition();
+        window.addEventListener("scroll", updatePortalPosition, true);
+        window.addEventListener("resize", updatePortalPosition);
+        return () => {
+            window.removeEventListener("scroll", updatePortalPosition, true);
+            window.removeEventListener("resize", updatePortalPosition);
+        };
+    }, [usePortal, open]);
+
+    const renderDropdown = (
+        <div
+            ref={dropdownRef}
+            style={usePortal ? portalStyle : undefined}
+            className={`${usePortal ? "" : "absolute mt-2 w-full"} 
+      z-50 rounded-xl border border-gray-200 bg-white shadow-xl`}
+        >
+            {searchable && (
+                <div className="p-2 border-b border-gray-200">
+                    <Input
+                        ref={searchInputRef as any}
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            onSearch?.(e.target.value);
+                        }}
+                    />
+                </div>
+            )}
+
+            <div
+                className="max-h-52 overflow-y-auto"
+                onScroll={(e) => {
+                    const target = e.target as HTMLDivElement;
+                    const scrollPercentage =
+                        (target.scrollTop + target.clientHeight) /
+                        target.scrollHeight;
+                    if (onScrollNearBottom && scrollPercentage >= 0.8) {
+                        onScrollNearBottom();
+                    }
+                }}
+            >
+                {filteredOptions.length ? (
+                    filteredOptions.map((opt) => {
+                        const isSelected = value === opt.value;
+
+                        return (
+                            <div
+                                key={opt.value}
+                                onClick={() => {
+                                    if (disabled) return;
+                                    onChange(opt.value);
+                                    setOpen(false);
+                                    setSearch("");
+                                }}
+                                className={`px-4 py-2 text-sm cursor-pointer flex items-center gap-2 transition
+                ${isSelected
+                                        ? "bg-gray-200 text-gray-900 font-medium"
+                                        : "text-gray-800 hover:bg-gray-100"
+                                    }`}
+                            >
+                                {opt.image && (
+                                    <img
+                                        src={opt.image}
+                                        alt=""
+                                        className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                )}
+                                {opt.label}
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p className="px-4 py-2 text-sm text-gray-400">
+                        No results found
+                    </p>
+                )}
+
+                {footer && <div className="px-4 py-2">{footer}</div>}
+            </div>
+        </div>
+    );
+
+    return (
+        <div ref={ref} className="relative w-full">
+            <button
+                type="button"
+                disabled={disabled}
+                onClick={() => !disabled && setOpen(!open)}
+                className={`w-full flex items-center justify-between px-4 py-2 rounded-lg border text-sm transition h-11
+        ${error ? "!border-red-500 !ring-red-500/20" : "border-gray-200"}
+        ${disabled
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-white text-gray-800"
+                    }`}
+            >
+                <span
+                    className={`flex items-center gap-2 ${selectedOption
+                            ? "text-gray-800"
+                            : "text-gray-400"
+                        }`}
+                >
+                    {selectedOption?.image && (
+                        <img
+                            src={selectedOption.image}
+                            alt=""
+                            className="w-6 h-6 rounded-full object-cover"
+                        />
+                    )}
+                    {selectedOption?.label || placeholder}
+                </span>
+
+                <ChevronDown
+                    className={`transition ${open ? "rotate-180" : ""}`}
+                />
+            </button>
+
+            {error && errorMessage && (
+                <p className="mt-1 text-xs text-red-500">{errorMessage}</p>
+            )}
+
+            {open &&
+                (usePortal
+                    ? createPortal(renderDropdown, document.body)
+                    : renderDropdown)}
+        </div>
+    );
+}

@@ -48,7 +48,9 @@ export default function FAQPage() {
   const [filteredFaqs, setFilteredFaqs] = useState<FAQRow[]>([]);
   const [searchText, setSearchText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  console.log("🚀 ~ FAQPage ~ editingId:", editingId)
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [faqToDelete, setFaqToDelete] = useState<FAQRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -83,7 +85,7 @@ export default function FAQPage() {
       setIsFetching(true);
       const res = await api.get(endPointApi.getAllFAQs);
       console.log("🚀 ~ fetchFAQs ~ res:", res);
-      
+
       if (res.data?.data) {
         const formattedFaqs = res.data.data.map((faq: any) => ({
           id: faq._id || faq.id, // Handle both _id and id
@@ -111,7 +113,7 @@ export default function FAQPage() {
       // Adjust the endpoint based on your backend API structure
       const res = await api.get(`${endPointApi.getAllFAQs}?search=${encodeURIComponent(searchTerm)}`);
       console.log("🚀 ~ searchFAQs ~ res:", res);
-      
+
       if (res.data?.data) {
         const formattedFaqs = res.data.data.map((faq: any) => ({
           id: faq._id || faq.id,
@@ -134,7 +136,7 @@ export default function FAQPage() {
   const createFAQ = async (data: FAQFormValues) => {
     try {
       const res = await api.post(endPointApi.createFAQ, data);
-      
+
       if (res.data) {
         toast.success('FAQ created successfully');
         return true;
@@ -154,7 +156,7 @@ export default function FAQPage() {
         `${endPointApi.updateFAQ}/${id}`,
         data
       );
-      
+
       if (res.data) {
         toast.success('FAQ updated successfully');
         return true;
@@ -171,7 +173,7 @@ export default function FAQPage() {
   const deleteFAQ = async (id: string) => {
     try {
       const res = await api.delete(`${endPointApi.deleteFAQ}/${id}`);
-      
+
       if (res.data) {
         toast.success('FAQ deleted successfully');
         return true;
@@ -187,7 +189,7 @@ export default function FAQPage() {
   const onSubmit = async (data: FAQFormValues) => {
     try {
       setIsLoading(true);
-      
+
       let success;
       if (editingId) {
         // Update existing FAQ
@@ -223,18 +225,31 @@ export default function FAQPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this FAQ?")) return;
+  const handleDeleteClick = (faq: FAQRow) => {
+    setFaqToDelete(faq);
+    setShowDeletePopup(true);
+  };
 
-    const success = await deleteFAQ(id);
+  const handleConfirmDelete = async () => {
+    if (!faqToDelete) return;
+
+    setIsDeleting(true);
+    const success = await deleteFAQ(faqToDelete.id);
     if (success) {
-      // After successful delete, refresh the list
+      setShowDeletePopup(false);
+      setFaqToDelete(null);
       if (searchText) {
         await searchFAQs(searchText);
       } else {
         await fetchFAQs();
       }
     }
+    setIsDeleting(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setFaqToDelete(null);
   };
 
   const handleClearSearch = () => {
@@ -248,15 +263,15 @@ export default function FAQPage() {
   };
 
   const columnDefs: ColDef<FAQRow>[] = [
-    { 
-      field: "question", 
-      headerName: "Question", 
+    {
+      field: "question",
+      headerName: "Question",
       flex: 1.5,
-      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' } 
+      cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
-    { 
-      field: "answer", 
-      headerName: "Answer", 
+    {
+      field: "answer",
+      headerName: "Answer",
       flex: 2,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
@@ -267,19 +282,19 @@ export default function FAQPage() {
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
         <div className="flex items-center justify-end gap-2 h-full pr-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
             onClick={() => handleEdit(params.data)}
           >
             <Edit size={16} />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-            onClick={() => handleDelete(params.data.id)}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
+            onClick={() => handleDeleteClick(params.data)}
           >
             <Trash size={16} />
           </Button>
@@ -304,8 +319,8 @@ export default function FAQPage() {
                 {editingId ? 'Edit FAQ' : 'Add New FAQ'}
               </CardTitle>
               <CardDescription>
-                {editingId 
-                  ? 'Update the FAQ details' 
+                {editingId
+                  ? 'Update the FAQ details'
                   : 'Provide clear answers to common user questions.'}
               </CardDescription>
             </CardHeader>
@@ -323,7 +338,7 @@ export default function FAQPage() {
                     error={errors.question?.message}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label htmlFor="answer" className="text-sm font-semibold text-slate-700">
                     Answer
@@ -331,7 +346,10 @@ export default function FAQPage() {
                   <textarea
                     id="answer"
                     rows={5}
-                    className="flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                    className={cn(
+                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+                      errors.answer ? "border-red-500 focus-visible:ring-red-500/20" : ""
+                    )}
                     placeholder="Provide the solution here..."
                     {...register("answer")}
                   />
@@ -341,9 +359,9 @@ export default function FAQPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 h-11 rounded-xl btn-primary" 
+                  <Button
+                    type="submit"
+                    className="flex-1 h-11 rounded-xl btn-primary"
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
@@ -358,9 +376,9 @@ export default function FAQPage() {
                       </>
                     )}
                   </Button>
-                  
+
                   {editingId && (
-                    <Button 
+                    <Button
                       type="button"
                       variant="outline"
                       className="h-11 rounded-xl"
@@ -428,9 +446,9 @@ export default function FAQPage() {
                         : 'No FAQs found'}
                     </p>
                     {searchText && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleClearSearch}
                         className="text-xs"
                       >
@@ -449,6 +467,58 @@ export default function FAQPage() {
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && faqToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Delete FAQ</h3>
+              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-700 mb-2">
+                  Are you sure you want to delete this FAQ?
+                </p>
+                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <p className="font-semibold text-slate-900 text-sm mb-1">{faqToDelete.question}</p>
+                  <p className="text-xs text-slate-600 line-clamp-2">{faqToDelete.answer}</p>
+                </div>
+                <p className="text-sm text-gray-500 mt-3">This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancelDelete} 
+                className="px-6" 
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleConfirmDelete} 
+                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete FAQ'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
