@@ -145,13 +145,13 @@ export default function AddCategoryPage() {
         );
       }
     },
-    {
-      field: "subcategories",
-      headerName: "Sub Categories",
-      width: 130,
-      valueGetter: (params) => params.data?.subcategories?.length || 0,
-      cellStyle: { textAlign: "center" }
-    },
+    // {
+    //   field: "subcategories",
+    //   headerName: "Sub Categories",
+    //   width: 130,
+    //   valueGetter: (params) => params.data?.subcategories?.length || 0,
+    //   cellStyle: { textAlign: "center" }
+    // },
     {
       field: "status",
       headerName: "Status",
@@ -180,7 +180,7 @@ export default function AddCategoryPage() {
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => (
-        <div className="flex items-center justify-start gap-2 h-full">
+        <div className="flex items-center justify-start gap-2 h-full pl-2">
           <Button
             variant="ghost"
             size="icon"
@@ -398,69 +398,69 @@ export default function AddCategoryPage() {
                     Category Image
                   </label>
 
-                  {editingId && currentEditingCategory?.image && !previewImage && (
-                    <div className="mb-3">
-                      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img
-                          src={getImageUrl(currentEditingCategory.image)}
-                          alt="Current category"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23f1f5f9'/%3E%3Ctext x='48' y='48' font-family='Arial' font-size='12' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {previewImage && (
-                    <div className="mb-3 relative inline-block">
-                      <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
-                      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200">
-                        <img
-                          src={previewImage}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewImage(null);
-                          setValue('image', undefined);
-                        }}
-                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      "border-2 border-dashed rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[160px]",
                       isDragActive ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
                       errors.image ? "border-red-500 bg-red-50" : ""
                     )}
                   >
                     <input {...getInputProps()} />
-                    <div className="bg-slate-100 p-2 rounded-full mb-2">
-                      <Plus className="h-5 w-5 text-slate-500" />
-                    </div>
-                    {isDragActive ? (
-                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
-                    ) : (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-700">
-                          Click or drag image to upload
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          SVG, PNG, JPG or GIF (max. 5MB)
-                        </p>
+
+                    {/* Show Preview Image (New or Existing) */}
+                    {(previewImage || (editingId && currentEditingCategory?.image)) ? (
+                      <div className="absolute inset-0 w-full h-full group">
+                        <img
+                          src={previewImage || getImageUrl(currentEditingCategory?.image || "")}
+                          alt="Category"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23f1f5f9'/%3E%3Ctext x='48' y='48' font-family='Arial' font-size='12' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
+                            <Edit size={14} />
+                            Change Image
+                          </div>
+                        </div>
+                        {/* Remove Button for new uploads */}
+                        {previewImage && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewImage(null);
+                              setValue('image', undefined);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors z-20"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
+                    ) : (
+                      <>
+                        <div className="bg-slate-100 p-2 rounded-full mb-2">
+                          <Plus className="h-5 w-5 text-slate-500" />
+                        </div>
+                        {isDragActive ? (
+                          <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                        ) : (
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-slate-700">
+                              Click or drag image to upload
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              SVG, PNG, JPG or GIF (max. 5MB)
+                            </p>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
+
                   {errors.image && (
                     <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
                   )}
@@ -470,35 +470,36 @@ export default function AddCategoryPage() {
                       : 'Upload an image for the category (JPEG, PNG, etc.)'}
                   </p>
                 </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-11 rounded-xl btn-primary"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {editingId ? 'Updating...' : 'Adding...'}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      {editingId ? 'Update Category' : 'Add Category'}
-                    </>
-                  )}
-                </Button>
-
-                {editingId && (
+                <div className={`flex ${editingId ? "gap-3" : ""}`}>
                   <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-10 mt-2"
-                    onClick={handleCancelEdit}
+                    type="submit"
+                    className={`${editingId ? "flex-1" : "w-full"} h-11 rounded-xl btn-primary`}
+                    disabled={isLoading}
                   >
-                    Cancel Edit
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {editingId ? 'Updating...' : 'Adding...'}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        {editingId ? 'Update Category' : 'Add Category'}
+                      </>
+                    )}
                   </Button>
-                )}
+
+                  {editingId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 h-11"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
               </form>
             </CardContent>
           </Card>

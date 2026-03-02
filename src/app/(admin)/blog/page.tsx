@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Edit, Trash, Loader2, Calendar, X } from "lucide-react";
@@ -12,6 +12,7 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import DatePicker from "@/components/ui/DatePicker";
 import { DataTable } from "@/components/ui/DataTable";
 import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
@@ -66,9 +67,13 @@ export default function BlogPage() {
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
+    defaultValues: {
+      date: "",
+    },
   });
 
   const watchImage = watch('image');
@@ -391,7 +396,7 @@ export default function BlogPage() {
             {params.value}
           </span>
         </div>
-      )
+      ),
     },
     {
       headerName: "Action",
@@ -399,7 +404,7 @@ export default function BlogPage() {
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: BlogRow }) => (
-        <div className="flex items-center justify-end gap-2 h-full pr-2">
+        <div className="flex items-center justify-start gap-2 h-full pl-2">
           <Button
             variant="ghost"
             size="icon"
@@ -418,21 +423,21 @@ export default function BlogPage() {
           </Button>
         </div>
       )
-    }
+    },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Blog Management</h2>
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Left: Form */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm">
+          <Card className="sticky top-16 border-slate-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">
                 {editingId ? 'Edit Blog Post' : 'New Blog Post'}
@@ -444,7 +449,7 @@ export default function BlogPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-semibold text-slate-700">
                     Article Title
@@ -452,7 +457,7 @@ export default function BlogPage() {
                   <Input
                     id="title"
                     placeholder="Enter post title"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("title")}
                     error={errors.title?.message}
                   />
@@ -500,12 +505,21 @@ export default function BlogPage() {
                   <label htmlFor="date" className="text-sm font-semibold text-slate-700">
                     Publish Date
                   </label>
-                  <Input
-                    id="date"
-                    type="date"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
-                    {...register("date")}
-                    error={errors.date?.message}
+                  <Controller
+                    name="date"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <>
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                        />
+                        {fieldState.error && (
+                          <p className="text-xs text-red-500 mt-1">{fieldState.error.message}</p>
+                        )}
+                      </>
+                    )}
                   />
                 </div>
 
@@ -515,67 +529,63 @@ export default function BlogPage() {
                     Featured Image
                   </label>
 
-                  {/* Show current image when editing */}
-                  {editingId && !previewImage && (
-                    <div className="mb-3">
-                      <p className="text-xs text-slate-500 mb-2">Current Image:</p>
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <SafeImage
-                          src={getImageUrl(blogs.find(b => b.id === editingId)?.image || '')}
-                          alt="Current blog"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Show preview of new image */}
-                  {previewImage && (
-                    <div className="mb-3 relative inline-block">
-                      <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <img
-                          src={previewImage}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewImage(null);
-                          setValue('image', undefined);
-                        }}
-                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "border-2 border-dotted rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      "border-2 border-dotted rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[160px]",
                       isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
                       errors.image ? "border-red-500 bg-red-50" : ""
                     )}
                   >
                     <input {...getInputProps()} />
-                    <div className="bg-slate-100 p-2 rounded-full mb-2">
-                      <Plus className="h-5 w-5 text-slate-500" />
-                    </div>
-                    {isDragActive ? (
-                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
-                    ) : (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-700">
-                          Click or drag image to upload
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          SVG, PNG, JPG (max. 5MB)
-                        </p>
+
+                    {/* Show Preview Image (New or Existing) */}
+                    {(previewImage || (editingId && !previewImage && blogs.find(b => b.id === editingId)?.image)) ? (
+                      <div className="absolute inset-0 w-full h-full group">
+                        <SafeImage
+                          src={previewImage || getImageUrl(blogs.find(b => b.id === editingId)?.image || '')}
+                          alt="Featured"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
+                            <Edit size={14} />
+                            Change Image
+                          </div>
+                        </div>
+                        {/* Remove Button for new uploads */}
+                        {previewImage && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewImage(null);
+                              setValue('image', undefined);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors z-20"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
+                    ) : (
+                      <>
+                        <div className="bg-slate-100 p-3 rounded-full mb-2 group-hover:bg-slate-200 transition-colors">
+                          <Plus className="h-6 w-6 text-slate-500" />
+                        </div>
+                        {isDragActive ? (
+                          <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                        ) : (
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-slate-700">
+                              Click or drag image to upload
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              SVG, PNG, JPG (max. 5MB)
+                            </p>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   {errors.image && (
@@ -591,7 +601,7 @@ export default function BlogPage() {
                 <div className="flex gap-2 mt-4">
                   <Button
                     type="submit"
-                    className="flex-1 h-11 rounded-xl btn-primary"
+                    className={`${editingId ? "flex-1" : "w-full"} h-11 rounded-xl btn-primary`}
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
@@ -611,7 +621,7 @@ export default function BlogPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-11 rounded-xl"
+                      className="flex-1 h-11 rounded-xl"
                       onClick={handleCancelEdit}
                     >
                       Cancel
@@ -728,19 +738,19 @@ export default function BlogPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleCancelDelete} 
-                className="px-6" 
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelDelete}
+                className="px-6"
                 disabled={isDeleting}
               >
                 Cancel
               </Button>
-              <Button 
-                type="button" 
-                onClick={handleConfirmDelete} 
-                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
+              <Button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-6 bg-red-600 hover:bg-red-700 text-white"
                 disabled={isDeleting}
               >
                 {isDeleting ? (
