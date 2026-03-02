@@ -16,6 +16,7 @@ import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
 
 const faqSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -266,22 +267,22 @@ export default function FAQPage() {
     {
       field: "question",
       headerName: "Question",
-      flex: 1.5,
+      width: 600,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
       field: "answer",
       headerName: "Answer",
-      flex: 2,
+      width: 800,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
     {
       headerName: "Action",
-      width: 120,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
-        <div className="flex items-center justify-end gap-2 h-full pr-2">
+        <div className="flex items-center justify-start gap-2 h-full pl-2">
           <Button
             variant="ghost"
             size="icon"
@@ -360,7 +361,7 @@ export default function FAQPage() {
                 <div className="flex gap-2">
                   <Button
                     type="submit"
-                    className="flex-1 h-11 rounded-xl btn-primary"
+                    className={`${editingId ? "flex-1" : "w-full"} h-11 rounded-xl btn-primary`}
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
@@ -380,7 +381,7 @@ export default function FAQPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-11 rounded-xl"
+                      className="flex-1 h-11 rounded-xl"
                       onClick={handleCancelEdit}
                     >
                       Cancel
@@ -457,9 +458,9 @@ export default function FAQPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={filteredFaqs}
-                  columnDefs={columnDefs}
+                  columns={columnDefs}
                 />
               )}
             </CardContent>
@@ -490,19 +491,19 @@ export default function FAQPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleCancelDelete} 
-                className="px-6" 
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancelDelete}
+                className="px-6"
                 disabled={isDeleting}
               >
                 Cancel
               </Button>
-              <Button 
-                type="button" 
-                onClick={handleConfirmDelete} 
-                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
+              <Button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-6 bg-red-600 hover:bg-red-700 text-white"
                 disabled={isDeleting}
               >
                 {isDeleting ? (
