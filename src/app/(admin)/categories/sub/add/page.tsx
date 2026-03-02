@@ -18,6 +18,7 @@ import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
@@ -620,36 +621,34 @@ export default function AddSubCategoryPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    type="submit"
-                    className={`${editingSubCategory ? "flex-1" : "w-full"} h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary`}
-                    disabled={isLoading || isFetching}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {editingSubCategory ? "Updating..." : "Saving..."}
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        {editingSubCategory ? "Update Sub Category" : "Add Sub Category"}
-                      </>
-                    )}
-                  </Button>
+<div className="flex gap-3">
+  <Button
+    type="submit"
+    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary"
+    disabled={isLoading || isFetching}
+  >
+    {isLoading ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        {editingSubCategory ? "Updating..." : "Saving..."}
+      </>
+    ) : (
+      <>
+        <Plus className="mr-2 h-4 w-4" />
+        {editingSubCategory ? "Update Sub Category" : "Add Sub Category"}
+      </>
+    )}
+  </Button>
 
-                  {editingSubCategory && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 h-11 rounded-xl"
-                      onClick={handleCancelEdit}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
+  <Button
+    type="button"
+    variant="outline"
+    className="flex-1 h-11 rounded-xl"
+    onClick={handleCancelEdit}
+  >
+    Cancel
+  </Button>
+</div>
               </form>
             </CardContent>
           </Card>
@@ -770,66 +769,14 @@ export default function AddSubCategoryPage() {
       </div>
 
       {/* Delete Confirmation Popup */}
-      {showDeletePopup && subCategoryToDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">Delete Sub-Category</h3>
-              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center space-x-4 mb-4">
-                {subCategoryToDelete?.image && (
-                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
-                    <img
-                      src={getImageUrl(subCategoryToDelete.image)}
-                      alt={subCategoryToDelete.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f1f5f9'/%3E%3Ctext x='32' y='32' font-family='Arial' font-size='10' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo img%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                  </div>
-                )}
-                <div>
-                  <p className="text-gray-700">
-                    Are you sure you want to delete <span className="font-semibold">"{subCategoryToDelete?.name}"</span>?
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancelDelete}
-                className="px-6"
-                disabled={isDeleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="px-6 bg-red-600 hover:bg-red-700 text-white"
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  'Delete Sub-Category'
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+     <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete Sub Category?"
+        description={subCategoryToDelete ? `Are you sure you want to delete "${subCategoryToDelete.name}"? This action cannot be undone.` : "This action cannot be undone."}
+        isLoading={isDeleting}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

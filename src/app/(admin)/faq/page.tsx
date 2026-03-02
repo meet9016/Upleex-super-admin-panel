@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const faqSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -267,18 +268,18 @@ export default function FAQPage() {
     {
       field: "question",
       headerName: "Question",
-      width: 600,
+      width: 400,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
       field: "answer",
       headerName: "Answer",
-      width: 800,
+      width: 500,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
     {
       headerName: "Action",
-      width: 200,
+      width: 150,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
@@ -358,36 +359,34 @@ export default function FAQPage() {
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    className={`${editingId ? "flex-1" : "w-full"} h-11 rounded-xl btn-primary`}
-                    disabled={isLoading || isFetching}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {editingId ? 'Updating...' : 'Saving...'}
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        {editingId ? 'Update FAQ' : 'Save FAQ'}
-                      </>
-                    )}
-                  </Button>
+         <div className="flex gap-2">
+  <Button
+    type="submit"
+    className="flex-1 h-11 rounded-xl btn-primary"
+    disabled={isLoading || isFetching}
+  >
+    {isLoading ? (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        {editingId ? 'Updating...' : 'Saving...'}
+      </>
+    ) : (
+      <>
+        <Plus className="mr-2 h-4 w-4" />
+        {editingId ? 'Update FAQ' : 'Save FAQ'}
+      </>
+    )}
+  </Button>
 
-                  {editingId && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 h-11 rounded-xl"
-                      onClick={handleCancelEdit}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
+    <Button
+      type="button"
+      variant="outline"
+      className="flex-1 h-11 rounded-xl"
+      onClick={handleCancelEdit}
+    >
+      Cancel
+    </Button>
+</div>
               </form>
             </CardContent>
           </Card>
@@ -508,56 +507,14 @@ export default function FAQPage() {
       </div>
 
       {/* Delete Confirmation Popup */}
-      {showDeletePopup && faqToDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">Delete FAQ</h3>
-              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="mb-4">
-                <p className="text-gray-700 mb-2">
-                  Are you sure you want to delete this FAQ?
-                </p>
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                  <p className="font-semibold text-slate-900 text-sm mb-1">{faqToDelete.question}</p>
-                  <p className="text-xs text-slate-600 line-clamp-2">{faqToDelete.answer}</p>
-                </div>
-                <p className="text-sm text-gray-500 mt-3">This action cannot be undone.</p>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleCancelDelete}
-                className="px-6"
-                disabled={isDeleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleConfirmDelete}
-                className="px-6 bg-red-600 hover:bg-red-700 text-white"
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  'Delete FAQ'
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+       <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete FAQ?"
+        description={faqToDelete ? `Are you sure you want to delete "${faqToDelete.question}"? This action cannot be undone.` : "This action cannot be undone."}
+        isLoading={isDeleting}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
