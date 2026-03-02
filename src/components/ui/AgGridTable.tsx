@@ -75,24 +75,22 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // IMPORTANT: No flex property for Quotes table
   const defaultColDef = useMemo(
-  () => ({
-    sortable: true,
-    resizable: true,
-    // filter: true,
-    suppressMenuHide: true,
-    menuTabs: ['filterMenuTab'],
-    cellStyle: { 
-      display: 'flex', 
-      alignItems: 'center', 
-      paddingLeft: '16px' 
-    },
-    headerClass: "ag-left-aligned-header",
-    cellClass: "ag-cell-with-border",
-  }),
-  []
-);
+    () => ({
+      sortable: true,
+      resizable: true,
+      suppressMenuHide: true,
+      menuTabs: ['filterMenuTab'],
+      cellStyle: {
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: '16px'
+      },
+      headerClass: "ag-left-aligned-header",
+      cellClass: "ag-cell-with-border",
+    }),
+    []
+  );
 
   const defaultColumns: ColDef[] = useMemo(
     () => [
@@ -101,6 +99,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
         headerName: "Plan Name",
         checkboxSelection: true,
         headerCheckboxSelection: true,
+        headerCheckboxSelectionFilteredOnly: true, // Only select filtered rows
         width: 200,
       },
       { field: "price", headerName: "Price", width: 100 },
@@ -118,14 +117,20 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
           return (
             <div className="flex items-center justify-center gap-3">
               <button
-                onClick={() => onEdit ? onEdit(id) : router.push(`/plan/edit/${id}`)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row selection when clicking action buttons
+                  onEdit ? onEdit(id) : router.push(`/plan/edit/${id}`);
+                }}
                 className="text-lg text-slate-500 hover:text-brand-600 transition"
                 aria-label="Edit"
               >
                 <MdModeEdit />
               </button>
               <button
-                onClick={() => onDelete ? onDelete(id) : alert(`Delete clicked for ID: ${id}`)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent row selection when clicking action buttons
+                  onDelete ? onDelete(id) : alert(`Delete clicked for ID: ${id}`);
+                }}
                 className="text-lg text-slate-400 hover:text-red-500 transition"
                 aria-label="Delete"
               >
@@ -140,15 +145,14 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   );
 
   const rowSelection = useMemo<RowSelectionOptions>(
-    () => ({ mode: "multiRow" }),
+    () => ({ 
+      mode: "multiRow",
+      checkboxes: true, // Enable checkboxes for selection
+      enableSelectionWithoutKeys: true, // Allow selection without holding Ctrl key
+      enableSelectAll: true, // Enable select all
+    }),
     []
   );
-
-  // const onGridReady = useCallback((params: any) => {
-  //   // DON'T call sizeColumnsToFit for any table - let columns keep their defined widths
-  //   // This ensures horizontal scroll works when total width > container width
-  //   console.log("Grid ready - horizontal scroll enabled");
-  // }, []);
 
   const handleAddClick = useCallback(() => {
     router.push(addButtonLink);
@@ -157,7 +161,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (filterModalRef.current && !filterModalRef.current.contains(event.target as Node) &&
-          filterButtonRef.current && !filterButtonRef.current.contains(event.target as Node)) {
+        filterButtonRef.current && !filterButtonRef.current.contains(event.target as Node)) {
         setShowFilterModal(false);
       }
     };
@@ -165,12 +169,19 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle selection changes
+  const onSelectionChanged = useCallback(() => {
+    if (gridRef.current && onSelectionChange) {
+      const selectedRows = gridRef.current.api.getSelectedRows();
+      onSelectionChange(selectedRows);
+    }
+  }, [onSelectionChange]);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4 dark:text-gray-200">
         <div className="flex items-center gap-3">
-          {/** Search input, optional */}
-          { enableSearch && (
+          {enableSearch && (
             <div className="relative">
               <input
                 type="text"
@@ -179,18 +190,17 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
                 onChange={(e) => { setSearchText(e.target.value); onSearchChange?.(e.target.value); }}
                 className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white w-64"
               />
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M11 19a8 8 0 100-16 8 8 0 000 16zm10 2l-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M11 19a8 8 0 100-16 8 8 0 000 16zm10 2l-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
             </div>
           )}
-          {/** Filter button with modal, optional */}
-          { enableFilter && (
+          {enableFilter && (
             <div className="relative">
               <button
                 ref={filterButtonRef}
                 onClick={() => setShowFilterModal(!showFilterModal)}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className=""><path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className=""><path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
                 Filter
                 {(activeFilterCount || 0) > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{activeFilterCount}</span>
@@ -225,13 +235,18 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
           rowSelection={rowSelection}
           paginationPageSizeSelector={[10, 20, 50, 100]}
           columnMenu="new"
-          suppressRowClickSelection
+          suppressRowClickSelection={true} // CRITICAL: This prevents row click from toggling selection
+          suppressRowDeselection={false} // Allow deselection by clicking checkbox again
+          rowMultiSelectWithClick={false} // Don't use click for multi-select
           animateRows
           alwaysShowHorizontalScroll={true}
-          onSelectionChanged={(e) => {
-            const selected = e.api.getSelectedRows();
-            onSelectionChange?.(selected);
-          }}
+          onSelectionChanged={onSelectionChanged}
+          // Ensure selections persist when data changes
+          immutableData={false}
+         getRowId={useCallback((params: any) => {
+  // Use id if available, otherwise fall back to categories_id
+  return params.data.id || params.data.categories_id || params.data._id;
+}, [])}
         />
       </div>
     </div>

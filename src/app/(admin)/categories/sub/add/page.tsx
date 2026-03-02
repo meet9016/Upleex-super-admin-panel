@@ -70,7 +70,7 @@ export default function AddSubCategoryPage() {
   const [editingSubCategory, setEditingSubCategory] = useState<SubCategoryRow | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
+  const [selectedRows, setSelectedRows] = useState<SubCategoryRow[]>([]);
   // Delete popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [subCategoryToDelete, setSubCategoryToDelete] = useState<SubCategoryRow | null>(null);
@@ -511,16 +511,16 @@ export default function AddSubCategoryPage() {
                     render={({ field }) => (
                       <SearchableDropdown
                         options={categories.map((cat) => ({
+                          value: String(cat.categories_id || ''),
                           label: cat.categories_name,
-                          value: String(cat.categories_id),
+                          image: cat.image, // This will now show in the dropdown
                         }))}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Select parent category..."
-                        searchable={true}
-                        error={!!errors.categoryId}
+                        value={watch('categoryId') || ''}
+                        onChange={(val) => setValue('categoryId', val)}
                         disabled={isFetching}
-                        usePortal={true}
+                        error={!!errors.categoryId}
+                        searchable
+                        multiple={false} // Set to true if you want multi-select
                       />
                     )}
                   />
@@ -668,6 +668,40 @@ export default function AddSubCategoryPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={async () => {
+                      if (selectedRows.length === 0) return;
+                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
+
+                      try {
+                        const ids = selectedRows.map(r => r.id).filter(Boolean);
+
+                        // Option 1: Use POST for bulk delete (recommended)
+                        const res = await api.delete(endPointApi.bulkDeleteSubCategory, {
+                          data: { ids }
+                        });
+
+                        // Option 2: If you must use DELETE, send data in config
+                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
+
+                        if (res?.data?.message || res?.data?.success) {
+                          toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
+                          setSelectedRows([]);
+                          await fetchCategories();
+                        } else {
+                          toast.error(res?.data?.message || 'Bulk delete failed');
+                        }
+                      } catch (error: any) {
+                        console.error("Bulk delete error:", error);
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
+                      }
+                    }}
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
                   <div className="relative">
                     <input
                       type="text"
@@ -723,6 +757,11 @@ export default function AddSubCategoryPage() {
                 <AgGridTable
                   rowData={filteredSubCategories}
                   columns={columnDefs as any}
+                  onSelectionChange={(selected) => {
+                    setSelectedRows(selected);
+                  }}
+                  enableSearch={false} // Since you have your own search
+                  enableFilter={false}
                 />
               )}
             </CardContent>

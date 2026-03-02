@@ -52,7 +52,7 @@ export default function FAQPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<FAQRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
+ const [selectedRows, setSelectedRows] = useState<FAQRow[]>([]);
   const debouncedSearch = useDebounce(searchText, 600);
 
   const {
@@ -406,6 +406,40 @@ export default function FAQPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                   <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={async () => {
+                      if (selectedRows.length === 0) return;
+                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
+
+                      try {
+                        const ids = selectedRows.map(r => r.id).filter(Boolean);
+
+                        // Option 1: Use POST for bulk delete (recommended)
+                        const res = await api.delete(endPointApi.bulkDeleteFAQ, {
+                          data: { ids }
+                        });
+
+                        // Option 2: If you must use DELETE, send data in config
+                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
+
+                        if (res?.data?.message || res?.data?.success) {
+                          toast.success(`${selectedRows.length} FAQ${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
+                          setSelectedRows([]);
+                          await fetchFAQs();
+                        } else {
+                          toast.error(res?.data?.message || 'Bulk delete failed');
+                        }
+                      } catch (error: any) {
+                        console.error("Bulk delete error:", error);
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected FAQs');
+                      }
+                    }}
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
                   <div className="relative">
                     <input
                       type="text"
@@ -461,6 +495,11 @@ export default function FAQPage() {
                 <AgGridTable
                   rowData={filteredFaqs}
                   columns={columnDefs}
+                   onSelectionChange={(selected) => {
+                    setSelectedRows(selected);
+                  }}
+                  enableSearch={false} // Since you have your own search
+                  enableFilter={false}
                 />
               )}
             </CardContent>

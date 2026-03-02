@@ -59,7 +59,7 @@ export default function AddCategoryPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
+ const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
   const debouncedSearch = useDebounce(searchText, 600);
 
   // Fetch categories with search
@@ -75,9 +75,15 @@ export default function AddCategoryPage() {
       const res = await api.get(endPointApi.getCategoryList, { params });
       console.log("🚀 ~ API Response:", res);
 
-      if (res?.data?.success && res?.data?.data) {
-        setCategories(res.data.data);
-      } else if (res?.data?.data) {
+    // When setting categories from API response
+if (res?.data?.success && res?.data?.data) {
+  // Transform data to include id field
+  const transformedData = res.data.data.map((category: any) => ({
+    ...category,
+    id: category.categories_id || category._id // Add id field for AG Grid
+  }));
+  setCategories(transformedData);
+}else if (res?.data?.data) {
         setCategories(res.data.data);
       }
     } catch (error) {
@@ -521,6 +527,40 @@ export default function AddCategoryPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
+                   <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={async () => {
+                      if (selectedRows.length === 0) return;
+                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
+
+                      try {
+                        const ids = selectedRows.map(r => r.id).filter(Boolean);
+
+                        // Option 1: Use POST for bulk delete (recommended)
+                        const res = await api.delete(endPointApi.bulkDeleteCategory, {
+                          data: { ids }
+                        });
+
+                        // Option 2: If you must use DELETE, send data in config
+                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
+
+                        if (res?.data?.message || res?.data?.success) {
+                          toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
+                          setSelectedRows([]);
+                          await fetchCategories();
+                        } else {
+                          toast.error(res?.data?.message || 'Bulk delete failed');
+                        }
+                      } catch (error: any) {
+                        console.error("Bulk delete error:", error);
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
+                      }
+                    }}
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
                   {/* Search Input */}
                   <div className="relative">
                     <input
@@ -577,6 +617,11 @@ export default function AddCategoryPage() {
                 <AgGridTable
                   rowData={categories}
                   columns={columnDefs as ColDef[]}
+                  onSelectionChange={(selected) => {
+                    setSelectedRows(selected);
+                  }}
+                  enableSearch={false} // Since you have your own search
+                  enableFilter={false}
                 />
               )}
             </CardContent>
