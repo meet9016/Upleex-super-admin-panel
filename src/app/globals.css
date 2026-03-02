@@ -106,12 +106,25 @@
     --ag-primary-color: #465fff;
     --ag-header-background-color: #f8fafc;
     --ag-header-foreground-color: #475569;
-    --ag-row-hover-color: #ecf3ff;
+    --ag-row-hover-color: #f1f5f9;
     --ag-selected-row-parent-background-color: #ecf3ff;
     --ag-font-family: inherit;
     --ag-font-size: 13px;
     --ag-border-color: #f1f5f9;
   }
+
+  /* Vendor-style AgGrid header and borders */
+  .ag-theme-alpine .ag-header { background-color: #e6f0fa !important; }
+  .ag-theme-alpine .ag-cell,
+  .ag-theme-alpine-dark .ag-cell { border-right: 1px dashed #d9dcde !important; }
+  .ag-theme-alpine .ag-cell:last-child,
+  .ag-theme-alpine-dark .ag-cell:last-child { border-right: none !important; }
+  .ag-theme-alpine .ag-header-cell,
+  .ag-theme-alpine-dark .ag-header-cell { border-right: 1px dashed #d9dcde !important; }
+  .ag-theme-alpine .ag-header-cell:last-child,
+  .ag-theme-alpine-dark .ag-header-cell:last-child { border-right: none !important; }
+  .ag-theme-alpine .ag-row { border-bottom: 1px solid #f3f4f6; }
+  .ag-theme-alpine-dark .ag-row { border-bottom: 1px solid #1a2231; }
 
   .ag-theme-quartz .ag-header-cell-label {
     font-weight: 700;
@@ -134,5 +147,17 @@
     @apply px-6 py-2.5 text-white font-semibold rounded-xl shadow-md transition-all duration-300 active:scale-95;
     background: linear-gradient(to right, #6366f1, #0ea5e9);
   }
+  .cute-ag-grid {
+  --ag-header-background-color: #eef9ff;
+  --ag-header-foreground-color: #1f2937;
+  --ag-border-color: #cbd5e1;
+  --ag-row-border-color: #cbd5e1;
+  --ag-cell-horizontal-border: solid #cbd5e1;
+  --ag-header-height: 48px;
+  --ag-row-height: 52px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(16, 24, 40, 0.1);
+}
 
 }

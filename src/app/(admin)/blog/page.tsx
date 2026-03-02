@@ -18,6 +18,7 @@ import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
 
 const blogSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -363,7 +364,7 @@ export default function BlogPage() {
   const columnDefs: ColDef<BlogRow>[] = [
     {
       headerName: "Blog Post",
-      flex: 2,
+      width: 600,
       cellRenderer: (params: { data: BlogRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -373,11 +374,11 @@ export default function BlogPage() {
               <SafeImage
                 src={imageUrl}
                 alt={params.data.title}
-                className="w-16 h-16 rounded-lg object-cover border border-slate-200 shadow-sm"
+                className="w-12 h-12 rounded-lg object-cover border border-slate-200 shadow-sm"
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-slate-900 text-base">
+              <span className="font-medium text-slate-700 text-sm">
                 {params.data.title}
               </span>
             </div>
@@ -388,7 +389,7 @@ export default function BlogPage() {
     {
       field: "blog_date",
       headerName: "Date",
-      width: 120,
+      width: 200,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full gap-1.5">
           <Calendar size={14} className="text-slate-400" />
@@ -400,7 +401,7 @@ export default function BlogPage() {
     },
     {
       headerName: "Action",
-      width: 120,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: BlogRow }) => (
@@ -617,16 +618,14 @@ export default function BlogPage() {
                     )}
                   </Button>
 
-                  {editingId && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 h-11 rounded-xl"
-                      onClick={handleCancelEdit}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-11 rounded-xl"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -698,9 +697,9 @@ export default function BlogPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={filteredBlogs}
-                  columnDefs={columnDefs}
+                  columns={columnDefs as any}
                 />
               )}
             </CardContent>

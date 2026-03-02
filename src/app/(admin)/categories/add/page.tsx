@@ -17,6 +17,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name must be at least 2 characters"),
@@ -112,7 +113,7 @@ export default function AddCategoryPage() {
     {
       field: "categories_name",
       headerName: "Category",
-      flex: 2,
+      width: 400,
       cellRenderer: (params: any) => {
         const imageUrl = getImageUrl(params.data.image);
         return (
@@ -155,7 +156,7 @@ export default function AddCategoryPage() {
     {
       field: "status",
       headerName: "Status",
-      width: 100,
+      width: 200,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${params.value === 'Active'
@@ -170,13 +171,13 @@ export default function AddCategoryPage() {
     {
       field: "created_at",
       headerName: "Created",
-      width: 120,
+      width: 200,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      width: 110,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => (
@@ -573,9 +574,9 @@ export default function AddCategoryPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={categories}
-                  columnDefs={columnDefs}
+                  columns={columnDefs as ColDef[]}
                 />
               )}
             </CardContent>

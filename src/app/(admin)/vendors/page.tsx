@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/Button";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -221,9 +222,9 @@ export default function VendorsPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <DataTable
+                                <AgGridTable
                                     rowData={rowData}
-                                    columnDefs={columnDefs}
+                                    columns={columnDefs as ColDef<any>[]}
                                 />
                             )}
                         </div>

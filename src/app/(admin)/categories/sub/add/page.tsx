@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
+import AgGridTable from "@/components/ui/AgGridTable";
 import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
@@ -355,7 +355,7 @@ export default function AddSubCategoryPage() {
     {
       field: "name",
       headerName: "Sub Category",
-      flex: 2,
+      width: 400,
       cellRenderer: (params: { data: SubCategoryRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -387,7 +387,7 @@ export default function AddSubCategoryPage() {
     {
       field: "parent",
       headerName: "Category",
-      flex: 1,
+      width: 200,
       cellRenderer: (params: { data: SubCategoryRow }) => (
         <div className="flex items-center h-full">
           <span className="text-sm text-slate-600">{params.data.parent}</span>
@@ -397,13 +397,13 @@ export default function AddSubCategoryPage() {
     {
       field: "created_at",
       headerName: "Created",
-      width: 120,
+      width: 200,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      width: 110,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: SubCategoryRow }) => (
@@ -720,9 +720,9 @@ export default function AddSubCategoryPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={filteredSubCategories}
-                  columnDefs={columnDefs}
+                  columns={columnDefs as any}
                 />
               )}
             </CardContent>

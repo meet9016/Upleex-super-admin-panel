@@ -16,6 +16,7 @@ import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
 
 const faqSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -266,18 +267,18 @@ export default function FAQPage() {
     {
       field: "question",
       headerName: "Question",
-      flex: 1.5,
+      width: 600,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
       field: "answer",
       headerName: "Answer",
-      flex: 2,
+      width: 800,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
     {
       headerName: "Action",
-      width: 120,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
@@ -457,9 +458,9 @@ export default function FAQPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={filteredFaqs}
-                  columnDefs={columnDefs}
+                  columns={columnDefs}
                 />
               )}
             </CardContent>
