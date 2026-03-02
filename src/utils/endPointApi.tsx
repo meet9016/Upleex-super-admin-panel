@@ -20,12 +20,14 @@ export interface EndPointApi {
     postCategoryList: string;
     updateCategory: string;
     deleteCategory: string;
+    bulkDeleteCategory: string;
 
     // Subcategories CRUD
     getSubCategoryList: string;
     createSubCategory: string;
     updateSubCategory: string;
     deleteSubCategory: string;
+    bulkDeleteSubCategory: string;
 
     // BLOG
     createBlog: string;
@@ -33,6 +35,7 @@ export interface EndPointApi {
     getBlogById: string;
     updateBlog: string;
     deleteBlog: string;
+    bulkDeleteBlog: string;
 
     // FAQ
     createFAQ: string;
@@ -40,6 +43,7 @@ export interface EndPointApi {
     getFAQById: string;
     updateFAQ: string;
     deleteFAQ: string;
+    bulkDeleteFAQ: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -64,12 +68,14 @@ const endPointApi: EndPointApi = {
     postCategoryList: 'categories/create-category',
     updateCategory: 'categories/update',
     deleteCategory: 'categories/delete',
+    bulkDeleteCategory: 'categories/bulk-delete',
 
     // Subcategories CRUD
     getSubCategoryList: 'subcategories/getall',
     createSubCategory: 'subcategories/create-subcategory',
     updateSubCategory: 'subcategories/update',
     deleteSubCategory: 'subcategories/delete',
+    bulkDeleteSubCategory: 'subcategories/bulk-delete',    
 
     // BLOG
     createBlog: 'blogs/create-blogs',
@@ -77,6 +83,7 @@ const endPointApi: EndPointApi = {
     getBlogById: 'blogs/getById',
     updateBlog: 'blogs/update',
     deleteBlog: 'blogs/delete',
+    bulkDeleteBlog: 'blogs/bulk-delete',
 
     // FAQ
     createFAQ: 'faqs/create-faq',
@@ -84,6 +91,7 @@ const endPointApi: EndPointApi = {
     getFAQById: 'faqs/getById',
     updateFAQ: 'faqs/update',
     deleteFAQ: 'faqs/delete',
+    bulkDeleteFAQ: 'faqs/bulk-delete',
 };
 
 export default endPointApi;
