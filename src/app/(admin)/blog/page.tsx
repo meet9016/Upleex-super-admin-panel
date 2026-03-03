@@ -1,22 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Edit, Trash, Loader2, Calendar, X } from "lucide-react";
+import { Plus, Edit, Trash, Loader2, X } from "lucide-react";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
+import { format, parse } from "date-fns"; // Install date-fns: npm install date-fns
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
+import DatePicker from "@/components/ui/DatePicker";
 import { ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import AgGridTable from "@/components/ui/AgGridTable";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const blogSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -33,8 +36,10 @@ interface BlogRow {
   title: string;
   image: string;
   description: string;
-  blog_date: string;
+  blog_date: string; // This will be transformed to DD/MM/YYYY
   long_description?: string;
+  // Add the raw date field if available
+  raw_date?: string;
 }
 
 function useDebounce<T>(value: T, delay: number = 500): T {
@@ -57,7 +62,8 @@ export default function BlogPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<BlogRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const [selectedRows, setSelectedRows] = useState<BlogRow[]>([]);
+  
   const debouncedSearch = useDebounce(searchText, 600);
 
   const {
@@ -66,9 +72,13 @@ export default function BlogPage() {
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
+    defaultValues: {
+      date: "",
+    },
   });
 
   const watchImage = watch('image');
@@ -119,6 +129,86 @@ export default function BlogPage() {
     }
   }, [debouncedSearch]);
 
+  // Helper function to format date to DD/MM/YYYY
+  const formatDateToDDMMYYYY = (dateString: string): string => {
+    if (!dateString) return '';
+    
+    console.log("Original date from API:", dateString);
+    
+    try {
+      // If it's already in DD/MM/YYYY format
+      if (dateString.includes('/') && dateString.split('/').length === 3) {
+        return dateString;
+      }
+      
+      // If it's in YYYY-MM-DD format (ISO)
+      if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+      }
+      
+      // If it's in YYYY-MM-DDTHH:mm:ss.sssZ format (ISO with time)
+      if (dateString.includes('T')) {
+        const datePart = dateString.split('T')[0];
+        const [year, month, day] = datePart.split('-');
+        return `${day}/${month}/${year}`;
+      }
+      
+      // If it's a timestamp number
+      if (!isNaN(Number(dateString))) {
+        const date = new Date(Number(dateString));
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+      
+      // Try to parse with Date object
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+    } catch (error) {
+      console.error("Error formatting date:", error);
+    }
+    
+    return dateString; // Return original if parsing fails
+  };
+
+  // Helper function to convert DD/MM/YYYY to YYYY-MM-DD for DatePicker
+  const convertToDatePickerFormat = (dateString: string): string => {
+    if (!dateString) return '';
+    
+    try {
+      // If it's in DD/MM/YYYY format
+      if (dateString.includes('/')) {
+        const [day, month, year] = dateString.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      // If it's already in YYYY-MM-DD format
+      if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
+        return dateString;
+      }
+      
+      // Try to parse with Date object
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+    } catch (error) {
+      console.error("Error converting date:", error);
+    }
+    
+    return dateString;
+  };
+
   // GET ALL BLOGS API CALL
   const fetchBlogs = async (search?: string) => {
     try {
@@ -127,14 +217,19 @@ export default function BlogPage() {
       if (search) params.search = search;
 
       const res = await api.get(endPointApi.getAllBlogs, { params });
-      console.log("🚀 ~ fetchBlogs ~ res:", res);
+      console.log("🚀 ~ fetchBlogs ~ raw response:", res.data);
 
-      // Check the response structure from your backend
       if (res.data?.data) {
-        // Your backend transforms the data in getAllBlogs
-        // It returns: { id, title, image, description, blog_date }
-        setBlogs(res.data.data);
-        setFilteredBlogs(res.data.data);
+        // Transform the data to ensure dates are in DD/MM/YYYY format
+        const transformedData = res.data.data.map((item: any) => ({
+          ...item,
+          // Format the date to DD/MM/YYYY
+          blog_date: formatDateToDDMMYYYY(item.blog_date || item.date || item.createdAt || ''),
+        }));
+        
+        console.log("🚀 ~ fetchBlogs ~ transformed data:", transformedData);
+        setBlogs(transformedData);
+        setFilteredBlogs(transformedData);
       }
     } catch (error) {
       console.error("Error fetching blogs:", error);
@@ -227,7 +322,12 @@ export default function BlogPage() {
       formData.append("title", data.title);
       formData.append("sort_description", data.sort_description);
       formData.append("long_description", data.long_description);
-      formData.append("date", data.date);
+      
+      // Send date in the format your backend expects
+      // If backend expects YYYY-MM-DD, send as is
+      // If backend expects DD/MM/YYYY, convert accordingly
+      formData.append("date", data.date); // Adjust based on backend requirement
+      console.log("📅 Sending date to API:", data.date);
 
       if (data.image && data.image[0]) {
         formData.append("image", data.image[0]);
@@ -235,10 +335,8 @@ export default function BlogPage() {
 
       let success;
       if (editingId) {
-        // Update existing blog
         success = await updateBlog(editingId, formData);
       } else {
-        // Create new blog
         success = await createBlog(formData);
       }
 
@@ -261,7 +359,7 @@ export default function BlogPage() {
       setIsFetching(true);
       // Fetch full blog details for editing
       const res = await api.get(`${endPointApi.getBlogById}/${blog.id}`);
-      console.log("🚀 ~ handleEdit ~ res:", res);
+      console.log("🚀 ~ handleEdit ~ full blog data:", res.data);
 
       if (res.data?.blog_data) {
         const blogData = res.data.blog_data;
@@ -270,10 +368,11 @@ export default function BlogPage() {
         setValue("sort_description", blogData.description);
         setValue("long_description", blogData.long_description || "");
 
-        // Convert DD-MM-YYYY to YYYY-MM-DD for input
+        // Convert the date from whatever format to YYYY-MM-DD for DatePicker
         if (blogData.blog_date) {
-          const [day, month, year] = blogData.blog_date.split('-');
-          setValue("date", `${year}-${month}-${day}`);
+          const datePickerDate = convertToDatePickerFormat(blogData.blog_date);
+          console.log("📅 Setting date in form:", datePickerDate);
+          setValue("date", datePickerDate);
         }
 
         setValue("image", "");
@@ -321,17 +420,6 @@ export default function BlogPage() {
     reset();
   };
 
-  const handleImageClick = () => {
-    document.getElementById('blog-image')?.click();
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('image', e.target.files);
-    }
-  };
-
   // Custom Image Component to prevent infinite loop
   const SafeImage = ({ src, alt, className }: { src: string | null; alt: string; className: string }) => {
     const [imgError, setImgError] = useState(false);
@@ -358,7 +446,7 @@ export default function BlogPage() {
   const columnDefs: ColDef<BlogRow>[] = [
     {
       headerName: "Blog Post",
-      flex: 2,
+      width: 600,
       cellRenderer: (params: { data: BlogRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -368,11 +456,11 @@ export default function BlogPage() {
               <SafeImage
                 src={imageUrl}
                 alt={params.data.title}
-                className="w-16 h-16 rounded-lg object-cover border border-slate-200 shadow-sm"
+                className="w-12 h-12 rounded-lg object-cover border border-slate-200 shadow-sm"
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold text-slate-900 text-base">
+              <span className="font-medium text-slate-700 text-sm">
                 {params.data.title}
               </span>
             </div>
@@ -383,23 +471,22 @@ export default function BlogPage() {
     {
       field: "blog_date",
       headerName: "Date",
-      width: 120,
+      width: 200,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full gap-1.5">
-          <Calendar size={14} className="text-slate-400" />
           <span className="text-sm text-slate-600">
-            {params.value}
+            {params.value || 'N/A'}
           </span>
         </div>
-      )
+      ),
     },
     {
       headerName: "Action",
-      width: 120,
+      width: 200,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: BlogRow }) => (
-        <div className="flex items-center justify-end gap-2 h-full pr-2">
+        <div className="flex items-center justify-start gap-2 h-full pl-2">
           <Button
             variant="ghost"
             size="icon"
@@ -418,21 +505,21 @@ export default function BlogPage() {
           </Button>
         </div>
       )
-    }
+    },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Blog Management</h2>
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Left: Form */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm">
+          <Card className="sticky top-16 border-slate-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">
                 {editingId ? 'Edit Blog Post' : 'New Blog Post'}
@@ -444,7 +531,7 @@ export default function BlogPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-semibold text-slate-700">
                     Article Title
@@ -452,7 +539,7 @@ export default function BlogPage() {
                   <Input
                     id="title"
                     placeholder="Enter post title"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("title")}
                     error={errors.title?.message}
                   />
@@ -500,12 +587,21 @@ export default function BlogPage() {
                   <label htmlFor="date" className="text-sm font-semibold text-slate-700">
                     Publish Date
                   </label>
-                  <Input
-                    id="date"
-                    type="date"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
-                    {...register("date")}
-                    error={errors.date?.message}
+                  <Controller
+                    name="date"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <>
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                        />
+                        {fieldState.error && (
+                          <p className="text-xs text-red-500 mt-1">{fieldState.error.message}</p>
+                        )}
+                      </>
+                    )}
                   />
                 </div>
 
@@ -515,67 +611,63 @@ export default function BlogPage() {
                     Featured Image
                   </label>
 
-                  {/* Show current image when editing */}
-                  {editingId && !previewImage && (
-                    <div className="mb-3">
-                      <p className="text-xs text-slate-500 mb-2">Current Image:</p>
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <SafeImage
-                          src={getImageUrl(blogs.find(b => b.id === editingId)?.image || '')}
-                          alt="Current blog"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Show preview of new image */}
-                  {previewImage && (
-                    <div className="mb-3 relative inline-block">
-                      <p className="text-xs text-slate-500 mb-2">New Image Preview:</p>
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <img
-                          src={previewImage}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewImage(null);
-                          setValue('image', undefined);
-                        }}
-                        className="absolute top-6 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 transition-colors z-10"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "border-2 border-dotted rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors w-full h-32",
+                      "border-2 border-dotted rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[160px]",
                       isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
                       errors.image ? "border-red-500 bg-red-50" : ""
                     )}
                   >
                     <input {...getInputProps()} />
-                    <div className="bg-slate-100 p-2 rounded-full mb-2">
-                      <Plus className="h-5 w-5 text-slate-500" />
-                    </div>
-                    {isDragActive ? (
-                      <p className="text-sm font-medium text-primary">Drop the image here...</p>
-                    ) : (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-700">
-                          Click or drag image to upload
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          SVG, PNG, JPG (max. 5MB)
-                        </p>
+
+                    {/* Show Preview Image (New or Existing) */}
+                    {(previewImage || (editingId && !previewImage && blogs.find(b => b.id === editingId)?.image)) ? (
+                      <div className="absolute inset-0 w-full h-full group">
+                        <SafeImage
+                          src={previewImage || getImageUrl(blogs.find(b => b.id === editingId)?.image || '')}
+                          alt="Featured"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
+                            <Edit size={14} />
+                            Change Image
+                          </div>
+                        </div>
+                        {/* Remove Button for new uploads */}
+                        {previewImage && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewImage(null);
+                              setValue('image', undefined);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors z-20"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
+                    ) : (
+                      <>
+                        <div className="bg-slate-100 p-3 rounded-full mb-2 group-hover:bg-slate-200 transition-colors">
+                          <Plus className="h-6 w-6 text-slate-500" />
+                        </div>
+                        {isDragActive ? (
+                          <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                        ) : (
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-slate-700">
+                              Click or drag image to upload
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              SVG, PNG, JPG (max. 5MB)
+                            </p>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   {errors.image && (
@@ -607,16 +699,14 @@ export default function BlogPage() {
                     )}
                   </Button>
 
-                  {editingId && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-11 rounded-xl"
-                      onClick={handleCancelEdit}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-11 rounded-xl"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -636,6 +726,35 @@ export default function BlogPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={async () => {
+                      if (selectedRows.length === 0) return;
+                      if (!confirm(`Delete ${selectedRows.length} selected blogs?`)) return;
+
+                      try {
+                        const ids = selectedRows.map(r => r.id).filter(Boolean);
+                        const res = await api.delete(endPointApi.bulkDeleteBlog, {
+                          data: { ids }
+                        });
+
+                        if (res?.data?.message || res?.data?.success) {
+                          toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
+                          setSelectedRows([]);
+                          await fetchBlogs();
+                        } else {
+                          toast.error(res?.data?.message || 'Bulk delete failed');
+                        }
+                      } catch (error: any) {
+                        console.error("Bulk delete error:", error);
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
+                      }
+                    }}
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
                   <div className="relative">
                     <input
                       type="text"
@@ -688,9 +807,14 @@ export default function BlogPage() {
                   </div>
                 </div>
               ) : (
-                <DataTable
+                <AgGridTable
                   rowData={filteredBlogs}
-                  columnDefs={columnDefs}
+                  columns={columnDefs as any}
+                  onSelectionChange={(selected) => {
+                    setSelectedRows(selected);
+                  }}
+                  enableSearch={false}
+                  enableFilter={false}
                 />
               )}
             </CardContent>
@@ -699,63 +823,14 @@ export default function BlogPage() {
       </div>
 
       {/* Delete Confirmation Popup */}
-      {showDeletePopup && blogToDelete && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">Delete Blog Post</h3>
-              <button onClick={handleCancelDelete} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center space-x-4 mb-4">
-                {blogToDelete?.image && (
-                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
-                    <SafeImage
-                      src={getImageUrl(blogToDelete.image)}
-                      alt={blogToDelete.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <p className="text-gray-700">
-                    Are you sure you want to delete <span className="font-semibold">"{blogToDelete?.title}"</span>?
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleCancelDelete} 
-                className="px-6" 
-                disabled={isDeleting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="button" 
-                onClick={handleConfirmDelete} 
-                className="px-6 bg-red-600 hover:bg-red-700 text-white" 
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  'Delete Blog'
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete Blog Post?"
+        description={blogToDelete ? `Are you sure you want to delete "${blogToDelete.title}"? This action cannot be undone.` : "This action cannot be undone."}
+        isLoading={isDeleting}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
