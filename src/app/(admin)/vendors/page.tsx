@@ -204,7 +204,7 @@ export default function VendorsPage() {
             <div className="grid gap-6">
                 <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
                     <CardContent className="p-0">
-                        <div className="h-[600px] w-full relative">
+                        <div className="h-full w-full relative">
                             {isLoading ? (
                                 <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10 backdrop-blur-[1px]">
                                     <div className="text-center">

@@ -517,7 +517,9 @@ export default function AddSubCategoryPage() {
                           image: cat.image, // This will now show in the dropdown
                         }))}
                         value={watch('categoryId') || ''}
-                        onChange={(val) => setValue('categoryId', val)}
+                        onChange={(val) =>
+  setValue('categoryId', Array.isArray(val) ? val[0] : val)
+}
                         disabled={isFetching}
                         error={!!errors.categoryId}
                         searchable

@@ -14,7 +14,7 @@ console.error = (...args) => {
 import React, { useMemo, useRef, memo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AgGridReact } from "ag-grid-react";
-import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions } from "ag-grid-community";
+import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions,ColumnMenuTab } from "ag-grid-community";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ColumnMenuModule, ContextMenuModule } from "ag-grid-enterprise";
 
@@ -74,8 +74,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
 
     return () => observer.disconnect();
   }, []);
-
-  const defaultColDef = useMemo(
+const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
       resizable: true,
@@ -178,8 +177,8 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   }, [onSelectionChange]);
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4 dark:text-gray-200">
+     <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4 dark:text-gray-200 flex-shrink-0">
         <div className="flex items-center gap-3">
           {enableSearch && (
             <div className="relative">
@@ -223,7 +222,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
         )}
       </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine'}`} style={{ width: "100%", height: "80vh" }}>
+      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "485px" }}>
         <AgGridReact
           rowHeight={60}
           ref={gridRef}
@@ -242,11 +241,12 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
           alwaysShowHorizontalScroll={true}
           onSelectionChanged={onSelectionChanged}
           // Ensure selections persist when data changes
-          immutableData={false}
+          // immutableData={false}
          getRowId={useCallback((params: any) => {
   // Use id if available, otherwise fall back to categories_id
   return params.data.id || params.data.categories_id || params.data._id;
 }, [])}
+
         />
       </div>
     </div>
