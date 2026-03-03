@@ -268,7 +268,7 @@ export default function FAQPage() {
     {
       field: "question",
       headerName: "Question",
-      width: 400,
+      width: 350,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
@@ -460,7 +460,7 @@ export default function FAQPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 relative">
+            <CardContent className="p-0 flex-1 relative h-full">
               {isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
                   <div className="text-center">
