@@ -189,7 +189,7 @@ export default function VendorsPage() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-slate-900">Vendor Requests</h2>
                 </div>
-                <div className="flex items-center gap-3">
+                {/* <div className="flex items-center gap-3">
                     <Button
                         variant="outline"
                         className="rounded-xl border-slate-200 text-slate-600 space-x-2"
@@ -198,7 +198,7 @@ export default function VendorsPage() {
                         <Clock size={16} />
                         <span>Refresh</span>
                     </Button>
-                </div>
+                </div> */}
             </div>
 
             <div className="grid gap-6">

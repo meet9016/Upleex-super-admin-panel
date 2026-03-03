@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, X } from "lucide-react";
 import { Input } from "./Input";
 
 type Option = {
@@ -50,8 +50,8 @@ export default function SearchableDropdown({
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [portalStyle, setPortalStyle] = useState<React.CSSProperties>();
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
-    // Handle both single and multiple values
     const selectedValues = multiple 
         ? (Array.isArray(value) ? value : value ? [value] : [])
         : (value ? [value] : []);
@@ -61,6 +61,13 @@ export default function SearchableDropdown({
     useEffect(() => {
         if (disabled) setOpen(false);
     }, [disabled]);
+
+    useEffect(() => {
+        if (!open) {
+            setHighlightedIndex(-1);
+            setSearch("");
+        }
+    }, [open]);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -111,12 +118,52 @@ export default function SearchableDropdown({
         };
     }, [usePortal, open]);
 
+    // Scroll highlighted item into view
+    useEffect(() => {
+        if (highlightedIndex >= 0 && dropdownRef.current) {
+            const highlightedElement = dropdownRef.current.querySelectorAll('[role="option"]')[highlightedIndex];
+            if (highlightedElement) {
+                highlightedElement.scrollIntoView({ block: 'nearest' });
+            }
+        }
+    }, [highlightedIndex]);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!open) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setHighlightedIndex(prev => 
+                    prev < filteredOptions.length - 1 ? prev + 1 : prev
+                );
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setHighlightedIndex(prev => prev > 0 ? prev - 1 : 0);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < filteredOptions.length) {
+                    handleOptionClick(filteredOptions[highlightedIndex]);
+                }
+                break;
+            case 'Escape':
+                setOpen(false);
+                setSearch("");
+                break;
+            case 'Tab':
+                setOpen(false);
+                setSearch("");
+                break;
+        }
+    };
+
     const handleOptionClick = (opt: Option) => {
         if (disabled) return;
         
         if (multiple) {
-            // Multiple selection logic
-            const currentValues = Array.isArray(value) ? value : [];
+            const currentValues = Array.isArray(value) ? value : value ? [value] : [];
             const isSelected = currentValues.includes(opt.value);
             
             let newValues: string[];
@@ -127,13 +174,33 @@ export default function SearchableDropdown({
             }
             
             onChange(newValues);
-            // Don't close dropdown for multiple selection
+            
+            // Keep focus on search input if open
+            if (searchable && open) {
+                setTimeout(() => {
+                    searchInputRef.current?.focus();
+                }, 0);
+            }
         } else {
-            // Single selection logic
             onChange(opt.value);
             setOpen(false);
             setSearch("");
         }
+    };
+
+    const handleRemoveSelected = (opt: Option, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (disabled) return;
+        
+        const currentValues = Array.isArray(value) ? value : value ? [value] : [];
+        const newValues = currentValues.filter(v => v !== opt.value);
+        onChange(newValues);
+    };
+
+    const handleClearAll = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (disabled) return;
+        onChange(multiple ? [] : "");
     };
 
     const getSelectedDisplayText = () => {
@@ -162,7 +229,9 @@ export default function SearchableDropdown({
                         onChange={(e) => {
                             setSearch(e.target.value);
                             onSearch?.(e.target.value);
+                            setHighlightedIndex(0);
                         }}
+                        onKeyDown={handleKeyDown}
                         className="w-full"
                     />
                 </div>
@@ -181,19 +250,23 @@ export default function SearchableDropdown({
                 }}
             >
                 {filteredOptions.length ? (
-                    filteredOptions.map((opt) => {
+                    filteredOptions.map((opt, index) => {
                         const isSelected = selectedValues.includes(opt.value);
 
                         return (
                             <div
                                 key={opt.value}
+                                role="option"
+                                aria-selected={isSelected}
                                 onClick={() => handleOptionClick(opt)}
-                                className={`px-4 py-2.5 text-sm cursor-pointer flex items-center gap-3 transition-all hover:bg-gray-50
-                                    ${isSelected ? "bg-blue-50/50" : ""}
+                                className={`px-4 py-2.5 text-sm cursor-pointer flex items-center gap-3 transition-all
+                                    ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"}
+                                    ${highlightedIndex === index ? "bg-gray-100" : ""}
                                     ${disabled ? "opacity-50 cursor-not-allowed" : ""}
                                 `}
+                                onMouseEnter={() => setHighlightedIndex(index)}
                             >
-                                {/* Square Checkbox - Same for both single and multiple */}
+                                {/* Checkbox */}
                                 <div className="flex-shrink-0">
                                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
                                         ${isSelected 
@@ -239,38 +312,41 @@ export default function SearchableDropdown({
 
     return (
         <div ref={ref} className="relative w-full">
-            {/* Selected items preview for multiple selection */}
+            {/* Selected items chips for multiple select */}
             {multiple && selectedOptions.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-1">
-                    {selectedOptions.slice(0, 3).map(opt => (
-                        <div key={opt.value} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                    {selectedOptions.map(opt => (
+                        <div 
+                            key={opt.value} 
+                            className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs group"
+                        >
                             {opt.image && (
-                                <img src={opt.image} alt={opt.label} className="w-4 h-4 rounded object-cover" />
+                                <img 
+                                    src={opt.image} 
+                                    alt={opt.label} 
+                                    className="w-4 h-4 rounded object-cover" 
+                                />
                             )}
-                            <span>{opt.label}</span>
+                            <span className="max-w-[150px] truncate">{opt.label}</span>
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOptionClick(opt);
-                                }}
-                                className="ml-1 hover:text-blue-900"
+                                type="button"
+                                onClick={(e) => handleRemoveSelected(opt, e)}
+                                className="hover:bg-blue-100 rounded-sm p-0.5 transition-colors"
+                                aria-label={`Remove ${opt.label}`}
                             >
-                                ×
+                                <X size={12} className="text-blue-600" />
                             </button>
                         </div>
                     ))}
-                    {selectedOptions.length > 3 && (
-                        <div className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
-                            +{selectedOptions.length - 3} more
-                        </div>
-                    )}
                 </div>
             )}
 
+            {/* Main dropdown button */}
             <button
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && setOpen(!open)}
+                onKeyDown={handleKeyDown}
                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm transition-all h-11
                     ${error ? "!border-red-500 !ring-red-500/20" : "border-gray-200 hover:border-gray-300"}
                     ${disabled
@@ -281,7 +357,7 @@ export default function SearchableDropdown({
                 `}
             >
                 <span className="flex items-center gap-2 truncate">
-                    {/* Show first selected image for single mode */}
+                    {/* Show selected item image for single select */}
                     {!multiple && selectedOptions[0]?.image && (
                         <img
                             src={selectedOptions[0].image}
@@ -294,10 +370,29 @@ export default function SearchableDropdown({
                     </span>
                 </span>
 
-                <ChevronDown
-                    size={18}
-                    className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                />
+                <div className="flex items-center gap-1">
+                    {/* Clear button - only show when there's a selection */}
+                    {selectedOptions.length > 0 && (
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleClearAll(e);
+                            }}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            role="button"
+                            tabIndex={-1}
+                            aria-label="Clear selection"
+                        >
+                            <X size={16} className="text-gray-400 hover:text-gray-600" />
+                        </div>
+                    )}
+                    
+                    {/* Dropdown arrow */}
+                    <ChevronDown
+                        size={18}
+                        className={`text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                    />
+                </div>
             </button>
 
             {error && errorMessage && (

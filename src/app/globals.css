@@ -111,6 +111,7 @@
     --ag-font-family: inherit;
     --ag-font-size: 13px;
     --ag-border-color: #f1f5f9;
+    
   }
 
   /* Vendor-style AgGrid header and borders */
@@ -134,7 +135,7 @@
   }
 
   .ag-theme-quartz .ag-root-wrapper {
-    border-radius: 0.75rem;
+   border-radius: 0 !important;
     border: none;
   }
 
@@ -155,9 +156,25 @@
   --ag-cell-horizontal-border: solid #cbd5e1;
   --ag-header-height: 48px;
   --ag-row-height: 52px;
-  border-radius: 12px;
+  border-radius: 0 !important;
   overflow: hidden;
   box-shadow: 0 1px 3px 0 rgba(16, 24, 40, 0.1);
+}
+.ag-theme-alpine,
+.ag-theme-alpine-dark {
+  border-radius: 0 !important;
+}
+/* Remove border radius from all AG Grid layers */
+.ag-theme-alpine,
+.ag-theme-alpine-dark,
+.ag-theme-alpine .ag-root-wrapper,
+.ag-theme-alpine-dark .ag-root-wrapper,
+.ag-theme-alpine .ag-root-wrapper-body,
+.ag-theme-alpine-dark .ag-root-wrapper-body {
+  border-radius: 0 !important;
+}
+.ag-root-wrapper {
+  border-radius: 0 !important;
 }
 
 }

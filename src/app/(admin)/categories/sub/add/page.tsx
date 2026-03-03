@@ -22,8 +22,8 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
-  name: z.string().min(2, "Sub-category name must be at least 2 characters"),
-  image: z.any().optional(),
+  name: z.string().min(2, "Sub-category name is required"),
+   image: z.any().refine((files) => files && files.length > 0, "Image is required"),
 });
 
 type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
@@ -72,6 +72,8 @@ export default function AddSubCategoryPage() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedRows, setSelectedRows] = useState<SubCategoryRow[]>([]);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   // Delete popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [subCategoryToDelete, setSubCategoryToDelete] = useState<SubCategoryRow | null>(null);
@@ -119,11 +121,13 @@ export default function AddSubCategoryPage() {
 
   // Image preview
   useEffect(() => {
-    if (watchImage && watchImage[0]) {
+    if (watchImage && watchImage[0] && watchImage[0] instanceof File) {
       const file = watchImage[0];
       const objectUrl = URL.createObjectURL(file);
       setPreviewImage(objectUrl);
       return () => URL.revokeObjectURL(objectUrl);
+    } else if (watchImage === 'existing') {
+      return;
     } else {
       setPreviewImage(null);
     }
@@ -249,7 +253,7 @@ export default function AddSubCategoryPage() {
     setEditingSubCategory(subCategory);
     setValue("categoryId", subCategory.parentId);
     setValue("name", subCategory.name);
-    setValue("image", "");
+    setValue("image", "existing");
     setPreviewImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -362,7 +366,7 @@ export default function AddSubCategoryPage() {
 
         return (
           <div className="flex items-center gap-3 h-full py-2">
-            <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110 bg-slate-100">
+            <div className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110 bg-slate-100">
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -398,7 +402,7 @@ export default function AddSubCategoryPage() {
     {
       field: "created_at",
       headerName: "Created",
-      width: 200,
+      width: 190,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : 'N/A',
       cellStyle: { textAlign: "center" }
     },
@@ -483,10 +487,13 @@ export default function AddSubCategoryPage() {
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-3 items-stretch">
         {/* Left: Form */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm">
+        <Card 
+  className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col" 
+  style={{ height: '770px' }}
+>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
@@ -572,9 +579,24 @@ export default function AddSubCategoryPage() {
                           }}
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
-                            <Edit size={14} />
-                            Change Image
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = previewImage || getImageUrl(editingSubCategory?.image || "");
+                                setModalImageUrl(url);
+                                setImageModalOpen(true);
+                              }}
+                              className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                              View
+                            </button>
+                            <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
+                              <Edit size={14} />
+                              Change
+                            </div>
                           </div>
                         </div>
                         {/* Remove Button for new uploads */}
@@ -658,7 +680,7 @@ export default function AddSubCategoryPage() {
 
         {/* Right: List */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col" style={{ height: '770px' }}>
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -779,6 +801,29 @@ export default function AddSubCategoryPage() {
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
       />
+
+      {/* Image Modal */}
+      {imageModalOpen && modalImageUrl && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setImageModalOpen(false)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setImageModalOpen(false)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <X size={32} />
+            </button>
+            <img
+              src={modalImageUrl}
+              alt="Preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
