@@ -44,6 +44,21 @@ export interface EndPointApi {
     updateFAQ: string;
     deleteFAQ: string;
     bulkDeleteFAQ: string;
+
+    // Listing Plan Purchases
+    getAllListingPlans: string;
+    getListingPlanById: string;
+    createListingPlan: string;
+    updateListingPlan: string;
+    deleteListingPlan: string;
+    getListingPlanOptions: string;
+
+    // Dynamic Plans (Definitions)
+    getAllPlans: string;
+    getPlanById: string;
+    createPlan: string;
+    updatePlan: string;
+    deletePlan: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -92,6 +107,21 @@ const endPointApi: EndPointApi = {
     updateFAQ: 'faqs/update',
     deleteFAQ: 'faqs/delete',
     bulkDeleteFAQ: 'faqs/bulk-delete',
+
+    // Listing Plan Purchases
+    getAllListingPlans: 'listing-plans/getall',
+    getListingPlanById: 'listing-plans/getById',
+    createListingPlan: 'listing-plans/create',
+    updateListingPlan: 'listing-plans/update',
+    deleteListingPlan: 'listing-plans/delete',
+    getListingPlanOptions: 'listing-plans/options',
+
+    // Dynamic Plans (Definitions)
+    getAllPlans: 'plans/getall',
+    getPlanById: 'plans/getById',
+    createPlan: 'plans/create',
+    updatePlan: 'plans/update',
+    deletePlan: 'plans/delete',
 };
 
 export default endPointApi;

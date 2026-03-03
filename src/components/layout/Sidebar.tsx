@@ -31,6 +31,8 @@ const menuItems = [
       { name: "Vendors", href: "/vendors", icon: Users },
       { name: "Add Category", href: "/categories/add", icon: FolderPlus },
       { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers },
+      { name: "Plan", href: "/plans", icon: FolderPlus },
+      { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus },
     ]
   },
   {
