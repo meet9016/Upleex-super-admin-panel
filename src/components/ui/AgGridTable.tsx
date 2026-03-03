@@ -222,9 +222,9 @@ const defaultColDef = useMemo<ColDef>(
         )}
       </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "485px" }}>
+      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "660px" }}>
         <AgGridReact
-          rowHeight={60}
+          rowHeight={40}
           ref={gridRef}
           rowData={rowData}
           columnDefs={columns || defaultColumns}

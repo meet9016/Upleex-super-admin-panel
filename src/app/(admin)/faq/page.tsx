@@ -20,8 +20,8 @@ import AgGridTable from "@/components/ui/AgGridTable";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const faqSchema = z.object({
-  question: z.string().min(10, "Question must be at least 10 characters"),
-  answer: z.string().min(20, "Answer must be at least 20 characters"),
+  question: z.string().min(10, "Question is required"),
+  answer: z.string().min(20, "Answer is required"),
 });
 
 type FAQFormValues = z.infer<typeof faqSchema>;
@@ -274,7 +274,7 @@ export default function FAQPage() {
     {
       field: "answer",
       headerName: "Answer",
-      width: 500,
+      width: 490,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
     {
@@ -306,15 +306,15 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-500">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">FAQ Management</h2>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 items-stretch" style={{ height: '774px' }}>
         {/* Left: Form */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm">
+          <Card className="sticky top-16 border-slate-100 shadow-sm h-full flex flex-col">
             <CardHeader>
               <CardTitle className="text-lg">
                 {editingId ? 'Edit FAQ' : 'Add New FAQ'}
@@ -394,7 +394,7 @@ export default function FAQPage() {
 
         {/* Right: List */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden h-[600px] flex flex-col">
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col"style={{ height: '774px' }}>
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
