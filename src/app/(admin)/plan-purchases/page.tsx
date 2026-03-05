@@ -116,6 +116,7 @@ export default function ListingPlanPurchasesPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-900">Listing Plan Purchases</h2>
         <Button
+        size="sm"
           variant="destructive"
           disabled={!selected.length || loading}
           onClick={deleteSelected}

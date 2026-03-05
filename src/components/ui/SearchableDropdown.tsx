@@ -89,6 +89,7 @@ export default function SearchableDropdown({
             o.label.toLowerCase().includes(search.toLowerCase())
         )
         : options;
+        
 
     useEffect(() => {
         if (!open || !searchable) return;
@@ -148,6 +149,22 @@ export default function SearchableDropdown({
                     handleOptionClick(filteredOptions[highlightedIndex]);
                 }
                 break;
+                 case 'Backspace':
+            // remove selected option
+            if (!search) {
+                if (multiple) {
+                    const currentValues = Array.isArray(value) ? value : value ? [value] : [];
+                    if (currentValues.length) {
+                        const newValues = currentValues.slice(0, -1);
+                        onChange(newValues);
+                    }
+                } else {
+                    if (value) {
+                        onChange("");
+                    }
+                }
+            }
+            break;
             case 'Escape':
                 setOpen(false);
                 setSearch("");
@@ -182,10 +199,18 @@ export default function SearchableDropdown({
                 }, 0);
             }
         } else {
-            onChange(opt.value);
-            setOpen(false);
-            setSearch("");
-        }
+    const currentValue = Array.isArray(value) ? value[0] : value;
+
+    // If already selected → deselect
+    if (currentValue === opt.value) {
+        onChange("");
+    } else {
+        onChange(opt.value);
+    }
+
+    setOpen(false);
+    setSearch("");
+}
     };
 
     const handleRemoveSelected = (opt: Option, e: React.MouseEvent) => {

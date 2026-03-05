@@ -8,6 +8,8 @@ import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
 import { Trash, Edit, Loader2, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 type Plan = {
   _id?: string;
@@ -32,6 +34,10 @@ export default function PlansPage() {
     status: "active",
     description: "",
   });
+  const statusOptions = [
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" }
+];
 
   const fetchData = async () => {
     setLoading(true);
@@ -139,7 +145,12 @@ export default function PlansPage() {
     { field: "plan_type", headerName: "Plan Type", minWidth: 160 },
     { field: "months", headerName: "Months", minWidth: 100 },
     { field: "max_products", headerName: "Max Products", minWidth: 130 },
-    { field: "amount", headerName: "Amount", minWidth: 120, valueFormatter: (p) => `₹${p.value}` },
+    {
+      field: "amount",
+      headerName: "Amount",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value}`,
+    },
     { field: "status", headerName: "Status", minWidth: 120 },
     { field: "description", headerName: "Description", minWidth: 200 },
     {
@@ -152,18 +163,16 @@ export default function PlansPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
+              className="w-8 h-8 rounded-full border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
               onClick={() => startEdit(row)}
-              title="Edit"
             >
               <Edit size={16} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
+              className="w-8 h-8 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
               onClick={() => deleteOne(row)}
-              title="Delete"
             >
               <Trash size={16} />
             </Button>
@@ -174,104 +183,196 @@ export default function PlansPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-900">Plans</h2>
-        <Button variant="destructive" disabled={!selected.length || loading} onClick={deleteSelected}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Delete Selected ({selected.length})
-        </Button>
+    <div className="space-y-4 animate-in fade-in duration-500">
+
+      {/* TITLE */}
+
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+          Plan Management
+        </h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Manage subscription plans and pricing
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
+
+        {/* LEFT FORM */}
+
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-            <div className="space-y-3">
+
+          <Card className="sticky top-16 border-slate-200">
+
+            <CardHeader>
+              <CardTitle>
+                {editingId ? "Edit Plan" : "Add Plan"}
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+
+              {/* Plan Type */}
+
               <div>
-                <label className="text-sm font-semibold text-slate-700">Plan Type</label>
+                <label className="text-sm font-semibold text-slate-700">
+                  Plan Type
+                </label>
                 <input
                   className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                   value={form.plan_type}
-                  onChange={(e) => setForm({ ...form, plan_type: e.target.value })}
-                  placeholder="basic / standard / premium / custom"
+                  onChange={(e) =>
+                    setForm({ ...form, plan_type: e.target.value })
+                  }
                 />
               </div>
+
+              {/* Inputs */}
+
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Months</label>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Months
+                  </label>
                   <input
                     type="number"
-                    min={1}
                     className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                     value={form.months}
-                    onChange={(e) => setForm({ ...form, months: Number(e.target.value || 1) })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        months: Number(e.target.value || 1),
+                      })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Max Products</label>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Max Products
+                  </label>
                   <input
                     type="number"
-                    min={1}
                     className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                     value={form.max_products}
-                    onChange={(e) => setForm({ ...form, max_products: Number(e.target.value || 1) })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        max_products: Number(e.target.value || 1),
+                      })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Amount</label>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Amount
+                  </label>
                   <input
                     type="number"
-                    min={0}
                     className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                     value={form.amount}
-                    onChange={(e) => setForm({ ...form, amount: Number(e.target.value || 0) })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        amount: Number(e.target.value || 0),
+                      })
+                    }
                   />
                 </div>
               </div>
+
+              {/* Status */}
+
+      <div>
+  <label className="text-sm font-semibold text-slate-700">
+    Status
+  </label>
+
+  <div className="mt-1">
+    <SearchableDropdown
+      options={statusOptions}
+      value={form.status}
+      placeholder="Select Status"
+      onChange={(val) =>
+        setForm({ ...form, status: val as string })
+      }
+    />
+  </div>
+</div>
+
+              {/* Description */}
+
               <div>
-                <label className="text-sm font-semibold text-slate-700">Status</label>
-                <select
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Description</label>
+                <label className="text-sm font-semibold text-slate-700">
+                  Description
+                </label>
+
                 <textarea
                   className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
                   rows={3}
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Optional"
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
                 />
               </div>
+
+              {/* Buttons */}
+
               <div className="flex gap-3">
-                <Button onClick={savePlan} className="flex-1">
+                <Button onClick={savePlan} className="flex-1 btn-primary">
                   <Plus className="mr-2 h-4 w-4" />
                   {editingId ? "Update Plan" : "Create Plan"}
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={resetForm}>
+
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={resetForm}
+                >
                   Cancel
                 </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* TABLE */}
+
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2">
-            <AgGridTable
-              columns={columns}
-              rowData={rows}
-              onSelectionChange={(sel: any[]) => setSelected(sel as Plan[])}
-              enableFilter={false}
-              enableSearch={false}
-              tableName="Plans"
-            />
-          </div>
+          <Card className="border-slate-200">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Plan List</CardTitle>
+              <Button
+              size="sm"
+                variant="destructive"
+                disabled={!selected.length || loading}
+                onClick={deleteSelected}
+                
+              >
+                {loading ? (
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                ) : null}
+                Delete Selected ({selected.length})
+              </Button>
+
+            </CardHeader>
+
+            <CardContent className="p-0">
+
+              <AgGridTable
+                columns={columns}
+                rowData={rows}
+                onSelectionChange={(sel: any[]) =>
+                  setSelected(sel as Plan[])
+                }
+                enableFilter={false}
+                enableSearch={false}
+                tableName="Plans"
+              />
+
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>
