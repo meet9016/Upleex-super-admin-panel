@@ -8,6 +8,7 @@ import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
 import { Trash, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 type Purchase = {
   _id?: string;
@@ -114,27 +115,41 @@ export default function ListingPlanPurchasesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-900">Listing Plan Purchases</h2>
-        <Button
-        size="sm"
-          variant="destructive"
-          disabled={!selected.length || loading}
-          onClick={deleteSelected}
-        >
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Delete Selected ({selected.length})
-        </Button>
+        <h2 className="text-3xl font-bold text-slate-900">Listing Plan Purchases</h2>
       </div>
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2">
-        <AgGridTable
-          columns={columns}
-          rowData={rows}
-          onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
-          enableFilter={false}
-          enableSearch={false}
-          tableName="Purchases"
-        />
+      <div className="lg:col-span-2">
+        <Card className="border-slate-200">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Purchases Plan List</CardTitle>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={!selected.length || loading}
+              onClick={deleteSelected}
+
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              ) : null}
+              Delete Selected ({selected.length})
+            </Button>
+
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <AgGridTable
+              columns={columns}
+              rowData={rows}
+              onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
+              enableFilter={false}
+              enableSearch={false}
+              tableName="Purchases"
+            />
+          </CardContent>
+        </Card>
+
       </div>
     </div>
+    // </div>
   );
 }

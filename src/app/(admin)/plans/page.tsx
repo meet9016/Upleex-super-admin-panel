@@ -35,9 +35,9 @@ export default function PlansPage() {
     description: "",
   });
   const statusOptions = [
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" }
-];
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" }
+  ];
 
   const fetchData = async () => {
     setLoading(true);
@@ -282,22 +282,22 @@ export default function PlansPage() {
 
               {/* Status */}
 
-      <div>
-  <label className="text-sm font-semibold text-slate-700">
-    Status
-  </label>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">
+                  Status
+                </label>
 
-  <div className="mt-1">
-    <SearchableDropdown
-      options={statusOptions}
-      value={form.status}
-      placeholder="Select Status"
-      onChange={(val) =>
-        setForm({ ...form, status: val as string })
-      }
-    />
-  </div>
-</div>
+                <div className="mt-1">
+                  <SearchableDropdown
+                    options={statusOptions}
+                    value={form.status ?? 'active'}
+                    placeholder="Select Status"
+                    onChange={(val) =>
+                      setForm({ ...form, status: Array.isArray(val) ? val[0] : val })
+                    }
+                  />
+                </div>
+              </div>
 
               {/* Description */}
 
@@ -343,11 +343,11 @@ export default function PlansPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Plan List</CardTitle>
               <Button
-              size="sm"
+                size="sm"
                 variant="destructive"
                 disabled={!selected.length || loading}
                 onClick={deleteSelected}
-                
+
               >
                 {loading ? (
                   <Loader2 className="mr-2 h-3 w-3 animate-spin" />
