@@ -20,6 +20,7 @@ type PPlan = {
   addon_available_for_yearly?: boolean;
   addon_price_per_year?: number;
   addon_max_slots?: number;
+  is_popular?: boolean;
 };
 
 export default function PriorityPlansPage() {
@@ -37,6 +38,7 @@ export default function PriorityPlansPage() {
     addon_available_for_yearly: false,
     addon_price_per_year: 0,
     addon_max_slots: 0,
+    is_popular: false,
   });
 
   const fetchData = async () => {
@@ -66,6 +68,7 @@ export default function PriorityPlansPage() {
       addon_available_for_yearly: false,
       addon_price_per_year: 0,
       addon_max_slots: 0,
+      is_popular: false,
     });
   };
 
@@ -87,7 +90,7 @@ export default function PriorityPlansPage() {
   };
 
   const startEdit = (p: PPlan) => {
-    setEditingId(p._id || null);
+    setEditingId((p as any)._id || (p as any).id || null);
     setForm({
       name: p.name,
       monthly_price: p.monthly_price,
@@ -98,6 +101,7 @@ export default function PriorityPlansPage() {
       addon_available_for_yearly: !!p.addon_available_for_yearly,
       addon_price_per_year: p.addon_price_per_year || 0,
       addon_max_slots: p.addon_max_slots || 0,
+      is_popular: !!p.is_popular,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -139,6 +143,7 @@ export default function PriorityPlansPage() {
     { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth: 120, valueFormatter: (p)=> p.value ? 'Yes' : 'No' },
     { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 120, valueFormatter: (p)=> p.value ? `₹${p.value}` : '-' },
     { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 120 },
+    { field: "is_popular", headerName: "Popular", minWidth: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
     {
       headerName: "Action",
       minWidth: 140,
@@ -216,6 +221,13 @@ export default function PriorityPlansPage() {
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Add-on Max Slots</label>
                   <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.addon_max_slots} onChange={(e)=> setForm({ ...form, addon_max_slots: Number(e.target.value||0) })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
+                <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <input type="checkbox" checked={!!form.is_popular} onChange={(e)=> setForm({ ...form, is_popular: e.target.checked })} />
+                  <span className="text-sm text-slate-700">⭐ Show as popular plan (only one can be popular)</span>
                 </div>
               </div>
               <div className="flex gap-3">
