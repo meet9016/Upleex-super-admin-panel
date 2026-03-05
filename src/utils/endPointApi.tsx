@@ -59,6 +59,11 @@ export interface EndPointApi {
     createPlan: string;
     updatePlan: string;
     deletePlan: string;
+    // Priority Plans
+    getAllPriorityPlans: string;
+    createPriorityPlan: string;
+    updatePriorityPlan: string;
+    deletePriorityPlan: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -122,6 +127,11 @@ const endPointApi: EndPointApi = {
     createPlan: 'plans/create',
     updatePlan: 'plans/update',
     deletePlan: 'plans/delete',
+    // Priority Plans
+    getAllPriorityPlans: 'priority-plans/getall',
+    createPriorityPlan: 'priority-plans/create',
+    updatePriorityPlan: 'priority-plans/update',
+    deletePriorityPlan: 'priority-plans/delete',
 };
 
 export default endPointApi;
