@@ -496,7 +496,7 @@ export default function AddSubCategoryPage() {
 >
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5 text-primary" />
+                {/* <Layers className="h-5 w-5 text-primary" /> */}
                 <CardTitle className="text-lg">
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
