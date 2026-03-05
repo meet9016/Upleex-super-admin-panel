@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,33 +13,57 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  LogOut
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/Button";
 
-const menuItems = [
+type MenuItem = {
+  name: string;
+  href?: string;
+  icon: React.ComponentType<any>;
+  subItems?: MenuItem[];
+};
+
+const menuItems: { group: string; items: MenuItem[] }[] = [
   {
-    group: "Analytics", items: [
+    group: "Analytics",
+    items: [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    ]
+    ],
   },
   {
-    group: "Management", items: [
+    group: "Management",
+    items: [
       { name: "Vendors", href: "/vendors", icon: Users },
-      { name: "Add Category", href: "/categories/add", icon: FolderPlus },
-      { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers },
-      { name: "Plan", href: "/plans", icon: FolderPlus },
-      { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus },
-    ]
+      {
+        name: "Categories",
+        icon: Layers,
+        subItems: [
+          { name: "Add Category", href: "/categories/add", icon: FolderPlus },
+          { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers },
+        ],
+      },
+      {
+        name: "Plans",
+        icon: FolderPlus,
+        subItems: [
+          { name: "Product listing Plan", href: "/plans", icon: FolderPlus },
+          { name: "Priority Plan", href: "/priority", icon: FolderPlus },
+          { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus },
+        ],
+      },
+    ],
   },
   {
-    group: "Content", items: [
+    group: "Content",
+    items: [
       { name: "Blog", href: "/blog", icon: BookOpen },
       { name: "FAQs", href: "/faq", icon: HelpCircle },
-    ]
+    ],
   },
 ];
 
@@ -49,14 +73,23 @@ interface SidebarProps {
   isMobile?: boolean;
 }
 
-export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: SidebarProps) {
+export function Sidebar({
+  isCollapsed = false,
+  onToggle,
+  isMobile = false,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  const toggleMenu = (name: string) => {
+    setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
 
   const handleLogout = async () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_info");
     router.push("/login");
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("user_info");
   };
 
   return (
@@ -107,29 +140,112 @@ export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: Sid
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href;
+                  const hasSubItems = !!item.subItems?.length;
+                  const isOpen = openMenus[item.name] ?? false;
 
+                  // Check if this item or any sub-item is active
+                  const isActive = item.href ? pathname === item.href : false;
+                  const isGroupActive =
+                    hasSubItems &&
+                    item.subItems?.some((sub) => pathname === sub.href);
+
+                  if (!hasSubItems) {
+                    // Regular link item
                   return (
                     <Link
                       key={item.name}
-                      href={item.href}
+                      href={item.href!}
                       onClick={isMobile ? onToggle : undefined}
                       className={cn(
                         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group",
-                        isActive
-                          ? "bg-blue-50 text-blue-600"  // Light blue for active
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900", // Lighter colors for inactive
-                        isCollapsed && !isMobile && "justify-center px-2"
+                        (isActive || isGroupActive)
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                        (isCollapsed && !isMobile) && "justify-center px-2"
                       )}
                     >
-                      <Icon size={20} className={cn(
-                        "transition-colors",
-                        isActive
-                          ? "text-blue-600" // Blue icon for active
-                          : "text-gray-400 group-hover:text-gray-600" // Light gray icon
-                      )} />
+                      <Icon
+                        size={20}
+                        className={cn(
+                          "transition-colors",
+                          (isActive || isGroupActive)
+                            ? "text-blue-600"
+                            : "text-gray-400 group-hover:text-gray-600"
+                        )}
+                      />
                       {(!isCollapsed || isMobile) && <span>{item.name}</span>}
                     </Link>
+                  );
+                  }
+
+                  // Collapsible parent with sub-items
+                  return (
+                    <div key={item.name}>
+                      <button
+                        type="button"
+                        onClick={() => toggleMenu(item.name)}
+                        className={cn(
+                          "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group",
+                          isGroupActive
+                            ? "bg-blue-50 text-blue-600"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                          (isCollapsed && !isMobile) && "justify-center px-2"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon
+                            size={20}
+                            className={cn(
+                              "transition-colors",
+                              isGroupActive
+                                ? "text-blue-600"
+                                : "text-gray-400 group-hover:text-gray-600"
+                            )}
+                          />
+                          {(!isCollapsed || isMobile) && <span>{item.name}</span>}
+                        </div>
+
+                        {(!isCollapsed || isMobile) && (
+                          isOpen ? (
+                            <ChevronDown size={16} />
+                          ) : (
+                            <ChevronRight size={16} />
+                          )
+                        )}
+                      </button>
+
+                      {/* Submenu items */}
+                      {isOpen && (!isCollapsed || isMobile) && (
+                        <div className="ml-8 mt-1 space-y-1">
+                          {item.subItems!.map((sub) => {
+                            const SubIcon = sub.icon;
+                            const subActive = pathname === sub.href;
+
+                            return (
+                              <Link
+                                key={sub.name}
+                                href={sub.href!}
+                                onClick={isMobile ? onToggle : undefined}
+                                className={cn(
+                                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all",
+                                  subActive
+                                    ? "bg-blue-50/70 text-blue-700 font-medium"
+                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                                )}
+                              >
+                                <SubIcon
+                                  size={18}
+                                  className={cn(
+                                    subActive ? "text-blue-600" : "text-gray-400"
+                                  )}
+                                />
+                                <span>{sub.name}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -143,7 +259,7 @@ export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: Sid
             onClick={isMobile ? onToggle : undefined}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group",
-              isCollapsed && !isMobile && "justify-center px-2"
+              (isCollapsed && !isMobile) && "justify-center px-2"
             )}
           >
             <Settings size={20} className="text-gray-400 group-hover:text-gray-600" />
@@ -153,7 +269,7 @@ export function Sidebar({ isCollapsed = false, onToggle, isMobile = false }: Sid
             onClick={handleLogout}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-all w-full text-left group",
-              isCollapsed && !isMobile && "justify-center px-2"
+              (isCollapsed && !isMobile) && "justify-center px-2"
             )}
           >
             <LogOut size={20} className="text-red-400 group-hover:text-red-500" />

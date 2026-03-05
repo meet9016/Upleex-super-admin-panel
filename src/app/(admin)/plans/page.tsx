@@ -19,6 +19,7 @@ type Plan = {
   amount: number;
   status?: string;
   description?: string;
+  popular?: boolean;
 };
 
 export default function PlansPage() {
@@ -33,6 +34,7 @@ export default function PlansPage() {
     amount: 0,
     status: "active",
     description: "",
+    popular: false,
   });
   const statusOptions = [
     { label: "Active", value: "active" },
@@ -65,6 +67,7 @@ export default function PlansPage() {
       amount: 0,
       status: "active",
       description: "",
+      popular: false,
     });
   };
 
@@ -77,6 +80,7 @@ export default function PlansPage() {
         amount: Number(form.amount),
         status: form.status || "active",
         description: form.description || "",
+        popular: !!form.popular,
       };
       if (editingId) {
         const res = await api.put(`${endPointApi.updatePlan}/${editingId}`, payload);
@@ -93,7 +97,7 @@ export default function PlansPage() {
   };
 
   const startEdit = (p: Plan) => {
-    setEditingId(p._id || null);
+    setEditingId((p as any)._id || (p as any).id || null);
     setForm({
       plan_type: p.plan_type,
       months: p.months,
@@ -101,6 +105,7 @@ export default function PlansPage() {
       amount: p.amount,
       status: p.status || "active",
       description: p.description || "",
+      popular: !!p.popular,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -152,6 +157,7 @@ export default function PlansPage() {
       valueFormatter: (p) => `₹${p.value}`,
     },
     { field: "status", headerName: "Status", minWidth: 120 },
+    { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
     { field: "description", headerName: "Description", minWidth: 200 },
     {
       headerName: "Action",
@@ -277,6 +283,17 @@ export default function PlansPage() {
                       })
                     }
                   />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">Popular</label>
+                  <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <input
+                      type="checkbox"
+                      checked={!!form.popular}
+                      onChange={(e)=> setForm({ ...form, popular: e.target.checked })}
+                    />
+                    <span className="text-sm text-slate-700">⭐ Mark as popular (only one can be popular)</span>
+                  </div>
                 </div>
               </div>
 
