@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { Loader2, Search, Filter, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Loader2, Search, Filter, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { DataTable } from "@/components/ui/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -11,6 +11,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import VendorDetailsModal from "./view";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -28,6 +29,8 @@ export default function VendorsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
     const [dropdownStatuses, setDropdownStatuses] = useState<any[]>([]);
+    const [showDetails, setShowDetails] = useState(false);
+    const [detailsRow, setDetailsRow] = useState<any | null>(null);
 
     const fetchVendors = useCallback(async () => {
         setIsLoading(true);
@@ -168,6 +171,14 @@ export default function VendorsPage() {
 
                 return (
                     <div className="flex items-center gap-2 h-full">
+                        <button
+                          type="button"
+                          onClick={() => { setDetailsRow(params.data); setShowDetails(true); }}
+                          className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+                          title="View details"
+                        >
+                          <Eye size={16} className="text-gray-600" />
+                        </button>
                         <div className="w-full">
                             <SearchableDropdown
                                 options={[
@@ -176,9 +187,19 @@ export default function VendorsPage() {
                                     { label: "Reject", value: "rejected" }
                                 ]}
                                 value={currentStatus}
-                                onChange={(val) => handleStatusChange(kycId, vendorId, Array.isArray(val) ? val[0] : val)}
+                                onChange={(val) => {
+                                    const next = Array.isArray(val) ? val[0] : val;
+                                    const completed = params.data.completed_pages?.length || 0;
+                                    if (next === 'approved' && completed < 5) {
+                                        toast.error('Complete all 5 pages before approving');
+                                        return;
+                                    }
+                                    handleStatusChange(kycId, vendorId, next);
+                                }}
                                 disabled={isUpdating === kycId}
                                 placeholder="Select Status"
+                                usePortal={true}
+                                maxHeight="max-h-48"
                             />
                         </div>
                         {isUpdating === kycId && <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />}
@@ -227,10 +248,15 @@ export default function VendorsPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <AgGridTable
+                                <>
+                                  <AgGridTable
                                     rowData={rowData}
                                     columns={columnDefs as ColDef<any>[]}
-                                />
+                                  />
+                                  {showDetails && detailsRow && (
+                                    <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />
+                                  )}
+                                </>
                             )}
                         </div>
                     </CardContent>
