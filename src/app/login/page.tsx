@@ -5,12 +5,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Lock, Mail, Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card";
-
+import { Lock, Mail, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { api } from "@/utils/axiosInstance";
@@ -18,8 +16,8 @@ import endPointApi from "@/utils/endPointApi";
 import { saveToken } from "@/utils/tokenManager";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email(" email address is required"),
+  password: z.string().min(6, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -28,7 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
+const [showPassword, setShowPassword] = useState(false);
   const {
     register: formRegister,
     handleSubmit,
@@ -95,24 +93,38 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                  Password
-                </label>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10 h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all"
-                  {...formRegister("password")}
-                  error={errors.password?.message}
-                />
-              </div>
-            </div>
+       <div className="space-y-2">
+  <div className="flex items-center justify-between">
+    <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+      Password
+    </label>
+  </div>
+
+  <div className="relative">
+    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+
+    <Input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      placeholder="••••••••"
+      className="pl-10 pr-10 h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all"
+      {...formRegister("password")}
+      error={errors.password?.message}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+    >
+      {showPassword ? (
+        <EyeOff className="h-5 w-5" />
+      ) : (
+        <Eye className="h-5 w-5" />
+      )}
+    </button>
+  </div>
+</div>
             <Button type="submit" className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95" disabled={isLoading}>
               {isLoading ? (
                 <>

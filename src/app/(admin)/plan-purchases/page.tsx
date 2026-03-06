@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
 import { Trash, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 type Purchase = {
   _id?: string;
@@ -28,6 +29,9 @@ export default function ListingPlanPurchasesPage() {
   const [rows, setRows] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Purchase[]>([]);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [purchaseToDelete, setPurchaseToDelete] = useState<Purchase | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,19 +50,39 @@ export default function ListingPlanPurchasesPage() {
     fetchData();
   }, []);
 
-  const deleteOne = async (row: Purchase) => {
-    const id = row._id || row.id;
+  const handleDeleteClick = (purchase: Purchase) => {
+    setPurchaseToDelete(purchase);
+    setShowDeletePopup(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!purchaseToDelete) return;
+    const id = purchaseToDelete._id || purchaseToDelete.id;
     if (!id) {
       toast.error("Invalid purchase id");
       return;
     }
+    setIsDeleting(true);
     try {
       await api.delete(`${endPointApi.deleteListingPlan}/${id}`);
       toast.success("Deleted successfully");
+      setShowDeletePopup(false);
+      setPurchaseToDelete(null);
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Delete failed");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setPurchaseToDelete(null);
+  };
+
+  const deleteOne = async (row: Purchase) => {
+    handleDeleteClick(row);
   };
 
   const deleteSelected = async () => {
@@ -149,7 +173,15 @@ export default function ListingPlanPurchasesPage() {
         </Card>
 
       </div>
+
+      <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete Purchase?"
+        description={purchaseToDelete ? `Are you sure you want to delete this purchase for "${purchaseToDelete.plan_type}" plan? This action cannot be undone.` : "This action cannot be undone."}
+        isLoading={isDeleting}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
-    // </div>
   );
 }
