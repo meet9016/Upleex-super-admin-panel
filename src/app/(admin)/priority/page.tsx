@@ -28,6 +28,7 @@ export default function PriorityPlansPage() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<PPlan[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedPlanType, setSelectedPlanType] = useState<string>("");
   const [form, setForm] = useState<PPlan>({
     name: "",
     monthly_price: 0,
@@ -58,6 +59,7 @@ export default function PriorityPlansPage() {
 
   const resetForm = () => {
     setEditingId(null);
+    setSelectedPlanType("");
     setForm({
       name: "",
       monthly_price: 0,
@@ -178,8 +180,26 @@ export default function PriorityPlansPage() {
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-semibold text-slate-700">Name</label>
-                <input className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.name} onChange={(e)=> setForm({ ...form, name: e.target.value })} placeholder="Priority Basic / Standard / Premium" />
+                <label className="text-sm font-semibold text-slate-700">Plan Type</label>
+                <select 
+                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
+                  value={selectedPlanType} 
+                  onChange={(e)=> {
+                    const val = e.target.value;
+                    setSelectedPlanType(val);
+                    setForm({ ...form, name: val.charAt(0).toUpperCase() + val.slice(1) });
+                    if (val === "premium") {
+                      setForm(prev => ({ ...prev, addon_available_for_yearly: true }));
+                    } else {
+                      setForm(prev => ({ ...prev, addon_available_for_yearly: false, addon_price_per_year: 0, addon_max_slots: 0 }));
+                    }
+                  }}
+                >
+                  <option value="">Select Plan Type</option>
+                  <option value="basic">Basic</option>
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                </select>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
@@ -206,23 +226,41 @@ export default function PriorityPlansPage() {
                 <label className="text-sm font-semibold text-slate-700">Description</label>
                 <textarea className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" rows={3} value={form.description} onChange={(e)=> setForm({ ...form, description: e.target.value })} />
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-1">
-                  <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <input type="checkbox" checked={!!form.addon_available_for_yearly} onChange={(e)=> setForm({ ...form, addon_available_for_yearly: e.target.checked })} />
-                    <span className="text-sm text-slate-600">Available for Yearly</span>
+              {selectedPlanType === "premium" && (
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-1">
+                    <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input 
+                        type="checkbox" 
+                        checked={!!form.addon_available_for_yearly} 
+                        onChange={(e)=> setForm({ ...form, addon_available_for_yearly: e.target.checked })} 
+                      />
+                      <span className="text-sm text-slate-600">Available for Yearly</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-slate-700">Add-on Price/Year</label>
+                    <input 
+                      type="number" 
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
+                      value={form.addon_price_per_year} 
+                      onChange={(e)=> setForm({ ...form, addon_price_per_year: Number(e.target.value||0) })} 
+                      disabled={!form.addon_available_for_yearly}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-slate-700">Add-on Max Slots</label>
+                    <input 
+                      type="number" 
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
+                      value={form.addon_max_slots} 
+                      onChange={(e)=> setForm({ ...form, addon_max_slots: Number(e.target.value||0) })} 
+                      disabled={!form.addon_available_for_yearly}
+                    />
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Add-on Price/Year</label>
-                  <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.addon_price_per_year} onChange={(e)=> setForm({ ...form, addon_price_per_year: Number(e.target.value||0) })} />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Add-on Max Slots</label>
-                  <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.addon_max_slots} onChange={(e)=> setForm({ ...form, addon_max_slots: Number(e.target.value||0) })} />
-                </div>
-              </div>
+              )}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
