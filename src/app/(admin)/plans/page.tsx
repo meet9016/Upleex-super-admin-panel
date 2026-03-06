@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Trash, Edit, Loader2, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 type Plan = {
   _id?: string;
@@ -27,6 +28,9 @@ export default function PlansPage() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Plan[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState<Plan>({
     plan_type: "",
     months: 1,
@@ -110,19 +114,39 @@ export default function PlansPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const deleteOne = async (plan: Plan) => {
-    const id = plan._id || (plan as any).id;
+  const handleDeleteClick = (plan: Plan) => {
+    setPlanToDelete(plan);
+    setShowDeletePopup(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!planToDelete) return;
+    const id = planToDelete._id || (planToDelete as any).id;
     if (!id) {
       toast.error("Invalid plan id");
       return;
     }
+    setIsDeleting(true);
     try {
       await api.delete(`${endPointApi.deletePlan}/${id}`);
       toast.success("Deleted successfully");
+      setShowDeletePopup(false);
+      setPlanToDelete(null);
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Delete failed");
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+    setPlanToDelete(null);
+  };
+
+  const deleteOne = async (plan: Plan) => {
+    handleDeleteClick(plan);
   };
 
   const deleteSelected = async () => {
@@ -392,6 +416,15 @@ export default function PlansPage() {
 
         </div>
       </div>
+
+      <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete Plan?"
+        description={planToDelete ? `Are you sure you want to delete "${planToDelete.plan_type}" plan? This action cannot be undone.` : "This action cannot be undone."}
+        isLoading={isDeleting}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

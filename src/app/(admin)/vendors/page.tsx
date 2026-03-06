@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -163,19 +164,23 @@ export default function VendorsPage() {
             cellRenderer: (params: any) => {
                 const kycId = params.data.id;
                 const vendorId = params.data.ContactDetails?.vendor_id;
+                const currentStatus = params.data.status || "pending";
 
                 return (
                     <div className="flex items-center gap-2 h-full">
-                        <select
-                            className="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-1.5 font-medium transition-all"
-                            value={params.data.status || "pending"}
-                            disabled={isUpdating === kycId}
-                            onChange={(e) => handleStatusChange(kycId, vendorId, e.target.value)}
-                        >
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approve</option>
-                            <option value="rejected">Reject</option>
-                        </select>
+                        <div className="w-full">
+                            <SearchableDropdown
+                                options={[
+                                    { label: "Pending", value: "pending" },
+                                    { label: "Approve", value: "approved" },
+                                    { label: "Reject", value: "rejected" }
+                                ]}
+                                value={currentStatus}
+                                onChange={(val) => handleStatusChange(kycId, vendorId, Array.isArray(val) ? val[0] : val)}
+                                disabled={isUpdating === kycId}
+                                placeholder="Select Status"
+                            />
+                        </div>
                         {isUpdating === kycId && <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />}
                     </div>
                 );
