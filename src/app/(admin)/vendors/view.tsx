@@ -64,6 +64,7 @@ type Props = {
 export default function VendorDetailsModal({ open, data, onClose }: Props) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFileType, setSelectedFileType] = useState<'image' | 'pdf' | null>(null);
   const [expandedSections, setExpandedSections] = useState<string[]>([
     'profile', 'contact', 'identity', 'financial', 'documents', 'activity'
   ]);
@@ -88,6 +89,15 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
   };
 
   const cleanUrl = (u?: string) => (u || '').replace(/`/g, '').trim();
+
+  const getFileType = (url: string): 'image' | 'pdf' => {
+    return url.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image';
+  };
+
+  const openFilePreview = (url: string) => {
+    setSelectedImage(url);
+    setSelectedFileType(getFileType(url));
+  };
 
   const status = String(data?.status || '').toLowerCase();
   const getStatusConfig = (status: string) => {
@@ -358,14 +368,22 @@ const TimelineItem = ({ icon: Icon, title, time, status, isLast }: any) => {
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                     {images.map((img, idx) => {
                       const Icon = img.icon;
+                      const fileType = getFileType(img.url);
+                      const isPDF = fileType === 'pdf';
+                      
                       return (
                         <div
                           key={img.key}
                           className="group relative bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer hover:border-slate-300 transition-all"
-                          onClick={() => setSelectedImage(img.url)}
+                          onClick={() => openFilePreview(img.url)}
                         >
                           <div className="aspect-square bg-slate-50">
-                            {img.url ? (
+                            {isPDF ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center">
+                                <FileText size={32} className="text-red-600 mb-2" />
+                                <p className="text-xs font-medium text-slate-600">PDF</p>
+                              </div>
+                            ) : img.url ? (
                               <img
                                 src={img.url}
                                 alt={img.label}
@@ -474,21 +492,35 @@ const TimelineItem = ({ icon: Icon, title, time, status, isLast }: any) => {
         </div>
       </div>
 
-      {/* Image Preview Modal */}
+      {/* File Preview Modal */}
       {selectedImage && (
         <div 
           className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80"
-          onClick={() => setSelectedImage(null)}
+          onClick={() => {
+            setSelectedImage(null);
+            setSelectedFileType(null);
+          }}
         >
-          <div className="relative max-w-3xl max-h-[80vh]">
-            <img 
-              src={selectedImage} 
-              alt="Preview" 
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-            />
+          <div className="relative w-full max-w-5xl max-h-[90vh]">
+            {selectedFileType === 'pdf' ? (
+              <iframe
+                src={selectedImage}
+                className="w-full h-[90vh] bg-white rounded-lg"
+                title="PDF Preview"
+              />
+            ) : (
+              <img 
+                src={selectedImage} 
+                alt="Preview" 
+                className="max-w-full max-h-[90vh] object-contain rounded-lg mx-auto"
+              />
+            )}
             <button 
-              className="absolute top-4 right-4 p-2 rounded-lg bg-black/50 text-white hover:bg-black/70 transition-colors"
-              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 p-2 rounded-lg bg-black/50 text-white hover:bg-black/70 transition-colors z-10"
+              onClick={() => {
+                setSelectedImage(null);
+                setSelectedFileType(null);
+              }}
             >
               <X size={20} />
             </button>
