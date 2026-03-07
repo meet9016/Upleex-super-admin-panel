@@ -91,27 +91,28 @@ export default function VendorsPage() {
         {
             headerName: "Vendor Name",
             valueGetter: p => p.data?.ContactDetails?.full_name || p.data?.full_name || 'N/A',
-            flex: 1,
+            width: 250,
             cellStyle: { fontWeight: "600", color: "#1e293b" }
         },
         {
             headerName: "Business Name",
             valueGetter: p => p.data?.Identity?.business_name || p.data?.business_name || 'N/A',
-            flex: 1,
+            width: 350,
+             cellStyle: { color: "#475569" }
         },
         {
             headerName: "Email",
             valueGetter: p => p.data?.ContactDetails?.email || p.data?.email || 'N/A',
-            flex: 1,
+            width: 400,
         },
         {
             headerName: "Phone",
             valueGetter: p => p.data?.ContactDetails?.mobile || p.data?.mobile || 'N/A',
-            width: 130,
+            width: 200,
         },
         {
             headerName: "KYC Progress",
-            width: 150,
+            width: 200,
             cellRenderer: (params: any) => {
                 const completed = params.data.completed_pages?.length || 0;
                 const total = 5;
@@ -135,7 +136,7 @@ export default function VendorsPage() {
         {
             field: "status",
             headerName: "Current Status",
-            width: 130,
+            width: 150,
             cellRenderer: (params: any) => {
                 const val = params.value?.toLowerCase();
                 let colors = "bg-yellow-100 text-yellow-700";
@@ -161,7 +162,7 @@ export default function VendorsPage() {
         },
         {
             headerName: "Action / Update Status",
-            width: 180,
+            width: 220,
             sortable: false,
             filter: false,
             cellRenderer: (params: any) => {
@@ -257,7 +258,7 @@ export default function VendorsPage() {
                                     <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />
                                   )}
                                 </>
-                            )}
+                            )}  
                         </div>
                     </CardContent>
                 </Card>
