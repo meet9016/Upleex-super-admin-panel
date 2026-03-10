@@ -64,6 +64,12 @@ export interface EndPointApi {
     createPriorityPlan: string;
     updatePriorityPlan: string;
     deletePriorityPlan: string;
+
+    // Vendor Products Approval
+    getAllVendors: string;
+    getVendorProducts: string;
+    approveProduct: string;
+    bulkApproveProducts: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -132,6 +138,12 @@ const endPointApi: EndPointApi = {
     createPriorityPlan: 'priority-plans/create',
     updatePriorityPlan: 'priority-plans/update',
     deletePriorityPlan: 'priority-plans/delete',
+
+    // Vendor Products Approval
+    getAllVendors: 'products/vendors/getall',
+    getVendorProducts: 'products/vendor',
+    approveProduct: 'products/approve',
+    bulkApproveProducts: 'products/bulk-approve',
 };
 
 export default endPointApi;

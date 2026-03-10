@@ -39,6 +39,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
     group: "Management",
     items: [
       { name: "Vendors", href: "/vendors", icon: Users },
+      { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus },
       {
         name: "Categories",
         icon: Layers,
