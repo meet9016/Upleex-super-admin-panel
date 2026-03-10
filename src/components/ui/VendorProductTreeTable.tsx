@@ -312,6 +312,7 @@ export default function VendorProductTreeTable({
   // Auto group column definition
   const autoGroupColumnDef = useMemo(() => ({
     headerName: "Vendor / Product",
+    field: "name" as any,
     cellRenderer: 'agGroupCellRenderer',
     cellRendererParams: {
       suppressCount: true,
