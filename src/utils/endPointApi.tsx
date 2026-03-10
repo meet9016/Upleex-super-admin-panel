@@ -11,7 +11,7 @@ export interface EndPointApi {
     // Vendor Management
     getVendorList: string;
     updateVendorStatus: string;
-
+    downloadVendorKycPdf: string;
     // Dropdowns
     getDropdowns: string;
 
@@ -85,6 +85,7 @@ const endPointApi: EndPointApi = {
     // Vendor Management
     getVendorList: 'vendor-kyc',
     updateVendorStatus: 'change-status',
+    downloadVendorKycPdf: 'vendor-kyc/:id/download-pdf',
 
     // Dropdowns
     getDropdowns: 'dropdowns',
@@ -101,7 +102,7 @@ const endPointApi: EndPointApi = {
     createSubCategory: 'subcategories/create-subcategory',
     updateSubCategory: 'subcategories/update',
     deleteSubCategory: 'subcategories/delete',
-    bulkDeleteSubCategory: 'subcategories/bulk-delete',    
+    bulkDeleteSubCategory: 'subcategories/bulk-delete',
 
     // BLOG
     createBlog: 'blogs/create-blogs',
