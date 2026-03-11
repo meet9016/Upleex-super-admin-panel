@@ -308,6 +308,7 @@ export default function PlansPage() {
                     }
                   />
                 </div>
+              </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Popular</label>
                   <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -319,7 +320,6 @@ export default function PlansPage() {
                     <span className="text-sm text-slate-700">⭐ Mark as popular (only one can be popular)</span>
                   </div>
                 </div>
-              </div>
 
               {/* Status */}
 
