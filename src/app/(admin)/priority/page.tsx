@@ -8,6 +8,7 @@ import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
 import { Trash, Edit, Loader2, Plus } from "lucide-react";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 type PPlan = {
   _id?: string;
@@ -41,6 +42,18 @@ export default function PriorityPlansPage() {
     addon_max_slots: 0,
     is_popular: false,
   });
+
+  // Options for dropdowns
+  const planTypeOptions = [
+    { label: "Basic", value: "basic" },
+    { label: "Standard", value: "standard" },
+    { label: "Premium", value: "premium" },
+  ];
+
+  const statusOptions = [
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
+  ];
 
   const fetchData = async () => {
     setLoading(true);
@@ -105,6 +118,7 @@ export default function PriorityPlansPage() {
       addon_max_slots: p.addon_max_slots || 0,
       is_popular: !!p.is_popular,
     });
+    setSelectedPlanType(p.name.toLowerCase());
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -141,11 +155,36 @@ export default function PriorityPlansPage() {
     { field: "monthly_price", headerName: "Monthly", minWidth: 120, valueFormatter: (p)=> `₹${p.value}` },
     { field: "yearly_price", headerName: "Yearly", minWidth: 120, valueFormatter: (p)=> `₹${p.value}` },
     { field: "product_slots", headerName: "Slots", minWidth: 100 },
-    { field: "status", headerName: "Status", minWidth: 120 },
+    { 
+      field: "status", 
+      headerName: "Status", 
+      minWidth: 120,
+      cellRenderer: (params: any) => {
+        const status = params.value;
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+          }`}>
+            {status}
+          </span>
+        );
+      }
+    },
     { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth: 120, valueFormatter: (p)=> p.value ? 'Yes' : 'No' },
     { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 120, valueFormatter: (p)=> p.value ? `₹${p.value}` : '-' },
     { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 120 },
-    { field: "is_popular", headerName: "Popular", minWidth: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
+    { 
+      field: "is_popular", 
+      headerName: "Popular", 
+      minWidth: 100, 
+      cellRenderer: (params: any) => {
+        return params.value ? (
+          <span className="flex items-center gap-1 text-yellow-600">
+            <span>⭐</span> Yes
+          </span>
+        ) : 'No';
+      }
+    },
     {
       headerName: "Action",
       minWidth: 140,
@@ -169,8 +208,8 @@ export default function PriorityPlansPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-900">Priority Plans (Visibility & Placement)</h2>
-        <Button variant="destructive" disabled={!selected.length || loading} onClick={deleteSelected}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        <Button variant="destructive" size="sm" disabled={!selected.length || loading} onClick={deleteSelected}>
+          {loading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
           Delete Selected ({selected.length})
         </Button>
       </div>
@@ -179,71 +218,106 @@ export default function PriorityPlansPage() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
             <div className="space-y-3">
+              {/* Plan Type Dropdown */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Plan Type</label>
-                <select 
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
-                  value={selectedPlanType} 
-                  onChange={(e)=> {
-                    const val = e.target.value;
-                    setSelectedPlanType(val);
-                    setForm({ ...form, name: val.charAt(0).toUpperCase() + val.slice(1) });
-                    if (val === "premium") {
-                      setForm(prev => ({ ...prev, addon_available_for_yearly: true }));
-                    } else {
-                      setForm(prev => ({ ...prev, addon_available_for_yearly: false, addon_price_per_year: 0, addon_max_slots: 0 }));
-                    }
-                  }}
-                >
-                  <option value="">Select Plan Type</option>
-                  <option value="basic">Basic</option>
-                  <option value="standard">Standard</option>
-                  <option value="premium">Premium</option>
-                </select>
+                <div className="mt-1">
+                  <SearchableDropdown
+                    searchable
+                    options={planTypeOptions}
+                    value={selectedPlanType}
+                    placeholder="Select Plan Type"
+                    onChange={(value) => {
+                      const val = value as string;
+                      setSelectedPlanType(val);
+                      setForm({ ...form, name: val.charAt(0).toUpperCase() + val.slice(1) });
+                      if (val === "premium") {
+                        setForm(prev => ({ ...prev, addon_available_for_yearly: true }));
+                      } else {
+                        setForm(prev => ({ ...prev, addon_available_for_yearly: false, addon_price_per_year: 0, addon_max_slots: 0 }));
+                      }
+                    }}
+                  />
+                </div>
               </div>
+
+              {/* Price and Slots Grid */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Monthly Price</label>
-                  <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.monthly_price} onChange={(e)=> setForm({ ...form, monthly_price: Number(e.target.value||0) })} />
+                  <input 
+                    type="number" 
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    value={form.monthly_price} 
+                    onChange={(e)=> setForm({ ...form, monthly_price: Number(e.target.value||0) })} 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Yearly Price</label>
-                  <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.yearly_price} onChange={(e)=> setForm({ ...form, yearly_price: Number(e.target.value||0) })} />
+                  <input 
+                    type="number" 
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    value={form.yearly_price} 
+                    onChange={(e)=> setForm({ ...form, yearly_price: Number(e.target.value||0) })} 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Product Slots</label>
-                  <input type="number" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.product_slots} onChange={(e)=> setForm({ ...form, product_slots: Number(e.target.value||1) })} />
+                  <input 
+                    type="number" 
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    value={form.product_slots} 
+                    onChange={(e)=> setForm({ ...form, product_slots: Number(e.target.value||1) })} 
+                  />
                 </div>
               </div>
+
+              {/* Status Dropdown */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Status</label>
-                <select className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" value={form.status} onChange={(e)=> setForm({ ...form, status: e.target.value })}>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="mt-1">
+                  <SearchableDropdown
+                    options={statusOptions}
+                    value={form.status || ''}
+                    placeholder="Select Status"
+                    onChange={(value) => setForm({ ...form, status: value as string })}
+                  />
+                </div>
               </div>
+
+              {/* Description */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Description</label>
-                <textarea className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" rows={3} value={form.description} onChange={(e)=> setForm({ ...form, description: e.target.value })} />
+                <textarea 
+                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  rows={3} 
+                  value={form.description} 
+                  onChange={(e)=> setForm({ ...form, description: e.target.value })} 
+                />
               </div>
+
+              {/* Add-on Section for Premium */}
               {selectedPlanType === "premium" && (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg">
                   <div className="col-span-1">
                     <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
                     <div className="flex items-center gap-2 mt-1">
                       <input 
                         type="checkbox" 
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                         checked={!!form.addon_available_for_yearly} 
                         onChange={(e)=> setForm({ ...form, addon_available_for_yearly: e.target.checked })} 
                       />
-                      <span className="text-sm text-slate-600">Available for Yearly</span>
+                      <span className="text-sm text-slate-600">Available</span>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-slate-700">Add-on Price/Year</label>
                     <input 
                       type="number" 
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
+                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !form.addon_available_for_yearly ? 'bg-slate-100' : ''
+                      }`}
                       value={form.addon_price_per_year} 
                       onChange={(e)=> setForm({ ...form, addon_price_per_year: Number(e.target.value||0) })} 
                       disabled={!form.addon_available_for_yearly}
@@ -253,7 +327,9 @@ export default function PriorityPlansPage() {
                     <label className="text-sm font-semibold text-slate-700">Add-on Max Slots</label>
                     <input 
                       type="number" 
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" 
+                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        !form.addon_available_for_yearly ? 'bg-slate-100' : ''
+                      }`}
                       value={form.addon_max_slots} 
                       onChange={(e)=> setForm({ ...form, addon_max_slots: Number(e.target.value||0) })} 
                       disabled={!form.addon_available_for_yearly}
@@ -261,25 +337,36 @@ export default function PriorityPlansPage() {
                   </div>
                 </div>
               )}
+
+              {/* Popular Checkbox */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <input type="checkbox" checked={!!form.is_popular} onChange={(e)=> setForm({ ...form, is_popular: e.target.checked })} />
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-yellow-300 text-yellow-500 focus:ring-yellow-500"
+                    checked={!!form.is_popular} 
+                    onChange={(e)=> setForm({ ...form, is_popular: e.target.checked })} 
+                  />
                   <span className="text-sm text-slate-700">⭐ Show as popular plan (only one can be popular)</span>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Button onClick={savePlan} className="flex-1">
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button onClick={savePlan} className="flex-1 bg-blue-600 hover:bg-blue-700">
                   <Plus className="mr-2 h-4 w-4" />
                   {editingId ? "Update Priority Plan" : "Create Priority Plan"}
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={resetForm}>
+                <Button variant="outline" className="flex-1 border-slate-300" onClick={resetForm}>
                   Cancel
                 </Button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Table Section */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2">
             <AgGridTable
