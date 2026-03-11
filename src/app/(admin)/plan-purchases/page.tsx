@@ -86,7 +86,7 @@ export default function ListingPlanPurchasesPage() {
             params.append('amount', String(Number(value)));
           } else if (key === 'start_month' || key === 'expire_month') {
             // Send month in YYYY-MM format as the backend expects
-            params.append(key, value);
+            params.append(key, String(value));
           } else {
             params.append(key, String(value));
           }
@@ -105,11 +105,11 @@ export default function ListingPlanPurchasesPage() {
       setRows(list);
 
       // Update plan options from fetched data
-      const types = Array.from(new Set((list || []).map((x: any) => x.plan_type).filter(Boolean)));
+      const types = Array.from(new Set((list || []).map((x: any) => x.plan_type).filter(Boolean))) as string[];
       setPlanOptions(types.map((t: string) => ({ label: t, value: t })));
 
       // Update amount options from fetched data (unique amounts)
-      const amounts = Array.from(new Set((list || []).map((x: any) => x.amount).filter(Boolean)));
+      const amounts = Array.from(new Set((list || []).map((x: any) => x.amount).filter(Boolean))) as number[];
       const sortedAmounts = amounts.sort((a: number, b: number) => a - b);
       setAmountOptions(sortedAmounts.map((amt: number) => ({
         label: `₹${amt}`,
@@ -244,9 +244,12 @@ export default function ListingPlanPurchasesPage() {
   };
 
   // Handle filter changes
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
+// Update the handleFilterChange function to handle both string and string[]
+const handleFilterChange = (key: string, value: string | string[]) => {
+  // If it's an array, take the first value or empty string
+  const finalValue = Array.isArray(value) ? (value[0] || '') : value;
+  setFilters(prev => ({ ...prev, [key]: finalValue }));
+};
 
   const columns: ColDef[] = [
     { field: "vendor_name", headerName: "Vendor", minWidth: 220 },
@@ -385,7 +388,7 @@ export default function ListingPlanPurchasesPage() {
                               options={planOptions}
                               value={filters.plan_type}
                               placeholder="Select Plan"
-                              onChange={(value) => handleFilterChange('plan_type', value)}
+                              onChange={(value) => handleFilterChange('plan_type',  value as string)}
                             />
                           </div>
 
@@ -399,7 +402,7 @@ export default function ListingPlanPurchasesPage() {
                               options={amountOptions}
                               value={filters.amount}
                               placeholder="Select Amount"
-                              onChange={(value) => handleFilterChange('amount', value)}
+                              onChange={(value) => handleFilterChange('amount',  value as string)}
                             />
                           </div>
 
@@ -411,9 +414,8 @@ export default function ListingPlanPurchasesPage() {
                             <DatePicker
                               value={filters.start_month}
                               onChange={(d) => handleFilterChange('start_month', d)}
-                              placeholder="Select start month"
-                              views={['year', 'month']}
-                              format="yyyy-MM"
+                              // views={['year', 'month']}
+                              // format="yyyy-MM"
                             />
                           </div>
 
@@ -425,9 +427,8 @@ export default function ListingPlanPurchasesPage() {
                             <DatePicker
                               value={filters.expire_month}
                               onChange={(d) => handleFilterChange('expire_month', d)}
-                              placeholder="Select expire month"
-                              views={['year', 'month']}
-                              format="yyyy-MM"
+                              // views={['year', 'month']}
+                              // format="yyyy-MM"
                             />
                           </div>
                         </div>
