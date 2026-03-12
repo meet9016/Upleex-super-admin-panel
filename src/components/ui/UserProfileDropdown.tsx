@@ -30,8 +30,10 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_info');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_info');
+      }
       toast.success('Logged out successfully');
       router.push('/login');
     } catch (error) {

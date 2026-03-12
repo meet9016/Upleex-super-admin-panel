@@ -95,8 +95,10 @@ export function Sidebar({
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_info");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_info");
+    }
     router.push("/login");
   };
 

@@ -15,12 +15,15 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user_info");
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem("user_info");
 
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUserName(parsedUser?.admin?.name || parsedUser?.name || "");
-      setUserEmail(parsedUser?.admin?.email || parsedUser?.email || "");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUserName(parsedUser?.admin?.name || parsedUser?.name || "");
+        setUserEmail(parsedUser?.admin?.email || parsedUser?.email || "");
+      }
     }
   }, []);
   

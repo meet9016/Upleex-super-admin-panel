@@ -34,9 +34,14 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      refreshPermissions();
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        refreshPermissions();
+      } else {
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }

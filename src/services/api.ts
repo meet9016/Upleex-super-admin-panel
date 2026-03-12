@@ -4,7 +4,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3688/a
 
 class ApiService {
   private getAuthHeaders() {
-    const token = localStorage.getItem('auth_token');
+    // Check if we're in browser environment
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
