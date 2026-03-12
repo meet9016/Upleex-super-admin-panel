@@ -235,7 +235,11 @@ export default function AddSubCategoryPage() {
 
         // Refresh the list
         fetchCategories();
-        reset();
+        reset({
+    categoryId: "",
+    name: "",
+    image: undefined
+  });
         setPreviewImage(null);
       }
     } catch (error: any) {
@@ -292,7 +296,11 @@ export default function AddSubCategoryPage() {
         // Refresh the list
         fetchCategories();
         setEditingSubCategory(null);
-        reset();
+         reset({
+    categoryId: "",
+    name: "",
+    image: undefined
+  });
         setPreviewImage(null);
       }
     } catch (error: any) {
@@ -313,32 +321,43 @@ export default function AddSubCategoryPage() {
   };
 
   // Confirm delete handler
-  const handleConfirmDelete = async () => {
-    if (!subCategoryToDelete) return;
+const handleConfirmDelete = async () => {
+  if (!subCategoryToDelete) return;
 
-    setIsDeleting(true);
-    try {
-      const res = await api.delete(`${endPointApi.deleteSubCategory}/${subCategoryToDelete.id}`);
+  setIsDeleting(true);
+  try {
+    const res = await api.delete(`${endPointApi.deleteSubCategory}/${subCategoryToDelete.id}`);
 
-      if (res.data) {
-        setNotification({
-          type: 'success',
-          message: 'Sub-category deleted successfully'
-        });
-        fetchCategories();
-        setShowDeletePopup(false);
-        setSubCategoryToDelete(null);
+    if (res.data) {
+      // Check if the deleted sub-category is the one being edited
+      if (editingSubCategory?.id === subCategoryToDelete.id) {
+        setEditingSubCategory(null);
+        setPreviewImage(null);
+        reset({
+          categoryId: "",
+          name: "",
+          image: undefined
+        }); // Clear the form
       }
-    } catch (error: any) {
-      console.error("Error deleting subcategory:", error);
+      
       setNotification({
-        type: 'error',
-        message: error.response?.data?.message || 'Failed to delete sub-category'
+        type: 'success',
+        message: 'Sub-category deleted successfully'
       });
-    } finally {
-      setIsDeleting(false);
+      fetchCategories();
+      setShowDeletePopup(false);
+      setSubCategoryToDelete(null);
     }
-  };
+  } catch (error: any) {
+    console.error("Error deleting subcategory:", error);
+    setNotification({
+      type: 'error',
+      message: error.response?.data?.message || 'Failed to delete sub-category'
+    });
+  } finally {
+    setIsDeleting(false);
+  }
+};
 
   // Cancel delete handler
   const handleCancelDelete = () => {
@@ -445,7 +464,11 @@ export default function AddSubCategoryPage() {
   const handleCancelEdit = () => {
     setEditingSubCategory(null);
     setPreviewImage(null);
-    reset();
+     reset({
+    categoryId: "",
+    name: "",
+    image: undefined
+  });
   };
 
   const currentEditingCategory = editingSubCategory
