@@ -11,12 +11,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, Mail, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import { api } from "@/utils/axiosInstance";
-import endPointApi from "@/utils/endPointApi";
-import { saveToken } from "@/utils/tokenManager";
+import { apiService } from "@/services/api";
 
 const loginSchema = z.object({
-  email: z.string().email(" email address is required"),
+  email: z.string().email("Valid email address is required"),
   password: z.string().min(6, "Password is required"),
 });
 
@@ -26,7 +24,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
   const {
     register: formRegister,
     handleSubmit,
@@ -38,24 +37,22 @@ const [showPassword, setShowPassword] = useState(false);
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const response = await api.post(endPointApi.adminLogin, data);
+      const response = await apiService.login(data.email, data.password)as any;
+      console.log('Login response:', response);
 
-      if (response.data.success || response.status === 200) {
-        const token = response.data.token || response.data.data?.token;
-        if (token) {
-          saveToken(token);
-          localStorage.setItem("user_info", JSON.stringify(response.data.data || response.data.user));
-          toast.success("Login successful! Welcome back.");
-          router.push("/dashboard");
-        } else {
-          toast.error("Authentication failed: No token received");
-        }
+      if (response.success && response.data?.token) {
+        // Save token and user info
+        localStorage.setItem("auth_token", response.data.token);
+        localStorage.setItem("user_info", JSON.stringify(response.data.admin));
+        
+        toast.success("Login successful! Welcome back.");
+        router.push("/dashboard");
       } else {
-        toast.error(response.data.message || "Login failed");
+        toast.error(response.message || "Login failed");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
+      toast.error(error.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +122,11 @@ const [showPassword, setShowPassword] = useState(false);
     </button>
   </div>
 </div>
-            <Button type="submit" className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95" disabled={isLoading}>
+<Button 
+  type="submit" 
+  className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95" 
+  disabled={isLoading}
+>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -138,12 +139,12 @@ const [showPassword, setShowPassword] = useState(false);
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 pt-4">
-          <div className="text-sm text-center">
+          {/* <div className="text-sm text-center">
             <span className="text-gray-500">Don't have an account? </span>
             <Link href="/register" className="text-indigo-600 font-semibold hover:underline">
               Register here
             </Link>
-          </div>
+          </div> */}
           <p className="text-center text-xs text-gray-400">
             © 2026 Upleex. All rights reserved.
           </p>

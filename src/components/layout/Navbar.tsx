@@ -1,23 +1,26 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bell, Search, User, Menu, Globe } from "lucide-react";
+import { Bell, Search, Menu, Globe } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { UserProfileDropdown } from "@/components/ui/UserProfileDropdown";
 
 interface NavbarProps {
   onMenuClick?: () => void;
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
- const [userName, setUserName] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user_info");
 
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      setUserName(parsedUser?.admin?.name || "");
+      setUserName(parsedUser?.admin?.name || parsedUser?.name || "");
+      setUserEmail(parsedUser?.admin?.email || parsedUser?.email || "");
     }
   }, []);
   
@@ -56,18 +59,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         
         <div className="h-8 w-[1px] bg-slate-100 mx-2 hidden md:block"></div>
 
-        <div className="flex items-center gap-3 pr-2 group cursor-pointer">
-          <div className="hidden text-right md:block">
-            <p className="text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors leading-none"> {userName}</p>
-            <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-1">Super Admin</p>
-          </div>
-          <div className="relative">
-            <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-primary font-bold border-2 border-transparent group-hover:border-primary/10 transition-all">
-              <User size={20} />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white"></div>
-          </div>
-        </div>
+        <UserProfileDropdown userName={userName} userEmail={userEmail} />
       </div>
     </header>
   );
