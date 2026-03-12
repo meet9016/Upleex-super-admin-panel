@@ -15,16 +15,19 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/Button";
+import { usePermissions } from "@/contexts/PermissionContext";
 
 type MenuItem = {
   name: string;
   href?: string;
   icon: React.ComponentType<any>;
+  permission?: string;
   subItems?: MenuItem[];
 };
 
@@ -32,38 +35,41 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
   {
     group: "Analytics",
     items: [
-      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard" },
     ],
   },
   {
     group: "Management",
     items: [
-      { name: "Vendors", href: "/vendors", icon: Users },
-      { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus },
+      { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
+      { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       {
         name: "Categories",
         icon: Layers,
+        permission: "categories",
         subItems: [
-          { name: "Add Category", href: "/categories/add", icon: FolderPlus },
-          { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers },
+          { name: "Add Category", href: "/categories/add", icon: FolderPlus, permission: "categories" },
+          { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers, permission: "subcategories" },
         ],
       },
       {
         name: "Plans",
         icon: FolderPlus,
+        permission: "orders",
         subItems: [
-          { name: "Product listing Plan", href: "/plans", icon: FolderPlus },
-          { name: "Priority Plan", href: "/priority", icon: FolderPlus },
-          { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus },
+          { name: "Product listing Plan", href: "/plans", icon: FolderPlus, permission: "orders" },
+          { name: "Priority Plan", href: "/priority", icon: FolderPlus, permission: "orders" },
+          { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus, permission: "orders" },
         ],
       },
+      { name: "Admin Permissions", href: "/admin-permissions", icon: Shield ,permission: "admin-permissions" },
     ],
   },
   {
     group: "Content",
     items: [
-      { name: "Blog", href: "/blog", icon: BookOpen },
-      { name: "FAQs", href: "/faq", icon: HelpCircle },
+      { name: "Blog", href: "/blog", icon: BookOpen, permission: "blogs" },
+      { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },
     ],
   },
 ];
@@ -82,16 +88,51 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+  const { hasPermission, loading } = usePermissions();
 
   const toggleMenu = (name: string) => {
     setOpenMenus((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_info");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_info");
+    }
     router.push("/login");
   };
+
+  const shouldShowItem = (item: MenuItem) => {
+    // If no permission specified, show the item
+    if (!item.permission) return true;
+    
+    // Check if user has permission
+    return hasPermission(item.permission);
+  };
+
+  const shouldShowGroup = (group: { group: string; items: MenuItem[] }) => {
+    return group.items.some(item => {
+      if (shouldShowItem(item)) return true;
+      if (item.subItems) {
+        return item.subItems.some(subItem => shouldShowItem(subItem));
+      }
+      return false;
+    });
+  };
+
+  if (loading) {
+    return (
+      <aside className={cn(
+        "fixed left-0 top-0 z-40 h-screen border-r bg-white transition-all duration-300 ease-in-out shadow-sm",
+        isCollapsed ? "w-20" : "w-64",
+        isMobile && "w-64"
+      )}>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside
@@ -131,7 +172,7 @@ export function Sidebar({
 
       <div className="flex flex-col h-[calc(100vh-64px)] justify-between py-6">
         <nav className="space-y-6 px-4">
-          {menuItems.map((group) => (
+          {menuItems.filter(shouldShowGroup).map((group) => (
             <div key={group.group} className="space-y-2">
               {(!isCollapsed || isMobile) && (
                 <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -139,7 +180,13 @@ export function Sidebar({
                 </p>
               )}
               <div className="space-y-1">
-                {group.items.map((item) => {
+                {group.items.filter(item => {
+                  if (shouldShowItem(item)) return true;
+                  if (item.subItems) {
+                    return item.subItems.some(subItem => shouldShowItem(subItem));
+                  }
+                  return false;
+                }).map((item) => {
                   const Icon = item.icon;
                   const hasSubItems = !!item.subItems?.length;
                   const isOpen = openMenus[item.name] ?? false;
@@ -218,7 +265,7 @@ export function Sidebar({
                       {/* Submenu items */}
                       {isOpen && (!isCollapsed || isMobile) && (
                         <div className="ml-8 mt-1 space-y-1">
-                          {item.subItems!.map((sub) => {
+                          {item.subItems!.filter(shouldShowItem).map((sub) => {
                             const SubIcon = sub.icon;
                             const subActive = pathname === sub.href;
 
@@ -255,17 +302,19 @@ export function Sidebar({
         </nav>
 
         <div className="px-4 mt-auto border-t border-gray-100 pt-6 space-y-1">
-          <Link
-            href="/settings"
-            onClick={isMobile ? onToggle : undefined}
-            className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group",
-              (isCollapsed && !isMobile) && "justify-center px-2"
-            )}
-          >
-            <Settings size={20} className="text-gray-400 group-hover:text-gray-600" />
-            {(!isCollapsed || isMobile) && <span>Settings</span>}
-          </Link>
+          {hasPermission('admin-permissions') && (
+            <Link
+              href="/settings"
+              onClick={isMobile ? onToggle : undefined}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group",
+                (isCollapsed && !isMobile) && "justify-center px-2"
+              )}
+            >
+              <Settings size={20} className="text-gray-400 group-hover:text-gray-600" />
+              {(!isCollapsed || isMobile) && <span>Settings</span>}
+            </Link>
+          )}
           <button
             onClick={handleLogout}
             className={cn(

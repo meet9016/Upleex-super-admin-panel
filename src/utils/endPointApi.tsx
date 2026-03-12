@@ -7,6 +7,10 @@ export interface EndPointApi {
     // Admin Auth
     adminLogin: string;
     adminRegister: string;
+    getAllAdmins: string;
+    getAvailablePages: string;
+    assignPermissions: string;
+    getMyPermissions: string;
 
     // Vendor Management
     getVendorList: string;
@@ -81,6 +85,10 @@ const endPointApi: EndPointApi = {
     // Admin Auth
     adminLogin: 'admin/login',
     adminRegister: 'admin/register',
+    getAllAdmins: 'admin/all-admins',
+    getAvailablePages: 'admin/available-pages',
+    assignPermissions: 'admin/assign-permissions',
+    getMyPermissions: 'admin/my-permissions',
 
     // Vendor Management
     getVendorList: 'vendor-kyc',
