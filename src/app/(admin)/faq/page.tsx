@@ -202,7 +202,10 @@ export default function FAQPage() {
       }
 
       if (success) {
-        reset();
+     reset({
+        question: "",
+        answer: ""
+      });
         setEditingId(null);
         // After successful operation, refresh the list
         if (searchText) {
@@ -232,22 +235,28 @@ export default function FAQPage() {
     setShowDeletePopup(true);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!faqToDelete) return;
+const handleConfirmDelete = async () => {
+  if (!faqToDelete) return;
 
-    setIsDeleting(true);
-    const success = await deleteFAQ(faqToDelete.id);
-    if (success) {
-      setShowDeletePopup(false);
-      setFaqToDelete(null);
-      if (searchText) {
-        await searchFAQs(searchText);
-      } else {
-        await fetchFAQs();
-      }
+  setIsDeleting(true);
+  const success = await deleteFAQ(faqToDelete.id);
+  if (success) {
+    // Check if the deleted FAQ is the one being edited
+    if (editingId === faqToDelete.id) {
+      setEditingId(null);
+      reset(); // Clear the form
     }
-    setIsDeleting(false);
-  };
+    
+    setShowDeletePopup(false);
+    setFaqToDelete(null);
+    if (searchText) {
+      await searchFAQs(searchText);
+    } else {
+      await fetchFAQs();
+    }
+  }
+  setIsDeleting(false);
+};
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
@@ -261,7 +270,10 @@ export default function FAQPage() {
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    reset();
+   reset({
+    question: "",
+    answer: ""
+  }); 
   };
 
   const columnDefs: ColDef<FAQRow>[] = [

@@ -52,31 +52,63 @@ export default function ListingPlanPurchasesPage() {
 
   // Search and filter states
   const [searchText, setSearchText] = useState("");
-  const [filters, setFilters] = useState({
+  const [tempFilters, setTempFilters] = useState({
     plan_type: '',
     amount: '',
-    start_month: '', // For purchases starting in this month
-    expire_month: '', // For purchases expiring in this month
+    start_month: '',
+    expire_month: '',
+  });
+  
+  // Applied filters (only changes when Apply button is clicked)
+  const [appliedFilters, setAppliedFilters] = useState({
+    plan_type: '',
+    amount: '',
+    start_month: '',
+    expire_month: '',
   });
 
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   const filterModalRef = useRef<HTMLDivElement>(null);
 
-  // Options states
-  const [planOptions, setPlanOptions] = useState<{ label: string; value: string }[]>([]);
-  const [amountOptions, setAmountOptions] = useState<{ label: string; value: string }[]>([]);
+  // Options states - store all available options
+  const [allPlanOptions, setAllPlanOptions] = useState<{ label: string; value: string }[]>([]);
+  const [allAmountOptions, setAllAmountOptions] = useState<{ label: string; value: string }[]>([]);
 
   const debouncedSearch = useDebounce(searchText, 600);
-  const activeFilterCount = Object.values(filters).filter(v => v !== '').length;
+  const activeFilterCount = Object.values(appliedFilters).filter(v => v !== '').length;
 
-  const fetchData = async (filterParams = {}) => {
+  // Fetch all available filter options on component mount
+  const fetchFilterOptions = async () => {
+    try {
+      // First, fetch all data without filters to get all options
+      const res = await api.get(endPointApi.getAllListingPlans);
+      const list = res?.data?.data || [];
+
+      // Extract all unique plan types
+      const types = Array.from(new Set((list || []).map((x: any) => x.plan_type).filter(Boolean))) as string[];
+      setAllPlanOptions(types.map((t: string) => ({ label: t, value: t })));
+
+      // Extract all unique amounts
+      const amounts = Array.from(new Set((list || []).map((x: any) => x.amount).filter(Boolean))) as number[];
+      const sortedAmounts = amounts.sort((a: number, b: number) => a - b);
+      setAllAmountOptions(sortedAmounts.map((amt: number) => ({
+        label: `₹${amt}`,
+        value: String(amt)
+      })));
+
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+    }
+  };
+
+  const fetchData = async (filterParams = {}, searchTerm = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
 
       // Add search parameter if exists
-      if (debouncedSearch && debouncedSearch.trim() !== '') {
-        params.append('q', debouncedSearch.trim());
+      if (searchTerm && searchTerm.trim() !== '') {
+        params.append('q', searchTerm.trim());
       }
 
       // Add all non-empty filter parameters
@@ -104,18 +136,6 @@ export default function ListingPlanPurchasesPage() {
       const list = res?.data?.data || [];
       setRows(list);
 
-      // Update plan options from fetched data
-      const types = Array.from(new Set((list || []).map((x: any) => x.plan_type).filter(Boolean))) as string[];
-      setPlanOptions(types.map((t: string) => ({ label: t, value: t })));
-
-      // Update amount options from fetched data (unique amounts)
-      const amounts = Array.from(new Set((list || []).map((x: any) => x.amount).filter(Boolean))) as number[];
-      const sortedAmounts = amounts.sort((a: number, b: number) => a - b);
-      setAmountOptions(sortedAmounts.map((amt: number) => ({
-        label: `₹${amt}`,
-        value: String(amt)
-      })));
-
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Failed to load plan purchases");
     } finally {
@@ -123,36 +143,15 @@ export default function ListingPlanPurchasesPage() {
     }
   };
 
-  // Apply filters when search debounce or filters change
+  // Fetch filter options on component mount
   useEffect(() => {
-    const params: any = {};
+    fetchFilterOptions();
+  }, []);
 
-    // Add plan filter
-    if (filters.plan_type) {
-      params.plan_type = filters.plan_type;
-    }
-
-    // Add amount (exact)
-    if (filters.amount) {
-      params.amount = filters.amount;
-    }
-
-    // Add start month filter - purchases that started in this month
-    if (filters.start_month) {
-      // Ensure it's in YYYY-MM format
-      const startMonth = filters.start_month.slice(0, 7);
-      params.start_month = startMonth;
-    }
-
-    // Add expire month filter - purchases that expire in this month
-    if (filters.expire_month) {
-      // Ensure it's in YYYY-MM format
-      const expireMonth = filters.expire_month.slice(0, 7);
-      params.expire_month = expireMonth;
-    }
-
-    fetchData(params);
-  }, [debouncedSearch, filters]);
+  // Apply search when debouncedSearch changes (search applies immediately)
+  useEffect(() => {
+    fetchData(appliedFilters, debouncedSearch);
+  }, [debouncedSearch, appliedFilters]);
 
   // Handle click outside to close modal
   useEffect(() => {
@@ -189,7 +188,7 @@ export default function ListingPlanPurchasesPage() {
       toast.success("Deleted successfully");
       setShowDeletePopup(false);
       setPurchaseToDelete(null);
-      fetchData();
+      fetchData(appliedFilters, debouncedSearch);
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Delete failed");
     } finally {
@@ -221,7 +220,7 @@ export default function ListingPlanPurchasesPage() {
       }
       toast.success("Selected purchases deleted");
       setSelected([]);
-      fetchData();
+      fetchData(appliedFilters, debouncedSearch);
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Bulk delete failed");
     }
@@ -232,9 +231,27 @@ export default function ListingPlanPurchasesPage() {
     setSearchText(e.target.value);
   };
 
+  // Open filter modal - initialize temp filters with current applied filters
+  const openFilterModal = () => {
+    setTempFilters({ ...appliedFilters });
+    setShowFilterModal(true);
+  };
+
+  // Apply filters - copy temp filters to applied filters and close modal
+  const applyFilters = () => {
+    setAppliedFilters({ ...tempFilters });
+    setShowFilterModal(false);
+  };
+
   // Clear all filters
   const clearFilters = () => {
-    setFilters({
+    setTempFilters({
+      plan_type: '',
+      amount: '',
+      start_month: '',
+      expire_month: '',
+    });
+    setAppliedFilters({
       plan_type: '',
       amount: '',
       start_month: '',
@@ -243,13 +260,12 @@ export default function ListingPlanPurchasesPage() {
     setShowFilterModal(false);
   };
 
-  // Handle filter changes
-// Update the handleFilterChange function to handle both string and string[]
-const handleFilterChange = (key: string, value: string | string[]) => {
-  // If it's an array, take the first value or empty string
-  const finalValue = Array.isArray(value) ? (value[0] || '') : value;
-  setFilters(prev => ({ ...prev, [key]: finalValue }));
-};
+  // Handle filter changes in temp state
+  const handleFilterChange = (key: string, value: string | string[]) => {
+    // If it's an array, take the first value or empty string
+    const finalValue = Array.isArray(value) ? (value[0] || '') : value;
+    setTempFilters(prev => ({ ...prev, [key]: finalValue }));
+  };
 
   const columns: ColDef[] = [
     { field: "vendor_name", headerName: "Vendor", minWidth: 220 },
@@ -306,16 +322,9 @@ const handleFilterChange = (key: string, value: string | string[]) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-
-        {/* Search and Filter Section */}
-
-      </div>
-
       <div className="lg:col-span-2">
         <Card className="border-slate-200">
           <CardHeader className="flex flex-row items-center justify-end">
-
             <div className="flex items-center justify-end">
               {/* All three elements at the end */}
               <div className="flex items-center gap-3">
@@ -348,7 +357,7 @@ const handleFilterChange = (key: string, value: string | string[]) => {
                 <div className="relative">
                   <button
                     ref={filterButtonRef}
-                    onClick={() => setShowFilterModal(!showFilterModal)}
+                    onClick={openFilterModal}
                     className="px-4 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative text-sm"
                   >
                     <CiFilter size={20} />
@@ -378,31 +387,31 @@ const handleFilterChange = (key: string, value: string | string[]) => {
                         </div>
 
                         <div className="space-y-4">
-                          {/* Plan Filter */}
+                          {/* Plan Filter - Using allPlanOptions */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Plan
                             </label>
                             <SearchableDropdown
                               searchable
-                              options={planOptions}
-                              value={filters.plan_type}
+                              options={allPlanOptions}
+                              value={tempFilters.plan_type}
                               placeholder="Select Plan"
-                              onChange={(value) => handleFilterChange('plan_type',  value as string)}
+                              onChange={(value) => handleFilterChange('plan_type', value as string)}
                             />
                           </div>
 
-                          {/* Amount Dropdown */}
+                          {/* Amount Dropdown - Using allAmountOptions */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Amount
                             </label>
                             <SearchableDropdown
                               searchable
-                              options={amountOptions}
-                              value={filters.amount}
+                              options={allAmountOptions}
+                              value={tempFilters.amount}
                               placeholder="Select Amount"
-                              onChange={(value) => handleFilterChange('amount',  value as string)}
+                              onChange={(value) => handleFilterChange('amount', value as string)}
                             />
                           </div>
 
@@ -412,10 +421,8 @@ const handleFilterChange = (key: string, value: string | string[]) => {
                               Start Month
                             </label>
                             <DatePicker
-                              value={filters.start_month}
+                              value={tempFilters.start_month}
                               onChange={(d) => handleFilterChange('start_month', d)}
-                              // views={['year', 'month']}
-                              // format="yyyy-MM"
                             />
                           </div>
 
@@ -425,10 +432,8 @@ const handleFilterChange = (key: string, value: string | string[]) => {
                               Expire Month
                             </label>
                             <DatePicker
-                              value={filters.expire_month}
+                              value={tempFilters.expire_month}
                               onChange={(d) => handleFilterChange('expire_month', d)}
-                              // views={['year', 'month']}
-                              // format="yyyy-MM"
                             />
                           </div>
                         </div>
@@ -442,7 +447,7 @@ const handleFilterChange = (key: string, value: string | string[]) => {
                             Clear All
                           </button>
                           <button
-                            onClick={() => setShowFilterModal(false)}
+                            onClick={applyFilters}
                             className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
                           >
                             Apply

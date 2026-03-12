@@ -119,26 +119,32 @@ export default function PlansPage() {
     setShowDeletePopup(true);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!planToDelete) return;
-    const id = planToDelete._id || (planToDelete as any).id;
-    if (!id) {
-      toast.error("Invalid plan id");
-      return;
+ const handleConfirmDelete = async () => {
+  if (!planToDelete) return;
+  const id = planToDelete._id || (planToDelete as any).id;
+  if (!id) {
+    toast.error("Invalid plan id");
+    return;
+  }
+  setIsDeleting(true);
+  try {
+    await api.delete(`${endPointApi.deletePlan}/${id}`);
+    toast.success("Deleted successfully");
+    
+    // Check if the deleted plan is the one being edited
+    if (editingId === id) {
+      resetForm(); // This will clear the form
     }
-    setIsDeleting(true);
-    try {
-      await api.delete(`${endPointApi.deletePlan}/${id}`);
-      toast.success("Deleted successfully");
-      setShowDeletePopup(false);
-      setPlanToDelete(null);
-      fetchData();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Delete failed");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+    
+    setShowDeletePopup(false);
+    setPlanToDelete(null);
+    fetchData();
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || "Delete failed");
+  } finally {
+    setIsDeleting(false);
+  }
+};
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);

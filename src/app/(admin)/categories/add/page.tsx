@@ -302,7 +302,10 @@ if (res?.data?.success && res?.data?.data) {
       }
 
       if (res?.data) {
-        reset();
+         reset({
+    name: "",
+    image: undefined
+  });
         setPreviewImage(null);
         await fetchCategories(debouncedSearch);
       }
@@ -333,27 +336,38 @@ if (res?.data?.success && res?.data?.data) {
   };
 
   // Confirm delete handler
-  const handleConfirmDelete = async () => {
-    if (!categoryToDelete) return;
+const handleConfirmDelete = async () => {
+  if (!categoryToDelete) return;
 
-    setIsDeleting(true);
-    try {
-      const id = categoryToDelete._id || categoryToDelete.categories_id;
+  setIsDeleting(true);
+  try {
+    const id = categoryToDelete._id || categoryToDelete.categories_id;
 
-      await api.delete(`${endPointApi.deleteCategory}/${id}`);
-      toast.success("Category deleted successfully");
-      await fetchCategories(debouncedSearch);
-
-      // Close popup
-      setShowDeletePopup(false);
-      setCategoryToDelete(null);
-    } catch (error: any) {
-      console.error("Error deleting category:", error);
-      toast.error(error?.response?.data?.message || "Failed to delete category");
-    } finally {
-      setIsDeleting(false);
+    await api.delete(`${endPointApi.deleteCategory}/${id}`);
+    toast.success("Category deleted successfully");
+    
+    // Check if the deleted category is the one being edited
+    if (editingId === id) {
+      setEditingId(null);
+      setPreviewImage(null);
+      reset({
+        name: "",
+        image: undefined
+      }); // Clear the form
     }
-  };
+    
+    await fetchCategories(debouncedSearch);
+
+    // Close popup
+    setShowDeletePopup(false);
+    setCategoryToDelete(null);
+  } catch (error: any) {
+    console.error("Error deleting category:", error);
+    toast.error(error?.response?.data?.message || "Failed to delete category");
+  } finally {
+    setIsDeleting(false);
+  }
+};
 
   // Cancel delete handler
   const handleCancelDelete = () => {
@@ -364,7 +378,10 @@ if (res?.data?.success && res?.data?.data) {
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
-    reset();
+     reset({
+    name: "",
+    image: undefined
+  });
   };
 
   const handleClearSearch = () => {

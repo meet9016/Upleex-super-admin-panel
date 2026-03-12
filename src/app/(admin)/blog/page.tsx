@@ -344,7 +344,13 @@ export default function BlogPage() {
       }
 
       if (success) {
-        reset();
+        reset({
+        title: "",
+        sort_description: "",
+        long_description: "",
+        date: "",
+        image: undefined
+      });
         setPreviewImage(null);
         setEditingId(null);
         await fetchBlogs(debouncedSearch);
@@ -395,18 +401,31 @@ export default function BlogPage() {
     setShowDeletePopup(true);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!blogToDelete) return;
+const handleConfirmDelete = async () => {
+  if (!blogToDelete) return;
 
-    setIsDeleting(true);
-    const success = await deleteBlog(blogToDelete.id);
-    if (success) {
-      setShowDeletePopup(false);
-      setBlogToDelete(null);
-      await fetchBlogs(debouncedSearch);
+  setIsDeleting(true);
+  const success = await deleteBlog(blogToDelete.id);
+  if (success) {
+    // Check if the deleted blog is the one being edited
+    if (editingId === blogToDelete.id) {
+      setEditingId(null);
+      setPreviewImage(null);
+      reset({
+        title: "",
+        sort_description: "",
+        long_description: "",
+        date: "",
+        image: undefined
+      }); // Clear the form
     }
-    setIsDeleting(false);
-  };
+    
+    setShowDeletePopup(false);
+    setBlogToDelete(null);
+    await fetchBlogs(debouncedSearch);
+  }
+  setIsDeleting(false);
+};
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
@@ -420,7 +439,13 @@ export default function BlogPage() {
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
-    reset();
+     reset({
+    title: "",
+    sort_description: "",
+    long_description: "",
+    date: "",
+    image: undefined
+  });
   };
 
   // Custom Image Component to prevent infinite loop
