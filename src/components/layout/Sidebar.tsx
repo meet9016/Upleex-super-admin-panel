@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronDown,
   Shield,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -43,6 +44,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
     items: [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
+       { name: "Quotes", href: "/quotes", icon: FileText },
       {
         name: "Categories",
         icon: Layers,
@@ -51,7 +53,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
           { name: "Add Category", href: "/categories/add", icon: FolderPlus, permission: "categories" },
           { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers, permission: "subcategories" },
         ],
-      },
+      },  
       {
         name: "Plans",
         icon: FolderPlus,
@@ -199,31 +201,31 @@ export function Sidebar({
 
                   if (!hasSubItems) {
                     // Regular link item
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href!}
-                      onClick={isMobile ? onToggle : undefined}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group",
-                        (isActive || isGroupActive)
-                          ? "bg-blue-50 text-blue-600"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                        (isCollapsed && !isMobile) && "justify-center px-2"
-                      )}
-                    >
-                      <Icon
-                        size={20}
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href!}
+                        onClick={isMobile ? onToggle : undefined}
                         className={cn(
-                          "transition-colors",
+                          "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group",
                           (isActive || isGroupActive)
-                            ? "text-blue-600"
-                            : "text-gray-400 group-hover:text-gray-600"
+                            ? "bg-blue-50 text-blue-600"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                          (isCollapsed && !isMobile) && "justify-center px-2"
                         )}
-                      />
-                      {(!isCollapsed || isMobile) && <span>{item.name}</span>}
-                    </Link>
-                  );
+                      >
+                        <Icon
+                          size={20}
+                          className={cn(
+                            "transition-colors",
+                            (isActive || isGroupActive)
+                              ? "text-blue-600"
+                              : "text-gray-400 group-hover:text-gray-600"
+                          )}
+                        />
+                        {(!isCollapsed || isMobile) && <span>{item.name}</span>}
+                      </Link>
+                    );
                   }
 
                   // Collapsible parent with sub-items
