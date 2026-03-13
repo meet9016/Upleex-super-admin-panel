@@ -95,12 +95,8 @@ interface TreeDataItem {
 }
 
 interface QuotesTreeTableProps {
-  data: Record<string, VendorGroup>;
+  data: Quote[];
   onViewDetails: (quote: any) => void;
-  onBulkApprove?: (quoteIds: string[]) => void;
-  onBulkReject?: (quoteIds: string[]) => void;
-  approving?: boolean;
-  rejecting?: boolean;
 }
 
 // Status cell renderer component
@@ -111,7 +107,8 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 
   const getStatusStyles = (status: string) => {
     const s = String(status || '').toLowerCase();
-    if (s === 'approved' || s === 'active') return "text-green-700 bg-green-50 border-green-200";
+    console.log("🚀 ~ getStatusStyles ~ s:", s)
+    if (s == 'approved' || s == 'active' || s == 'approval') return "text-green-700 bg-green-50 border-green-200";
     if (s === 'rejected') return "text-rose-700 bg-rose-50 border-rose-200";
     if (s === 'completed') return "text-blue-700 bg-blue-50 border-blue-200";
     return "text-amber-700 bg-amber-50 border-amber-200";
@@ -119,7 +116,7 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 
   const getStatusLabel = (status: string) => {
     const s = String(status || '').toLowerCase();
-    if (s === 'approved' || s === 'active') return "Approved";
+    if (s === 'approved' || s === 'active' || s === 'approval') return "Approved";
     if (s === 'rejected') return "Rejected";
     if (s === 'completed') return "Completed";
     return "Pending";
@@ -127,7 +124,7 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 
   const styles = getStatusStyles(status);
   const label = getStatusLabel(status);
-  const Icon = label === "Approved" ? CheckCircle : label === "Rejected" ? XCircle : Clock;
+  const Icon = label === "Approved"  ? CheckCircle : label === "Rejected" ? XCircle : Clock;
 
   return (
     <div className="flex items-center h-full">
@@ -192,7 +189,6 @@ export default function QuotesTreeTable({
   onViewDetails,
 }: QuotesTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
-  const [selectedQuoteCount, setSelectedQuoteCount] = useState(0);
   const [quickFilterText, setQuickFilterText] = useState('');
 
   // Format price function
@@ -202,29 +198,36 @@ export default function QuotesTreeTable({
 
   // Transform data for tree structure with path
   const rowData: TreeDataItem[] = useMemo(() => {
-    if (!data) return [];
+    if (!data || !Array.isArray(data)) return [];
 
-    return Object.values(data).map((vendor: VendorGroup, vendorIndex) => {
-      // Filter only approved/active quotes
-      const approvedQuotes = vendor.quotes.filter((q: any) => {
+    // Grouping by vendor on frontend
+    const groups: Record<string, Quote[]> = data.reduce((acc, quote) => {
+      const vendorName = quote.product_id?.vendor_name || 'Unknown Vendor';
+      if (!acc[vendorName]) acc[vendorName] = [];
+      acc[vendorName].push(quote);
+      return acc;
+    }, {} as Record<string, Quote[]>);
+
+    return Object.entries(groups).map(([vendorName, quotes], vendorIndex) => {
+      // Filter out pending quotes (Show everything else like approved, rejected, completed)
+      const filteredQuotes = quotes.filter((q: any) => {
         const s = String(q.status || "").toLowerCase();
-        return s === "approved" || s === "active";
+        return s !== "pending";
       });
 
-      // Only show vendor if they have approved quotes
-      if (approvedQuotes.length === 0) return null;
+      // Only show vendor if they have quotes that are not pending
+      if (filteredQuotes.length === 0) return null;
 
-      // Create vendor path
-      const vendorPath = [`vendor-${vendor.vendorName}-${vendorIndex}`];
+      const vendorPath = [`vendor-${vendorName}-${vendorIndex}`];
 
       return {
-        id: `vendor-${vendor.vendorName}-${vendorIndex}`,
-        name: vendor.vendorName,
+        id: `vendor-${vendorName}-${vendorIndex}`,
+        name: vendorName,
         type: 'vendor',
-        vendorName: vendor.vendorName,
-        quantity: approvedQuotes.length,
+        vendorName: vendorName,
+        quantity: filteredQuotes.length,
         path: vendorPath,
-        children: approvedQuotes.map((quote: Quote, quoteIndex) => {
+        children: filteredQuotes.map((quote: Quote, quoteIndex) => {
           const price = parseFloat(quote.calculated_price || quote.total_price || '0');
           const startDate = quote.start_date ? new Date(quote.start_date).toLocaleDateString() : '';
           const endDate = quote.end_date ? new Date(quote.end_date).toLocaleDateString() : '';
@@ -233,7 +236,7 @@ export default function QuotesTreeTable({
             id: quote._id || `quote-${vendorIndex}-${quoteIndex}`,
             name: quote.product_id?.product_name || 'Unknown Product',
             type: 'quote',
-            vendorName: vendor.vendorName,
+            vendorName: vendorName,
             productName: quote.product_id?.product_name || 'Unknown Product',
             quantity: quote.qty || 0,
             price: price,
@@ -248,20 +251,10 @@ export default function QuotesTreeTable({
             originalData: quote,
             path: [...vendorPath, quote._id || `quote-${vendorIndex}-${quoteIndex}`],
           };
-        }).filter(Boolean)
+        })
       };
     }).filter(Boolean) as TreeDataItem[];
   }, [data]);
-
-  // Update selected count
-  const updateSelectedCount = useCallback(() => {
-    if (!gridRef.current?.api) return;
-
-    const selectedNodes = gridRef.current.api.getSelectedNodes();
-    const count = selectedNodes.filter(node => node.data?.type === 'quote').length;
-    setSelectedQuoteCount(count);
-  }, []);
-
 
   // Quick filter handler
   const onQuickFilterChanged = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,7 +262,7 @@ export default function QuotesTreeTable({
     gridRef.current?.api.setGridOption('quickFilterText', event.target.value);
   }, []);
 
-  // Column definitions
+  // Column definitions (keeping existing)
   const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
     {
       headerName: "Category",
@@ -351,6 +344,7 @@ export default function QuotesTreeTable({
       width: 100,
     }
   ], []);
+
   // Default column definition
   const defaultColDef = useMemo(() => ({
     flex: 1,
@@ -399,9 +393,8 @@ export default function QuotesTreeTable({
   }), [onViewDetails]);
 
   return (
-    <div className="space-y-4">
-
-      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden" style={{ height: "750px" }}>
+    <div className="space-y-4 h-full flex flex-col">
+      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden flex-1">
         <AgGridReact
           ref={gridRef}
           rowData={rowData}
@@ -410,22 +403,17 @@ export default function QuotesTreeTable({
           autoGroupColumnDef={autoGroupColumnDef}
           rowSelection={rowSelection}
           treeData={true}
-          pagination
-          paginationPageSize={20}
-          paginationPageSizeSelector={[10, 20, 50, 100]}
           animateRows={true}
           context={context}
           suppressRowClickSelection={true}
           getRowId={getRowId}
           getDataPath={getDataPath}
-          groupDefaultExpanded={1}
+          groupDefaultExpanded={0}
           groupDisplayType="singleColumn"
           treeDataChildrenField="children"
           quickFilterText={quickFilterText}
-          onSelectionChanged={updateSelectedCount}
           rowHeight={45}
           headerHeight={48}
-        // className="ag-theme-quartz"
         />
       </div>
     </div>
