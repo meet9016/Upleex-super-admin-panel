@@ -74,6 +74,13 @@ export interface EndPointApi {
     getVendorProducts: string;
     approveProduct: string;
     bulkApproveProducts: string;
+
+    // Quotes
+    postAllQuotes: string;
+    getQuoteById: string;
+    updateQuote: string;
+    changeQuoteStatus: string;
+    getQuoteStatuses: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -153,6 +160,13 @@ const endPointApi: EndPointApi = {
     getVendorProducts: 'products/vendor',
     approveProduct: 'products/approve',
     bulkApproveProducts: 'products/bulk-approve',
+
+    // Quotes
+    postAllQuotes: 'quote/getallforadmin',
+    getQuoteById: 'quote/getById',
+    updateQuote: 'quote/update',
+    changeQuoteStatus: 'quote/change-status',
+    getQuoteStatuses: 'quote/status-dropdown'
 };
 
 export default endPointApi;

@@ -97,14 +97,14 @@ interface VendorProductTreeTableProps {
 // Status cell renderer component
 const StatusCellRenderer = (props: ICellRendererParams) => {
   if (props.data?.type === 'vendor') return null;
-  
+
   const status = props.value;
   const statusClasses = {
     approved: 'bg-green-100 text-green-700',
     pending: 'bg-yellow-100 text-yellow-700',
     rejected: 'bg-red-100 text-red-700'
   };
-  
+
   return (
     <span className={`text-xs px-2 py-1 rounded ${statusClasses[status as keyof typeof statusClasses] || statusClasses.pending}`}>
       {status}
@@ -150,17 +150,17 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
 // Custom group cell renderer with triangle icon and vendor info
 const VendorGroupCellRenderer = (props: ICellRendererParams) => {
   const { data, node } = props;
-  
+
   if (data.type === 'vendor') {
     const isExpanded = node.expanded;
-    
+
     return (
-      <div className="flex items-center gap-2 py-1">        
+      <div className="flex items-center gap-2 py-1">
         {/* Vendor info */}
         <div className="font-bold">
-          <div className="text-sm text-gray-600">{data.full_name || 'N/A'}  - {data.name }</div>
+          <div className="text-sm text-gray-600">{data.full_name || 'N/A'}  - {data.name}</div>
         </div>
-        
+
         {/* Pending count badge */}
         {data.pending_count > 0 && (
           <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700 ml-2">
@@ -170,7 +170,7 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
       </div>
     );
   }
-  
+
   // Product row - show product name with indentation
   return (
     <div className="flex items-center pl-6">
@@ -194,7 +194,7 @@ export default function VendorProductTreeTable({
     return vendors.map(vendor => {
       // Create vendor path
       const vendorPath = [vendor._id];
-      
+
       return {
         id: vendor._id,
         name: vendor.business_name,
@@ -222,7 +222,7 @@ export default function VendorProductTreeTable({
   // Update selected count
   const updateSelectedCount = useCallback(() => {
     if (!gridRef.current?.api) return;
-    
+
     const selectedNodes = gridRef.current.api.getSelectedNodes();
     const count = selectedNodes.filter(node => node.data.type === 'product').length;
     setSelectedProductCount(count);
@@ -230,12 +230,12 @@ export default function VendorProductTreeTable({
 
   const handleBulkApproveClick = useCallback(() => {
     if (!gridRef.current?.api) return;
-    
+
     const selectedNodes = gridRef.current.api.getSelectedNodes();
     const productIds = selectedNodes
       .filter(node => node.data.type === 'product')
       .map(node => node.data.id);
-    
+
     if (productIds.length > 0) {
       onBulkApprove(productIds);
       // Clear selection after approval
@@ -247,7 +247,7 @@ export default function VendorProductTreeTable({
   const onGroupSelectsChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as 'self' | 'descendants' | 'filteredDescendants';
     setGroupSelects(value);
-    
+
     // Update row selection configuration
     gridRef.current?.api.setGridOption('rowSelection', {
       mode: 'multiRow',
@@ -261,19 +261,19 @@ export default function VendorProductTreeTable({
   }, []);
 
   // Column definitions
-  const columnDefs: ColDef[] = useMemo(() => [
+  const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
     {
       headerName: "Category",
       field: "category_name",
-      valueGetter: (params: ValueGetterParams) => {
-        return params.data?.type === 'product' ? params.data.category_name : '';
+      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
+        return params.data?.type === 'product' ? params.data.category_name || '' : '';
       },
       flex: 1,
     },
     {
       headerName: "Price",
       field: "price",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params: ValueFormatterParams<TreeDataItem, number>) => {
         return params.value ? `₹${params.value}` : '';
       },
       flex: 1,
@@ -287,14 +287,13 @@ export default function VendorProductTreeTable({
     {
       headerName: "Created",
       field: "createdAt",
-      valueFormatter: (params: ValueFormatterParams) => {
+      valueFormatter: (params: ValueFormatterParams<TreeDataItem, string>) => {
         return params.value ? new Date(params.value).toLocaleDateString() : '';
       },
       flex: 1,
     },
     {
       headerName: "Action",
-      field: "action",
       cellRenderer: ActionCellRenderer,
       suppressSizeToFit: true,
       width: 200,
@@ -317,7 +316,6 @@ export default function VendorProductTreeTable({
     cellRendererParams: {
       suppressCount: true,
       innerRenderer: VendorGroupCellRenderer,
-      checkbox: true,
     },
     flex: 2,
     minWidth: 300,
@@ -381,41 +379,41 @@ export default function VendorProductTreeTable({
         )}
       </div>
 
-    
-        <div className="ag-theme-alpine w-full" style={{ height: "750px" }}>
-          <AgGridReact
-            ref={gridRef}
-            rowData={rowData}
-            columnDefs={columnDefs} 
-            defaultColDef={defaultColDef}
-            autoGroupColumnDef={autoGroupColumnDef}
-            rowSelection={rowSelection}
-            treeData={true}
-              pagination
+
+      <div className="ag-theme-alpine w-full" style={{ height: "750px" }}>
+        <AgGridReact
+          ref={gridRef}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          defaultColDef={defaultColDef}
+          autoGroupColumnDef={autoGroupColumnDef}
+          rowSelection={rowSelection}
+          treeData={true}
+          pagination
           paginationPageSize={20}
-             paginationPageSizeSelector={[10, 20, 50, 100]}
-            animateRows={true}
-            context={context}
-            // domLayout="autoHeight"
-            suppressRowClickSelection={true}
-            getRowId={getRowId}
-            getDataPath={getDataPath}
-            groupDefaultExpanded={0}
-            groupDisplayType="singleColumn"
-            treeDataChildrenField="children"
-            groupHideOpenParents={false}
-            groupRemoveSingleChildren={false}
-            groupRemoveLowestSingleChildren={false}
-            alwaysShowHorizontalScroll={true} 
-            getRowStyle={(params) => {
-              if (params.data?.type === 'vendor') {
-                return { background: '#f9fafb' };
-              }
-              return undefined;
-            }}
-            onSelectionChanged={updateSelectedCount}
-          />
-        </div>
+          paginationPageSizeSelector={[10, 20, 50, 100]}
+          animateRows={true}
+          context={context}
+          // domLayout="autoHeight"
+          suppressRowClickSelection={true}
+          getRowId={getRowId}
+          getDataPath={getDataPath}
+          groupDefaultExpanded={0}
+          groupDisplayType="singleColumn"
+          treeDataChildrenField="children"
+          groupHideOpenParents={false}
+          groupRemoveSingleChildren={false}
+          groupRemoveLowestSingleChildren={false}
+          alwaysShowHorizontalScroll={true}
+          getRowStyle={(params) => {
+            if (params.data?.type === 'vendor') {
+              return { background: '#f9fafb' };
+            }
+            return undefined;
+          }}
+          onSelectionChanged={updateSelectedCount}
+        />
+      </div>
     </div>
   );
 }
