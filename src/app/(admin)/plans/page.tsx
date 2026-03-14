@@ -7,7 +7,9 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
-import { Trash, Edit, Loader2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import ActionButtons from "@/components/common/ActionButtons";
+import StatusBadge from "@/components/common/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
@@ -186,35 +188,20 @@ export default function PlansPage() {
       minWidth: 120,
       valueFormatter: (p) => `₹${p.value}`,
     },
-    { field: "status", headerName: "Status", minWidth: 120 },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 120,
+      cellRenderer: (params: any) => <StatusBadge status={params.value} />,
+    },
     { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
     { field: "description", headerName: "Description", minWidth: 200 },
     {
       headerName: "Action",
       minWidth: 140,
-      cellRenderer: (params: any) => {
-        const row = params.data as Plan;
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8 rounded-full border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
-              onClick={() => startEdit(row)}
-            >
-              <Edit size={16} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-8 h-8 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-              onClick={() => deleteOne(row)}
-            >
-              <Trash size={16} />
-            </Button>
-          </div>
-        );
-      },
+      cellRenderer: (params: any) => (
+        <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
+      ),
     },
   ];
 

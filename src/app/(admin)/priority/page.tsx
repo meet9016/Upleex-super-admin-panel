@@ -7,7 +7,9 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
-import { Trash, Edit, Loader2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import ActionButtons from "@/components/common/ActionButtons";
+import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 type PPlan = {
@@ -150,57 +152,49 @@ export default function PriorityPlansPage() {
     }
   };
 
+  // Custom cell renderer for Popular column with checkbox
+  const PopularCellRenderer = (params: any) => {
+    const isPopular = params.value;
+    return (
+      <div className="flex items-center justify-center h-full">
+        <input
+          type="checkbox"
+          checked={isPopular}
+          disabled={true}
+          className="w-4 h-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500 cursor-default"
+          readOnly
+        />
+      </div>
+    );
+  };
+
   const columns: ColDef[] = [
     { field: "name", headerName: "Name", minWidth: 160 },
-    { field: "monthly_price", headerName: "Monthly", minWidth: 120, valueFormatter: (p)=> `₹${p.value}` },
-    { field: "yearly_price", headerName: "Yearly", minWidth: 120, valueFormatter: (p)=> `₹${p.value}` },
+    { field: "monthly_price", headerName: "Monthly", minWidth: 120, valueFormatter: (p) => `₹${p.value}` },
+    { field: "yearly_price", headerName: "Yearly", minWidth: 120, valueFormatter: (p) => `₹${p.value}` },
     { field: "product_slots", headerName: "Slots", minWidth: 100 },
-    { 
-      field: "status", 
-      headerName: "Status", 
+    {
+      field: "status",
+      headerName: "Status",
       minWidth: 120,
-      cellRenderer: (params: any) => {
-        const status = params.value;
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-          }`}>
-            {status}
-          </span>
-        );
-      }
+      cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth: 120, valueFormatter: (p)=> p.value ? 'Yes' : 'No' },
-    { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 120, valueFormatter: (p)=> p.value ? `₹${p.value}` : '-' },
+    { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth: 120, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
+    { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 120, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
     { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 120 },
-    { 
-      field: "is_popular", 
-      headerName: "Popular", 
-      minWidth: 100, 
-      cellRenderer: (params: any) => {
-        return params.value ? (
-          <span className="flex items-center gap-1 text-yellow-600">
-            <span>⭐</span> Yes
-          </span>
-        ) : 'No';
-      }
+    {
+      field: "is_popular",
+      headerName: "Popular",
+      minWidth: 80,
+      cellRenderer: PopularCellRenderer,
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     },
     {
       headerName: "Action",
       minWidth: 140,
-      cellRenderer: (params: any) => {
-        const row = params.data as PPlan;
-        return (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="w-8 h-8 border-2 border-[#4A90E2] text-[#4A90E2]" onClick={()=> startEdit(row)}>
-              <Edit size={16} />
-            </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8 border-2 border-[#E55353] text-[#E55353]" onClick={()=> deleteOne(row)}>
-              <Trash size={16} />
-            </Button>
-          </div>
-        );
-      }
+      cellRenderer: (params: any) => (
+        <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
+      ),
     }
   ];
 
@@ -245,29 +239,29 @@ export default function PriorityPlansPage() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Monthly Price</label>
-                  <input 
-                    type="number" 
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    value={form.monthly_price} 
-                    onChange={(e)=> setForm({ ...form, monthly_price: Number(e.target.value||0) })} 
+                  <input
+                    type="number"
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={form.monthly_price}
+                    onChange={(e) => setForm({ ...form, monthly_price: Number(e.target.value || 0) })}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Yearly Price</label>
-                  <input 
-                    type="number" 
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    value={form.yearly_price} 
-                    onChange={(e)=> setForm({ ...form, yearly_price: Number(e.target.value||0) })} 
+                  <input
+                    type="number"
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={form.yearly_price}
+                    onChange={(e) => setForm({ ...form, yearly_price: Number(e.target.value || 0) })}
                   />
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Product Slots</label>
-                  <input 
-                    type="number" 
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    value={form.product_slots} 
-                    onChange={(e)=> setForm({ ...form, product_slots: Number(e.target.value||1) })} 
+                  <input
+                    type="number"
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={form.product_slots}
+                    onChange={(e) => setForm({ ...form, product_slots: Number(e.target.value || 1) })}
                   />
                 </div>
               </div>
@@ -288,11 +282,11 @@ export default function PriorityPlansPage() {
               {/* Description */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">Description</label>
-                <textarea 
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                  rows={3} 
-                  value={form.description} 
-                  onChange={(e)=> setForm({ ...form, description: e.target.value })} 
+                <textarea
+                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
               </div>
 
@@ -302,36 +296,34 @@ export default function PriorityPlansPage() {
                   <div className="col-span-1">
                     <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
                     <div className="flex items-center gap-2 mt-1">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        checked={!!form.addon_available_for_yearly} 
-                        onChange={(e)=> setForm({ ...form, addon_available_for_yearly: e.target.checked })} 
+                        checked={!!form.addon_available_for_yearly}
+                        onChange={(e) => setForm({ ...form, addon_available_for_yearly: e.target.checked })}
                       />
                       <span className="text-sm text-slate-600">Available</span>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-slate-700">Add-on Price/Year</label>
-                    <input 
-                      type="number" 
-                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        !form.addon_available_for_yearly ? 'bg-slate-100' : ''
-                      }`}
-                      value={form.addon_price_per_year} 
-                      onChange={(e)=> setForm({ ...form, addon_price_per_year: Number(e.target.value||0) })} 
+                    <input
+                      type="number"
+                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${!form.addon_available_for_yearly ? 'bg-slate-100' : ''
+                        }`}
+                      value={form.addon_price_per_year}
+                      onChange={(e) => setForm({ ...form, addon_price_per_year: Number(e.target.value || 0) })}
                       disabled={!form.addon_available_for_yearly}
                     />
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-slate-700">Add-on Max Slots</label>
-                    <input 
-                      type="number" 
-                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        !form.addon_available_for_yearly ? 'bg-slate-100' : ''
-                      }`}
-                      value={form.addon_max_slots} 
-                      onChange={(e)=> setForm({ ...form, addon_max_slots: Number(e.target.value||0) })} 
+                    <input
+                      type="number"
+                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${!form.addon_available_for_yearly ? 'bg-slate-100' : ''
+                        }`}
+                      value={form.addon_max_slots}
+                      onChange={(e) => setForm({ ...form, addon_max_slots: Number(e.target.value || 0) })}
                       disabled={!form.addon_available_for_yearly}
                     />
                   </div>
@@ -342,11 +334,11 @@ export default function PriorityPlansPage() {
               <div>
                 <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-4 h-4 rounded border-yellow-300 text-yellow-500 focus:ring-yellow-500"
-                    checked={!!form.is_popular} 
-                    onChange={(e)=> setForm({ ...form, is_popular: e.target.checked })} 
+                    checked={!!form.is_popular}
+                    onChange={(e) => setForm({ ...form, is_popular: e.target.checked })}
                   />
                   <span className="text-sm text-slate-700">⭐ Show as popular plan (only one can be popular)</span>
                 </div>

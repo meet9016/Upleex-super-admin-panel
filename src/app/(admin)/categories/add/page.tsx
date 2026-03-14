@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Loader2, Edit, Trash, X } from "lucide-react";
+import { Plus, Loader2, X, Edit } from "lucide-react";
+import ActionButtons from "@/components/common/ActionButtons";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
@@ -162,26 +163,12 @@ if (res?.data?.success && res?.data?.data) {
     //   valueGetter: (params) => params.data?.subcategories?.length || 0,
     //   cellStyle: { textAlign: "center" }
     // },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 190,
-      cellRenderer: (params: { value: string }) => (
-        <div className="flex items-center h-full">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${params.value === 'Active'
-            ? 'bg-green-100 text-green-700'
-            : 'bg-yellow-100 text-yellow-700'
-            }`}>
-            {params.value || 'Active'}
-          </span>
-        </div>
-      )
-    },
+  
     {
       field: "created_at",
       headerName: "Created",
       width: 200,
-      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : 'N/A',
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
@@ -190,24 +177,7 @@ if (res?.data?.success && res?.data?.data) {
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => (
-        <div className="flex items-center justify-start gap-2 h-full pl-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
-            onClick={() => handleEdit(params.data)}
-          >
-            <Edit size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
-            onClick={() => handleDeleteClick(params.data)}
-          >
-            <Trash size={16} />
-          </Button>
-        </div>
+        <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )
     }
   ];

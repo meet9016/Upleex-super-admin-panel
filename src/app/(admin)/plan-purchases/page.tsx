@@ -8,7 +8,8 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
-import { Trash, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import ActionButtons from "@/components/common/ActionButtons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import DatePicker from "@/components/ui/DatePicker";
@@ -286,37 +287,26 @@ export default function ListingPlanPurchasesPage() {
       field: "start_at",
       headerName: "Start",
       minWidth: 140,
-      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString() : "-"
+      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "-"
     },
     {
       field: "expire_at",
       headerName: "Expire",
       minWidth: 140,
-      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString() : "-"
+      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "-"
     },
     {
       field: "createdAt",
       headerName: "Created",
       minWidth: 140,
-      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString() : "-"
+      valueFormatter: (p) => p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "-"
     },
     {
       headerName: "Action",
       minWidth: 120,
-      cellRenderer: (params: any) => {
-        const row = params.data as Purchase;
-        return (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
-            onClick={() => deleteOne(row)}
-            title="Delete"
-          >
-            <Trash size={16} />
-          </Button>
-        );
-      },
+      cellRenderer: (params: any) => (
+        <ActionButtons showEdit={false} onDelete={() => deleteOne(params.data)} />
+      ),
     },
   ];
 

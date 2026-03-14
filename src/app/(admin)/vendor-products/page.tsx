@@ -18,6 +18,7 @@ interface Vendor {
 
 interface Product {
   _id: string;
+  id?: string;
   product_name: string;
   category_name: string;
   price: number;
@@ -29,6 +30,7 @@ export default function VendorProductApprovalPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -127,13 +129,30 @@ export default function VendorProductApprovalPage() {
       setApproving(true);
       await api.post(endPointApi.bulkApproveProducts, { product_ids: productIds });
       toast.success(`${productIds.length} products approved`);
-      // Refresh the current page after bulk approve
       await fetchVendorsWithProducts(page);
     } catch (error) {
       console.error('Failed to bulk approve:', error);
       toast.error("Failed to approve");
     } finally {
       setApproving(false);
+    }
+  };
+
+  const handleBulkReject = async (productIds: string[]) => {
+    if (productIds.length === 0) {
+      toast.info("Select products to reject");
+      return;
+    }
+    try {
+      setRejecting(true);
+      await api.post(endPointApi.bulkRejectProducts, { product_ids: productIds });
+      toast.success(`${productIds.length} products rejected`);
+      await fetchVendorsWithProducts(page);
+    } catch (error) {
+      console.error('Failed to bulk reject:', error);
+      toast.error("Failed to reject");
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -176,11 +195,13 @@ export default function VendorProductApprovalPage() {
         ) : (
           <>
             <VendorProductTreeTable
-              vendors={vendors}
-              onBulkApprove={handleBulkApprove}
-              onStatusChange={handleStatusChange}
-              approving={approving}
-            />
+            vendors={vendors}
+            onBulkApprove={handleBulkApprove}
+            onBulkReject={handleBulkReject}
+            onStatusChange={handleStatusChange}
+            approving={approving}
+            rejecting={rejecting}
+          />
             
             {/* Loading more indicator */}
             {loadingMore && (

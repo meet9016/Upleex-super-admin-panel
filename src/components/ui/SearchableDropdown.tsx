@@ -26,6 +26,7 @@ type Props = {
     disabled?: boolean;
     multiple?: boolean;
     maxHeight?: string;
+    showClear?: boolean;
 };
 
 export default function SearchableDropdown({
@@ -43,6 +44,7 @@ export default function SearchableDropdown({
     disabled = false,
     multiple = false,
     maxHeight = "max-h-60",
+    showClear = true,
 }: Props) {
     const ref = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,10 +54,10 @@ export default function SearchableDropdown({
     const [portalStyle, setPortalStyle] = useState<React.CSSProperties>();
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
-    const selectedValues = multiple 
+    const selectedValues = multiple
         ? (Array.isArray(value) ? value : value ? [value] : [])
         : (value ? [value] : []);
-    
+
     const selectedOptions = options.filter(o => selectedValues.includes(o.value));
 
     useEffect(() => {
@@ -89,7 +91,7 @@ export default function SearchableDropdown({
             o.label.toLowerCase().includes(search.toLowerCase())
         )
         : options;
-        
+
 
     useEffect(() => {
         if (!open || !searchable) return;
@@ -135,7 +137,7 @@ export default function SearchableDropdown({
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
-                setHighlightedIndex(prev => 
+                setHighlightedIndex(prev =>
                     prev < filteredOptions.length - 1 ? prev + 1 : prev
                 );
                 break;
@@ -149,22 +151,22 @@ export default function SearchableDropdown({
                     handleOptionClick(filteredOptions[highlightedIndex]);
                 }
                 break;
-                 case 'Backspace':
-            // remove selected option
-            if (!search) {
-                if (multiple) {
-                    const currentValues = Array.isArray(value) ? value : value ? [value] : [];
-                    if (currentValues.length) {
-                        const newValues = currentValues.slice(0, -1);
-                        onChange(newValues);
-                    }
-                } else {
-                    if (value) {
-                        onChange("");
+            case 'Backspace':
+                // remove selected option
+                if (!search) {
+                    if (multiple) {
+                        const currentValues = Array.isArray(value) ? value : value ? [value] : [];
+                        if (currentValues.length) {
+                            const newValues = currentValues.slice(0, -1);
+                            onChange(newValues);
+                        }
+                    } else {
+                        if (value) {
+                            onChange("");
+                        }
                     }
                 }
-            }
-            break;
+                break;
             case 'Escape':
                 setOpen(false);
                 setSearch("");
@@ -178,20 +180,20 @@ export default function SearchableDropdown({
 
     const handleOptionClick = (opt: Option) => {
         if (disabled) return;
-        
+
         if (multiple) {
             const currentValues = Array.isArray(value) ? value : value ? [value] : [];
             const isSelected = currentValues.includes(opt.value);
-            
+
             let newValues: string[];
             if (isSelected) {
                 newValues = currentValues.filter(v => v !== opt.value);
             } else {
                 newValues = [...currentValues, opt.value];
             }
-            
+
             onChange(newValues);
-            
+
             // Keep focus on search input if open
             if (searchable && open) {
                 setTimeout(() => {
@@ -199,24 +201,24 @@ export default function SearchableDropdown({
                 }, 0);
             }
         } else {
-    const currentValue = Array.isArray(value) ? value[0] : value;
+            const currentValue = Array.isArray(value) ? value[0] : value;
 
-    // If already selected → deselect
-    if (currentValue === opt.value) {
-        onChange("");
-    } else {
-        onChange(opt.value);
-    }
+            // If already selected → deselect
+            if (currentValue === opt.value) {
+                onChange("");
+            } else {
+                onChange(opt.value);
+            }
 
-    setOpen(false);
-    setSearch("");
-}
+            setOpen(false);
+            setSearch("");
+        }
     };
 
     const handleRemoveSelected = (opt: Option, e: React.MouseEvent) => {
         e.stopPropagation();
         if (disabled) return;
-        
+
         const currentValues = Array.isArray(value) ? value : value ? [value] : [];
         const newValues = currentValues.filter(v => v !== opt.value);
         onChange(newValues);
@@ -294,8 +296,8 @@ export default function SearchableDropdown({
                                 {/* Checkbox */}
                                 <div className="flex-shrink-0">
                                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
-                                        ${isSelected 
-                                            ? 'bg-blue-500 border-blue-500' 
+                                        ${isSelected
+                                            ? 'bg-blue-500 border-blue-500'
                                             : 'border-gray-300 bg-white'
                                         }`}
                                     >
@@ -341,15 +343,15 @@ export default function SearchableDropdown({
             {multiple && selectedOptions.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                     {selectedOptions.map(opt => (
-                        <div 
-                            key={opt.value} 
+                        <div
+                            key={opt.value}
                             className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs group"
                         >
                             {opt.image && (
-                                <img 
-                                    src={opt.image} 
-                                    alt={opt.label} 
-                                    className="w-4 h-4 rounded object-cover" 
+                                <img
+                                    src={opt.image}
+                                    alt={opt.label}
+                                    className="w-4 h-4 rounded object-cover"
                                 />
                             )}
                             <span className="max-w-[150px] truncate">{opt.label}</span>
@@ -396,8 +398,8 @@ export default function SearchableDropdown({
                 </span>
 
                 <div className="flex items-center gap-1">
-                    {/* Clear button - only show when there's a selection */}
-                    {selectedOptions.length > 0 && (
+                    {/* Clear button - only show when there's a selection and showClear is true */}
+                    {showClear && selectedOptions.length > 0 && (
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -411,7 +413,7 @@ export default function SearchableDropdown({
                             <X size={16} className="text-gray-400 hover:text-gray-600" />
                         </div>
                     )}
-                    
+
                     {/* Dropdown arrow */}
                     <ChevronDown
                         size={18}

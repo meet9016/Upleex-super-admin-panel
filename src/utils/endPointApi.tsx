@@ -74,6 +74,7 @@ export interface EndPointApi {
     getVendorProducts: string;
     approveProduct: string;
     bulkApproveProducts: string;
+    bulkRejectProducts: string;
 
     // Quotes
     postAllQuotes: string;
@@ -160,6 +161,8 @@ const endPointApi: EndPointApi = {
     getVendorProducts: 'products/vendor',
     approveProduct: 'products/approve',
     bulkApproveProducts: 'products/bulk-approve',
+    bulkRejectProducts: 'products/bulk-reject',
+
 
     // Quotes
     postAllQuotes: 'quote/getallforadmin',

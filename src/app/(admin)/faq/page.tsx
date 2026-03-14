@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Search, Edit, Trash, Loader2, X } from "lucide-react";
+import { Plus, Search, Loader2, X } from "lucide-react";
+import ActionButtons from "@/components/common/ActionButtons";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 
@@ -295,24 +296,7 @@ const handleConfirmDelete = async () => {
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
-        <div className="flex items-center justify-start gap-2 h-full pl-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white transition"
-            onClick={() => handleEdit(params.data)}
-          >
-            <Edit size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#E55353] text-[#E55353] hover:bg-[#E55353] hover:text-white transition"
-            onClick={() => handleDeleteClick(params.data)}
-          >
-            <Trash size={16} />
-          </Button>
-        </div>
+        <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )
     }
   ];

@@ -129,7 +129,7 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
   return (
     <div className="flex items-center h-full">
       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${styles}`}>
-        <Icon size={12} />
+        {/* <Icon size={12} /> */}
         {label}
       </span>
     </div>
@@ -229,8 +229,8 @@ export default function QuotesTreeTable({
         path: vendorPath,
         children: filteredQuotes.map((quote: Quote, quoteIndex) => {
           const price = parseFloat(quote.calculated_price || quote.total_price || '0');
-          const startDate = quote.start_date ? new Date(quote.start_date).toLocaleDateString() : '';
-          const endDate = quote.end_date ? new Date(quote.end_date).toLocaleDateString() : '';
+          const startDate = quote.start_date ? new Date(quote.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+          const endDate = quote.end_date ? new Date(quote.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
 
           return {
             id: quote._id || `quote-${vendorIndex}-${quoteIndex}`,
@@ -271,6 +271,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.category_name || '' : '';
       },
       flex: 1,
+       cellStyle: () => ({ textAlign: 'left' }),
     },
     {
       headerName: "Sub Category",
@@ -279,6 +280,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.sub_category_name || '' : '';
       },
       flex: 1,
+       cellStyle: () => ({ textAlign: 'left' }),
     },
     {
       headerName: "Product Type",
@@ -295,7 +297,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.quantity : undefined;
       },
       width: 100,
-      cellStyle: () => ({ textAlign: 'center' }),
+      cellStyle: () => ({ textAlign: 'left' }),
     },
     {
       headerName: "Price",
@@ -304,7 +306,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.formattedPrice : '';
       },
       width: 150,
-      cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'right' }),
+      cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'left' }),
     },
     {
       headerName: "Dates",
@@ -333,7 +335,7 @@ export default function QuotesTreeTable({
       field: "createdAt",
       valueFormatter: (params: ValueFormatterParams<TreeDataItem, string>) => {
         if (params.data?.type !== 'quote') return '';
-        return params.value ? new Date(params.value).toLocaleDateString() : '';
+        return params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
       },
       width: 120,
     },
