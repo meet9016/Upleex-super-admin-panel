@@ -317,51 +317,57 @@ export default function BlogPage() {
     }
   };
 
-  const onSubmit = async (data: BlogFormValues) => {
-    try {
-      setIsLoading(true);
+const onSubmit = async (data: BlogFormValues) => {
+  try {
+    setIsLoading(true);
 
-      const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("sort_description", data.sort_description);
-      formData.append("long_description", data.long_description);
-      
-      // Send date in the format your backend expects
-      // If backend expects YYYY-MM-DD, send as is
-      // If backend expects DD/MM/YYYY, convert accordingly
-      formData.append("date", data.date); // Adjust based on backend requirement
-      console.log("📅 Sending date to API:", data.date);
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("sort_description", data.sort_description);
+    formData.append("long_description", data.long_description);
+    formData.append("date", data.date);
+    console.log("📅 Sending date to API:", data.date);
 
-      if (data.image && data.image[0]) {
+    if (editingId) {
+      if (data.image && data.image[0] && data.image[0] instanceof File) {
+        // New image uploaded - append it
+        formData.append("image", data.image[0]);
+      } else {
+        console.log("Keeping existing image");
+      }
+    } else {
+      // For create mode - image is required
+      if (data.image && data.image[0] && data.image[0] instanceof File) {
         formData.append("image", data.image[0]);
       }
+    }
 
-      let success;
-      if (editingId) {
-        success = await updateBlog(editingId, formData);
-      } else {
-        success = await createBlog(formData);
-      }
+    let success;
+    if (editingId) {
+      success = await updateBlog(editingId, formData);
+    } else {
+      success = await createBlog(formData);
+    }
 
-      if (success) {
-        reset({
+    if (success) {
+      reset({
         title: "",
         sort_description: "",
         long_description: "",
         date: "",
         image: undefined
       });
-        setPreviewImage(null);
-        setEditingId(null);
-        await fetchBlogs(debouncedSearch);
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error?.response?.data?.message || 'Operation failed');
-    } finally {
-      setIsLoading(false);
+      setPreviewImage(null);
+      setEditingId(null);
+      await fetchBlogs(debouncedSearch);
     }
-  };
+  } catch (error: any) {
+    console.error("Error:", error);
+    toast.error(error?.response?.data?.message || 'Operation failed');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleEdit = async (blog: BlogRow) => {
     try {

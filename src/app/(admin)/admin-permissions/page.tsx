@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { apiService } from '@/services/api';
 import { Button } from '@/components/ui/Button';
@@ -34,6 +34,8 @@ export default function AdminPermissionsPage() {
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Add ref to track if we've already shown the toast
+  const hasShownPreSelectToast = useRef(false);
 
   useEffect(() => {
     loadData();
@@ -47,10 +49,15 @@ export default function AdminPermissionsPage() {
       if (adminExists) {
         setSelectedAdmin(adminEmail);
         setSelectedPermissions(adminExists.permissions || []);
-        toast.info(`Pre-selected admin: ${adminExists.name}`);
+        
+        // Only show toast once
+        if (!hasShownPreSelectToast.current) {
+          toast.info(`Pre-selected admin: ${adminExists.name}`);
+          hasShownPreSelectToast.current = true;
+        }
       }
     }
-  }, [searchParams, admins]);
+  }, [searchParams, admins]); // Keep the dependencies as is
 
   const loadData = async () => {
     try {
