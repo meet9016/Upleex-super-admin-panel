@@ -1,6 +1,6 @@
 import endPointApi from '@/utils/endPointApi';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3688/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3688/api/v1';
 
 class ApiService {
   private getAuthHeaders() {
