@@ -10,52 +10,43 @@ import {
   ValueGetterParams,
   ClientSideRowModelModule,
   ValidationModule,
-  CellStyleModule,
   TextFilterModule,
   NumberFilterModule,
   DateFilterModule,
-  CustomFilterModule,
-  RowStyleModule,
   RowSelectionModule,
   QuickFilterModule,
 } from "ag-grid-community";
 import {
   RowGroupingModule,
   TreeDataModule,
-  FiltersToolPanelModule,
   SetFilterModule,
-  MasterDetailModule,
   ColumnMenuModule,
   ContextMenuModule,
 } from "ag-grid-enterprise";
 import { Button } from "./Button";
 import { Loader2 } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
+import StatusBadge from "@/components/common/StatusBadge";
+import { toast } from "react-toastify";
 
-// Register all required modules
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
   ValidationModule,
-  CellStyleModule,
   TextFilterModule,
   NumberFilterModule,
   DateFilterModule,
-  CustomFilterModule,
-  RowStyleModule,
   RowSelectionModule,
   QuickFilterModule,
   RowGroupingModule,
   TreeDataModule,
-  FiltersToolPanelModule,
   SetFilterModule,
-  MasterDetailModule,
   ColumnMenuModule,
   ContextMenuModule,
 ]);
 
 interface Product {
-  id?: string;
   _id?: string;
+  id?: string;
   product_name: string;
   category_name: string;
   price: number;
@@ -65,6 +56,7 @@ interface Product {
 
 interface Vendor {
   _id: string;
+  vendor_id?: string;
   business_name: string;
   full_name: string;
   pendingCount: number;
@@ -74,15 +66,14 @@ interface Vendor {
 interface TreeDataItem {
   id: string;
   name: string;
-  type: 'vendor' | 'product';
-  vendorId?: string;
-  vendorName?: string;
+  type: "vendor" | "product";
   full_name?: string;
   category_name?: string;
   price?: number;
   approval_status?: string;
   createdAt?: string;
   pending_count?: number;
+  product_count?: number;
   children?: TreeDataItem[];
   path?: string[];
 }
@@ -90,91 +81,103 @@ interface TreeDataItem {
 interface VendorProductTreeTableProps {
   vendors: Vendor[];
   onBulkApprove: (productIds: string[]) => void;
+  onBulkReject?: (productIds: string[]) => void;
   onStatusChange: (productId: string, status: string) => void;
   approving: boolean;
+  rejecting?: boolean;
 }
 
-// Status cell renderer component
+// Status cell renderer
 const StatusCellRenderer = (props: ICellRendererParams) => {
-  if (props.data?.type === 'vendor') return null;
-
-  const status = props.value;
-  const statusClasses = {
-    approved: 'bg-green-100 text-green-700',
-    pending: 'bg-yellow-100 text-yellow-700',
-    rejected: 'bg-red-100 text-red-700'
-  };
-
+  if (props.data?.type === "vendor") return null;
   return (
-    <span className={`text-xs px-2 py-1 rounded ${statusClasses[status as keyof typeof statusClasses] || statusClasses.pending}`}>
-      {status}
-    </span>
-  );
-};
-
-// Action cell renderer component
-const ActionCellRenderer = (props: ICellRendererParams) => {
-  const [updatingProduct, setUpdatingProduct] = useState<string | null>(null);
-  const { onStatusChange } = props.context;
-
-  const handleStatusChange = async (productId: string, status: string) => {
-    setUpdatingProduct(productId);
-    await onStatusChange(productId, status);
-    setUpdatingProduct(null);
-  };
-
-  if (props.data?.type !== 'product') return null;
-
-  return (
-    <div onClick={(e) => e.stopPropagation()} className="w-40">
-      <SearchableDropdown
-        options={[
-          { label: "Pending", value: "pending" },
-          { label: "Approved", value: "approved" },
-          { label: "Rejected", value: "rejected" }
-        ]}
-        value={props.data.approval_status}
-        onChange={(val) => {
-          const status = Array.isArray(val) ? val[0] : val;
-          handleStatusChange(props.data.id, status);
-        }}
-        disabled={updatingProduct === props.data.id}
-        placeholder="Select Status"
-        usePortal={true}
-        maxHeight="max-h-48"
-      />
+    <div className="flex items-center h-full">
+      <StatusBadge status={props.value || "pending"} />
     </div>
   );
 };
 
-// Custom group cell renderer with triangle icon and vendor info
+const ActionCellRenderer = (props: ICellRendererParams) => {
+  const [updating, setUpdating] = useState(false);
+  const { onStatusChange } = props.context;
+  const uniqueId = useRef(`dropdown-${Math.random().toString(36).substr(2, 9)}`).current;
+
+  if (props.data?.type !== "product") return null;
+
+  const handleChange = async (val: string | string[]) => {
+    const status = Array.isArray(val) ? val[0] : val;
+    setUpdating(true);
+    await onStatusChange(props.data.id, status);
+    setUpdating(false);
+  };
+
+  // Style tag with unique class
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .${uniqueId} .searchable-dropdown-options,
+      .${uniqueId} [class*="options"] {
+        max-height: 150px !important;
+        overflow-y: auto !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [uniqueId]);
+
+  return (
+    <div onClick={(e) => e.stopPropagation()} className="w-40 mt-1">
+      <div className={uniqueId}>
+        <SearchableDropdown
+          options={[
+            { label: "Pending", value: "pending" },
+            { label: "Approved", value: "approved" },
+            { label: "Rejected", value: "rejected" },
+          ]}
+          value={props.data.approval_status}
+          onChange={handleChange}
+          disabled={updating}
+          placeholder="Select Status"
+          usePortal={true}
+          maxHeight="max-h-48"
+          showClear={false}
+        />
+      </div>
+    </div>
+  );
+};
+
+// Vendor group cell renderer - same as QuotesTreeTable
 const VendorGroupCellRenderer = (props: ICellRendererParams) => {
-  const { data, node } = props;
+  const { data } = props;
 
-  if (data.type === 'vendor') {
-    const isExpanded = node.expanded;
-
+  if (data.type === "vendor") {
     return (
-      <div className="flex items-center gap-2 py-1">
-        {/* Vendor info */}
-        <div className="font-bold">
-          <div className="text-sm text-gray-600">{data.full_name || 'N/A'}  - {data.name}</div>
-        </div>
-
-        {/* Pending count badge */}
-        {data.pending_count > 0 && (
-          <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700 ml-2">
-            {data.pending_count} pending
+      <div className="flex items-center gap-3 py-1">
+        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+          <span className="text-indigo-600 font-semibold text-sm">
+            {data.name?.charAt(0).toUpperCase()}
           </span>
-        )}
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-900">{data.name}</div>
+          <div className="text-xs text-gray-500">
+            {data.full_name} · {data.product_count} products
+            {data.pending_count > 0 && (
+              <span className="ml-2 text-amber-600">{data.pending_count} pending</span>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Product row - show product name with indentation
   return (
-    <div className="flex items-center pl-6">
-      <span>{props.value}</span>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-gray-700 font-medium">{data.name || "-"}</span>
     </div>
   );
 };
@@ -182,205 +185,185 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
 export default function VendorProductTreeTable({
   vendors,
   onBulkApprove,
+  onBulkReject,
   onStatusChange,
   approving,
+  rejecting,
 }: VendorProductTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
-  const [groupSelects, setGroupSelects] = useState<'self' | 'descendants' | 'filteredDescendants'>('descendants');
-  const [selectedProductCount, setSelectedProductCount] = useState(0);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [approvableCount, setApprovableCount] = useState(0);
+  const [rejectableCount, setRejectableCount] = useState(0);
 
-  // Transform data for tree structure with path
+
   const rowData: TreeDataItem[] = useMemo(() => {
-    return vendors.map(vendor => {
-      // Create vendor path
+    return vendors.map((vendor) => {
       const vendorPath = [vendor._id];
-
       return {
         id: vendor._id,
         name: vendor.business_name,
         full_name: vendor.full_name,
-        type: 'vendor',
-        vendorId: vendor._id,
+        type: "vendor",
         pending_count: vendor.pendingCount,
+        product_count: vendor.products?.length || 0,
         path: vendorPath,
-        children: vendor.products?.map(product => ({
-          id: product.id || product._id || '',
+        children: (vendor.products || []).map((product) => ({
+          id: product.id || product._id || "",
           name: product.product_name,
-          type: 'product' as const,
-          vendorId: vendor._id,
-          vendorName: vendor.business_name,
+          type: "product" as const,
           category_name: product.category_name,
           price: product.price,
           approval_status: product.approval_status,
           createdAt: product.createdAt,
-          path: [...vendorPath, product.id || product._id || ''],
-        })) || []
+          path: [...vendorPath, product.id || product._id || ""],
+        })),
       };
     });
   }, [vendors]);
 
-  // Update selected count
-  const updateSelectedCount = useCallback(() => {
+  const handleBulkApprove = useCallback(() => {
     if (!gridRef.current?.api) return;
+    const selectedNodes = gridRef.current.api.getSelectedNodes().filter(n => n.data.type === "product");
+    const validNodes = selectedNodes.filter(n => n.data.approval_status !== "approved");
 
-    const selectedNodes = gridRef.current.api.getSelectedNodes();
-    const count = selectedNodes.filter(node => node.data.type === 'product').length;
-    setSelectedProductCount(count);
-  }, []);
+    if (validNodes.length === 0 && selectedNodes.length > 0) {
+      toast.info("Selected products are already approved");
+      return;
+    }
 
-  const handleBulkApproveClick = useCallback(() => {
-    if (!gridRef.current?.api) return;
-
-    const selectedNodes = gridRef.current.api.getSelectedNodes();
-    const productIds = selectedNodes
-      .filter(node => node.data.type === 'product')
-      .map(node => node.data.id);
-
-    if (productIds.length > 0) {
-      onBulkApprove(productIds);
-      // Clear selection after approval
-      gridRef.current?.api.deselectAll();
+    const ids = validNodes.map((n) => n.data.id);
+    if (ids.length > 0) {
+      onBulkApprove(ids);
     }
   }, [onBulkApprove]);
 
-  // Handle group selection mode change
-  const onGroupSelectsChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value as 'self' | 'descendants' | 'filteredDescendants';
-    setGroupSelects(value);
+  const handleBulkReject = useCallback(() => {
+    if (!gridRef.current?.api || !onBulkReject) return;
+    const selectedNodes = gridRef.current.api.getSelectedNodes().filter(n => n.data.type === "product");
+    const validNodes = selectedNodes.filter(n => n.data.approval_status !== "rejected");
 
-    // Update row selection configuration
-    gridRef.current?.api.setGridOption('rowSelection', {
-      mode: 'multiRow',
-      groupSelects: value,
-    });
+    if (validNodes.length === 0 && selectedNodes.length > 0) {
+      toast.info("Selected products are already rejected");
+      return;
+    }
+
+    const ids = validNodes.map((n) => n.data.id);
+    if (ids.length > 0) {
+      onBulkReject(ids);
+    }
+  }, [onBulkReject]);
+
+  const updateCount = useCallback(() => {
+    if (!gridRef.current?.api) return;
+    const nodes = gridRef.current.api.getSelectedNodes();
+    const productNodes = nodes.filter((n) => n.data.type === "product");
+
+    setSelectedCount(productNodes.length);
+    setApprovableCount(productNodes.filter((n) => n.data.approval_status !== "approved").length);
+    setRejectableCount(productNodes.filter((n) => n.data.approval_status !== "rejected").length);
   }, []);
 
-  // Quick filter handler
-  const onQuickFilterChanged = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    gridRef.current?.api.setGridOption('quickFilterText', event.target.value);
-  }, []);
-
-  // Column definitions
   const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
     {
       headerName: "Category",
       field: "category_name",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? params.data.category_name || '' : '';
-      },
+      valueGetter: (p: ValueGetterParams<TreeDataItem, string>) =>
+        p.data?.type === "product" ? p.data.category_name || "" : "",
       flex: 1,
     },
     {
       headerName: "Price",
       field: "price",
-      valueFormatter: (params: ValueFormatterParams<TreeDataItem, number>) => {
-        return params.value ? `₹${params.value}` : '';
-      },
-      flex: 1,
+      valueGetter: (p: ValueGetterParams<TreeDataItem, number>) =>
+        p.data?.type === "product" ? p.data.price : undefined,
+      valueFormatter: (p: ValueFormatterParams<TreeDataItem, number>) =>
+        p.value ? `₹${p.value}` : "",
+      width: 120,
+      cellStyle: () => ({ fontWeight: "bold", color: "#059669" }),
     },
     {
       headerName: "Status",
       field: "approval_status",
       cellRenderer: StatusCellRenderer,
-      flex: 1,
+      width: 150,
     },
     {
       headerName: "Created",
       field: "createdAt",
-      valueFormatter: (params: ValueFormatterParams<TreeDataItem, string>) => {
-        return params.value ? new Date(params.value).toLocaleDateString() : '';
+      valueFormatter: (p: ValueFormatterParams<TreeDataItem, string>) => {
+        if (p.data?.type !== "product") return "";
+        return p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "";
       },
-      flex: 1,
+      width: 130,
     },
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
-      suppressSizeToFit: true,
       width: 200,
-    }
+    },
   ], []);
 
-  // Default column definition
   const defaultColDef = useMemo(() => ({
     flex: 1,
     minWidth: 100,
     sortable: true,
-    // filter: true,
+    resizable: true,
+    filter: false,
   }), []);
 
-  // Auto group column definition
-  const autoGroupColumnDef = useMemo(() => ({
+  const autoGroupColumnDef: ColDef<TreeDataItem> = useMemo(() => ({
     headerName: "Vendor / Product",
-    field: "name" as any,
-    cellRenderer: 'agGroupCellRenderer',
+    field: "name",
+    cellRenderer: "agGroupCellRenderer",
     cellRendererParams: {
       suppressCount: true,
       innerRenderer: VendorGroupCellRenderer,
+      checkbox: true,
     },
     flex: 2,
-    minWidth: 300,
+    minWidth: 350,
   }), []);
 
-  // Row selection configuration
-  const rowSelection = useMemo(() => ({
-    mode: 'multiRow' as const,
-    groupSelects: groupSelects,
-  }), [groupSelects]);
+  const rowSelection = useMemo<any>(() => ({
+    mode: "multiRow" as const,
+    groupSelects: "descendants" as const,
+  }), []);
 
-  // Get data path for tree structure
-  const getDataPath = useCallback((data: TreeDataItem) => {
-    return data.path || [data.id];
-  }, []);
+  const getDataPath = useCallback((data: TreeDataItem) => data.path || [data.id], []);
+  const getRowId = useCallback((params: any) =>
+    params.data.type === "vendor" ? `vendor-${params.data.id}` : `product-${params.data.id}`, []);
 
-  // Get row ID
-  const getRowId = useCallback((params: any) => {
-    if (params.data.type === 'vendor') {
-      return `vendor-${params.data.id}`;
-    }
-    return `product-${params.data.id}`;
-  }, []);
-
-  // Context object for cell renderers
-  const context = useMemo(() => ({
-    onStatusChange,
-  }), [onStatusChange]);
+  const context = useMemo(() => ({ onStatusChange }), [onStatusChange]);
 
   return (
     <div className="space-y-4">
-      {/* Header with quick filter and selection controls */}
-      <div className="flex justify-between items-center">
-        {selectedProductCount > 0 && (
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                gridRef.current?.api.deselectAll();
-                setSelectedProductCount(0);
-              }}
-              variant="outline"
-              className="border-gray-300"
-            >
-              Clear All ({selectedProductCount})
+      {selectedCount > 0 && (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="border-gray-300"
+            onClick={() => { gridRef.current?.api.deselectAll(); setSelectedCount(0); }}
+          >
+            Clear ({selectedCount})
+          </Button>
+          {onBulkReject && rejectableCount > 0 && (
+            <Button onClick={handleBulkReject} disabled={rejecting} className="bg-red-600 hover:bg-red-700">
+              <>Reject Selected ({rejectableCount})</>
             </Button>
-            <Button
-              onClick={handleBulkApproveClick}
-              disabled={approving}
-              className="bg-green-600 hover:bg-green-700"
-            >
+          )}
+          {approvableCount > 0 && (
+            <Button onClick={handleBulkApprove} disabled={approving} className="bg-green-600 hover:bg-green-700">
               {approving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Approving...
-                </>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Approving...</>
               ) : (
-                <>Approve Selected ({selectedProductCount})</>
+                <>Approve Selected ({approvableCount})</>
               )}
             </Button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
-
-      <div className="ag-theme-alpine w-full" style={{ height: "750px" }}>
+      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden" style={{ height: "700px" }}>
         <AgGridReact
           ref={gridRef}
           rowData={rowData}
@@ -389,29 +372,20 @@ export default function VendorProductTreeTable({
           autoGroupColumnDef={autoGroupColumnDef}
           rowSelection={rowSelection}
           treeData={true}
-          pagination
-          paginationPageSize={20}
-          paginationPageSizeSelector={[10, 20, 50, 100]}
           animateRows={true}
           context={context}
-          // domLayout="autoHeight"
           suppressRowClickSelection={true}
           getRowId={getRowId}
           getDataPath={getDataPath}
           groupDefaultExpanded={0}
           groupDisplayType="singleColumn"
           treeDataChildrenField="children"
-          groupHideOpenParents={false}
-          groupRemoveSingleChildren={false}
-          groupRemoveLowestSingleChildren={false}
-          alwaysShowHorizontalScroll={true}
-          getRowStyle={(params) => {
-            if (params.data?.type === 'vendor') {
-              return { background: '#f9fafb' };
-            }
-            return undefined;
-          }}
-          onSelectionChanged={updateSelectedCount}
+          rowHeight={45}
+          headerHeight={48}
+          getRowStyle={(params) =>
+            params.data?.type === "vendor" ? { background: "#f9fafb" } : undefined
+          }
+          onSelectionChanged={updateCount}
         />
       </div>
     </div>

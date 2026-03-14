@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { Loader2, Search, Filter, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
+import { Loader2, Search, Eye } from "lucide-react";
+import StatusBadge from "@/components/common/StatusBadge";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { DataTable } from "@/components/ui/DataTable";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -137,28 +138,11 @@ export default function VendorsPage() {
             field: "status",
             headerName: "Current Status",
             width: 150,
-            cellRenderer: (params: any) => {
-                const val = params.value?.toLowerCase();
-                let colors = "bg-yellow-100 text-yellow-700";
-                let Icon = Clock;
-
-                if (val === "approved") {
-                    colors = "bg-green-100 text-green-700";
-                    Icon = CheckCircle;
-                } else if (val === "rejected") {
-                    colors = "bg-red-100 text-red-700";
-                    Icon = XCircle;
-                }
-
-                return (
-                    <div className="flex items-center h-full">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${colors}`}>
-                            <Icon size={12} />
-                            {params.value || "Pending"}
-                        </span>
-                    </div>
-                );
-            }
+            cellRenderer: (params: any) => (
+                <div className="flex items-center h-full">
+                    <StatusBadge status={params.value || 'pending'} />
+                </div>
+            )
         },
         {
             headerName: "Action / Update Status",
@@ -201,6 +185,7 @@ export default function VendorsPage() {
                                 placeholder="Select Status"
                                 usePortal={true}
                                 maxHeight="max-h-48"
+                                showClear={false}
                             />
                         </div>
                         {isUpdating === kycId && <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />}
