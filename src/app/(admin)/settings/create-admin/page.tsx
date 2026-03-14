@@ -230,35 +230,36 @@ export default function CreateAdminPage() {
               </div> */}
 
               {/* Submit Buttons */}
-              <div className="flex items-center gap-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating Admin...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Create Admin Account
-                    </>
-                  )}
-                </Button>
-                <Link href="/settings">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="px-8 h-12 rounded-xl"
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </Button>
-                </Link>
-              </div>
+            <div className="flex items-center gap-4 pt-4">
+  <Button
+    type="submit"
+    disabled={isLoading}
+    className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold"
+  >
+    {isLoading ? (
+      <>
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+        Creating Admin...
+      </>
+    ) : (
+      <>
+        <UserPlus className="h-4 w-4 mr-2" />
+        Create Admin Account
+      </>
+    )}
+  </Button>
+
+  <Link href="/settings" className="flex-1">
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full h-12 rounded-xl"
+      disabled={isLoading}
+    >
+      Cancel
+    </Button>
+  </Link>
+</div>
             </form>
           </CardContent>
         </Card>
