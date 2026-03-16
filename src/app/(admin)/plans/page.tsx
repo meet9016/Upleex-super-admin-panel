@@ -17,9 +17,9 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 type Plan = {
   _id?: string;
   plan_type: string;
-  months: number;
-  max_products: number;
-  amount: number;
+  months: number | '';
+  max_products: number | '';
+  amount: number | '';
   status?: string;
   description?: string;
   popular?: boolean;
@@ -158,7 +158,7 @@ export default function PlansPage() {
   };
 
   const deleteSelected = async () => {
-    if (!selected.length) {
+    if (!selected.length) { 
       toast.info("Select rows to delete");
       return;
     }
@@ -179,26 +179,26 @@ export default function PlansPage() {
   };
 
   const columns: ColDef[] = [
-    { field: "plan_type", headerName: "Plan Type", minWidth: 160 },
-    { field: "months", headerName: "Months", minWidth: 100 },
-    { field: "max_products", headerName: "Max Products", minWidth: 130 },
+    { field: "plan_type", headerName: "Plan Type", width: 160 },
+    { field: "months", headerName: "Months", width : 100 },
+    { field: "max_products", headerName: "Max Products", width: 100 },
     {
       field: "amount",
       headerName: "Amount",
-      minWidth: 120,
+      width: 100,
       valueFormatter: (p) => `₹${p.value}`,
     },
     {
       field: "status",
       headerName: "Status",
-      minWidth: 120,
+      width: 100,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
-    { field: "description", headerName: "Description", minWidth: 200 },
+    { field: "popular", headerName: "Popular", width: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
+    { field: "description", headerName: "Description", width: 200 },
     {
       headerName: "Action",
-      minWidth: 140,
+      width: 140,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
       ),
@@ -252,55 +252,101 @@ export default function PlansPage() {
 
               {/* Inputs */}
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Months
-                  </label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                    value={form.months}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        months: Number(e.target.value || 1),
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Max Products
-                  </label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                    value={form.max_products}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        max_products: Number(e.target.value || 1),
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Amount
-                  </label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                    value={form.amount}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        amount: Number(e.target.value || 0),
-                      })
-                    }
-                  />
-                </div>
+               <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-sm font-semibold text-slate-700">
+                            Months
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="99"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+                            value={form.months}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Allow empty string temporarily for better UX
+                              if (value === '') {
+                                setForm({ ...form, months: '' });
+                                return;
+                              }
+                              const numValue = Number(value);
+                              // Restrict to max 2 digits (1-99)
+                              if (!isNaN(numValue) && numValue >= 1 && numValue <= 99) {
+                                setForm({ ...form, months: numValue });
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Set default value if empty on blur
+                              if (e.target.value === '') {
+                                setForm({ ...form, months: 1 });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-semibold text-slate-700">
+                            Max Products
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="9999"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+                            value={form.max_products}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Allow empty string temporarily for better UX
+                              if (value === '') {
+                                setForm({ ...form, max_products: '' });
+                                return;
+                              }
+                              const numValue = Number(value);
+                              // Restrict to max 4 digits (1-9999)
+                              if (!isNaN(numValue) && numValue >= 1 && numValue <= 9999) {
+                                setForm({ ...form, max_products: numValue });
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Set default value if empty on blur
+                              if (e.target.value === '') {
+                                setForm({ ...form, max_products: 1 });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-semibold text-slate-700">
+                            Amount
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="999999"
+                            step="1"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+                            value={form.amount}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Allow empty string temporarily for better UX
+                              if (value === '') {
+                                setForm({ ...form, amount: '' });
+                                return;
+                              }
+                              const numValue = Number(value);
+                              // Restrict to max 6 digits (0-999999)
+                              if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
+                                setForm({ ...form, amount: numValue });
+                              }
+                            }}
+                            onBlur={(e) => {
+                              // Set default value if empty on blur
+                              if (e.target.value === '') {
+                                setForm({ ...form, amount: 0 });
+                              }
+                            }}
+                          />
+                        </div>
               </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">Popular</label>
@@ -394,7 +440,7 @@ export default function PlansPage() {
             <CardContent className="p-0">
 
               <AgGridTable
-                columns={columns}
+                columns={columns} 
                 rowData={rows}
                 onSelectionChange={(sel: any[]) =>
                   setSelected(sel as Plan[])

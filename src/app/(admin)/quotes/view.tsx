@@ -203,7 +203,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
     };
 
     const StatBadge = ({ icon: Icon, label, value, color }: any) => (
-        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">.\
             <div className={`p-2 rounded-lg ${color}`}>
                 <Icon size={16} className="text-white" />
             </div>
@@ -254,8 +254,8 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                 <p className="text-sm text-slate-300 flex items-center gap-2">
                                     <Building2 size={14} className="opacity-70" />
                                     Requested from: <span className="font-semibold text-white">{vendorName}</span>
-                                    <span className="text-slate-400">•</span>
-                                    <span className="text-slate-300">{businessName}</span>
+                                    {/* <span className="text-slate-400">•</span> */}
+                                      {/* <span className="text-slate-300">{businessName}</span> */}
                                 </p>
                             </div>
                           

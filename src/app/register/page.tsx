@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Lock, Mail, User, Phone, Loader2, ArrowLeft } from "lucide-react";
+import { Lock, Mail, User, Phone, ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
-
+import { apiService } from "@/services/api";
+import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -141,10 +142,7 @@ export default function RegisterPage() {
 
                         <Button type="submit" className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95 mt-4" disabled={isLoading}>
                             {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Creating Account...
-                                </>
+                                <Loader type="button" text="Creating Account..." iconClassName="text-white" />
                             ) : (
                                 "Create Account"
                             )}

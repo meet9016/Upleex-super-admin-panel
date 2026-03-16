@@ -13,6 +13,7 @@ import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import VendorDetailsModal from "./view";
+import Loader from "@/components/common/Loader";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -186,9 +187,10 @@ export default function VendorsPage() {
                                 usePortal={true}
                                 maxHeight="max-h-48"
                                 showClear={false}
+                                buttonClassName="h-8 py-1"
                             />
                         </div>
-                        {isUpdating === kycId && <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />}
+                        {isUpdating === kycId && <Loader className="text-indigo-600" />}
                     </div>
                 );
             }
@@ -218,12 +220,7 @@ export default function VendorsPage() {
                     <CardContent className="p-0">
                         <div className="h-full w-full relative">
                             {isLoading ? (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10 backdrop-blur-[1px]">
-                                    <div className="text-center">
-                                        <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mx-auto mb-3" />
-                                        <p className="text-sm font-semibold text-slate-600 italic">Fetching vendor data...</p>
-                                    </div>
-                                </div>
+                                <Loader type="section" text="Fetching vendor data..." />
                             ) : rowData.length === 0 ? (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="text-center group">

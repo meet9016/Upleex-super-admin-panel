@@ -44,7 +44,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
     items: [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
-       { name: "Quotes", href: "/quotes", icon: FileText },
+      { name: "Quotes", href: "/quotes", icon: FileText },
       {
         name: "Categories",
         icon: Layers,
@@ -53,7 +53,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
           { name: "Add Category", href: "/categories/add", icon: FolderPlus, permission: "categories" },
           { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers, permission: "subcategories" },
         ],
-      },  
+      },
       {
         name: "Plans",
         icon: FolderPlus,
@@ -64,7 +64,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
           { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus, permission: "orders" },
         ],
       },
-      { name: "Admin Permissions", href: "/admin-permissions", icon: Shield ,permission: "admin-permissions" },
+      { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
     ],
   },
   {
@@ -107,7 +107,7 @@ export function Sidebar({
   const shouldShowItem = (item: MenuItem) => {
     // If no permission specified, show the item
     if (!item.permission) return true;
-    
+
     // Check if user has permission
     return hasPermission(item.permission);
   };
@@ -317,7 +317,7 @@ export function Sidebar({
               {(!isCollapsed || isMobile) && <span>Settings</span>}
             </Link>
           )}
-          <button
+          {/* <button
             onClick={handleLogout}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-all w-full text-left group",
@@ -326,7 +326,7 @@ export function Sidebar({
           >
             <LogOut size={20} className="text-red-400 group-hover:text-red-500" />
             {(!isCollapsed || isMobile) && <span>Logout</span>}
-          </button>
+          </button> */}
         </div>
       </div>
     </aside>

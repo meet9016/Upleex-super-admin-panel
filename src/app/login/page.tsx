@@ -12,6 +12,7 @@ import { Lock, Mail, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { apiService } from "@/services/api";
+import Loader from "@/components/common/Loader";
 
 const loginSchema = z.object({
   email: z.string().email("Valid email address is required"),
@@ -128,10 +129,7 @@ export default function LoginPage() {
   disabled={isLoading}
 >
               {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Authenticating...
-                </>
+                <Loader type="button" text="Authenticating..." iconClassName="text-white" />
               ) : (
                 "Sign In"
               )}
