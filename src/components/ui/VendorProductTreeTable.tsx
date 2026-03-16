@@ -28,6 +28,7 @@ import { Loader2 } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
 import StatusBadge from "@/components/common/StatusBadge";
 import { toast } from "react-toastify";
+import Loader from "@/components/common/Loader";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -144,6 +145,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           usePortal={true}
           maxHeight="max-h-48"
           showClear={false}
+           buttonClassName="h-8 py-1"
         />
       </div>
     </div>
@@ -354,7 +356,7 @@ export default function VendorProductTreeTable({
           {approvableCount > 0 && (
             <Button onClick={handleBulkApprove} disabled={approving} className="bg-green-600 hover:bg-green-700">
               {approving ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Approving...</>
+                <Loader type="button" text="Approving..." iconClassName="text-white" />
               ) : (
                 <>Approve Selected ({approvableCount})</>
               )}

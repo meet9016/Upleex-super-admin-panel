@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
+import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/Button";
 
 interface CommonDeleteModalProps {
@@ -63,16 +64,13 @@ export default function CommonDeleteModal({
           </Button>
 
           <Button
-            type="button"
+            variant="destructive"
+            className="bg-red-600 hover:bg-red-700 text-white min-w-[100px]"
             onClick={onConfirm}
-            className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white"
             disabled={isLoading}
           >
             {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
-              </>
+              <Loader type="button" text="Deleting..." iconClassName="text-white" />
             ) : (
               "Yes, Delete"
             )}

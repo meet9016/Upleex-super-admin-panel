@@ -15,9 +15,9 @@ import SearchableDropdown from "@/components/ui/SearchableDropdown";
 type PPlan = {
   _id?: string;
   name: string;
-  monthly_price: number;
-  yearly_price: number;
-  product_slots: number;
+  monthly_price: number  |'';
+  yearly_price: number |'';
+  product_slots: number |'';
   status?: string;
   description?: string;
   addon_available_for_yearly?: boolean;
@@ -169,29 +169,29 @@ export default function PriorityPlansPage() {
   };
 
   const columns: ColDef[] = [
-    { field: "name", headerName: "Name", minWidth: 160 },
-    { field: "monthly_price", headerName: "Monthly", minWidth: 120, valueFormatter: (p) => `₹${p.value}` },
-    { field: "yearly_price", headerName: "Yearly", minWidth: 120, valueFormatter: (p) => `₹${p.value}` },
-    { field: "product_slots", headerName: "Slots", minWidth: 100 },
+    { field: "name", headerName: "Name", width: 160 },
+    { field: "monthly_price", headerName: "Monthly", width: 100, valueFormatter: (p) => `₹${p.value}` },
+    { field: "yearly_price", headerName: "Yearly", width: 100, valueFormatter: (p) => `₹${p.value}` },
+    { field: "product_slots", headerName: "Slots", width: 100 },
     {
       field: "status",
       headerName: "Status",
-      minWidth: 120,
+      width: 120,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth: 120, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
-    { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 120, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
-    { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 120 },
+    { field: "addon_available_for_yearly", headerName: "Annual Add-on", width: 100, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
+    { field: "addon_price_per_year", headerName: "Add-on Price", width: 100, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
+    { field: "addon_max_slots", headerName: "Add-on Slots", width: 100 },
     {
       field: "is_popular",
       headerName: "Popular",
-      minWidth: 80,
+      width: 80,
       cellRenderer: PopularCellRenderer,
       cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     },
     {
       headerName: "Action",
-      minWidth: 140,
+      width: 140,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
       ),
@@ -236,34 +236,108 @@ export default function PriorityPlansPage() {
               </div>
 
               {/* Price and Slots Grid */}
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Monthly Price</label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={form.monthly_price}
-                    onChange={(e) => setForm({ ...form, monthly_price: Number(e.target.value || 0) })}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Yearly Price</label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={form.yearly_price}
-                    onChange={(e) => setForm({ ...form, yearly_price: Number(e.target.value || 0) })}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Product Slots</label>
-                  <input
-                    type="number"
-                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={form.product_slots}
-                    onChange={(e) => setForm({ ...form, product_slots: Number(e.target.value || 1) })}
-                  />
-                </div>
+            <div className="grid grid-cols-3 gap-3">
+  {/* Monthly Price Field */}
+  <div>
+    <label className="text-sm font-semibold text-slate-700">
+      Monthly Price
+    </label>
+    <input
+      type="number"
+      min="0"
+      max="999999"
+      step="1"
+      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+      value={form.monthly_price}
+      onChange={(e) => {
+        const value = e.target.value;
+        // Allow empty string temporarily for better UX
+        if (value === '') {
+          setForm({ ...form, monthly_price: '' });
+          return;
+        }
+        const numValue = Number(value);
+        // Restrict to max 6 digits (0-999999)
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
+          setForm({ ...form, monthly_price: numValue });
+        }
+      }}
+      onBlur={(e) => {
+        // Set default value if empty on blur
+        if (e.target.value === '') {
+          setForm({ ...form, monthly_price: 0 });
+        }
+      }}
+    />
+  </div>
+
+  {/* Yearly Price Field */}
+  <div>
+    <label className="text-sm font-semibold text-slate-700">
+      Yearly Price
+    </label>
+    <input
+      type="number"
+      min="0"
+      max="999999"
+      step="1"
+      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+      value={form.yearly_price}
+      onChange={(e) => {
+        const value = e.target.value;
+        // Allow empty string temporarily for better UX
+        if (value === '') {
+          setForm({ ...form, yearly_price: '' });
+          return;
+        }
+        const numValue = Number(value);
+        // Restrict to max 6 digits (0-999999)
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
+          setForm({ ...form, yearly_price: numValue });
+        }
+      }}
+      onBlur={(e) => {
+        // Set default value if empty on blur
+        if (e.target.value === '') {
+          setForm({ ...form, yearly_price: 0 });
+        }
+      }}
+    />
+  </div>
+
+  {/* Product Slots Field */}
+  <div>
+    <label className="text-sm font-semibold text-slate-700">
+      Product Slots
+    </label>
+    <input
+      type="number"
+      min="1"
+      max="999999"
+      step="1"
+      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+      value={form.product_slots}
+      onChange={(e) => {
+        const value = e.target.value;
+        // Allow empty string temporarily for better UX
+        if (value === '') {
+          setForm({ ...form, product_slots: '' });
+          return;
+        }
+        const numValue = Number(value);
+        // Restrict to max 6 digits (1-999999)
+        if (!isNaN(numValue) && numValue >= 1 && numValue <= 999999) {
+          setForm({ ...form, product_slots: numValue });
+        }
+      }}
+      onBlur={(e) => {
+        // Set default value if empty on blur
+        if (e.target.value === '') {
+          setForm({ ...form, product_slots: 1 });
+        }
+      }}
+    />
+  </div>
               </div>
 
               {/* Status Dropdown */}

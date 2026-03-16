@@ -17,6 +17,7 @@ import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions,ColumnMenuTab } from "ag-grid-community";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ColumnMenuModule, ContextMenuModule } from "ag-grid-enterprise";
+import Loader from "@/components/common/Loader";
 
 ModuleRegistry.registerModules([AllCommunityModule, ColumnMenuModule, ContextMenuModule]);
 
@@ -35,6 +36,7 @@ interface AgGridTableProps {
   renderFilterContent?: () => React.ReactNode;
   activeFilterCount?: number;
   onSelectionChange?: (selected: any[]) => void;
+  loading?: boolean;
 }
 
 const AgGridTable: React.FC<AgGridTableProps> = ({
@@ -50,6 +52,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   renderFilterContent,
   activeFilterCount,
   onSelectionChange,
+  loading = false,
 }) => {
   const router = useRouter();
   const gridRef = useRef<any>(null);
@@ -222,32 +225,31 @@ const defaultColDef = useMemo<ColDef>(
         )}
       </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "660px" }}>
-        <AgGridReact
-          rowHeight={40}
-          ref={gridRef}
-          rowData={rowData}
-          columnDefs={columns || defaultColumns}
-          defaultColDef={defaultColDef}
-          pagination
-          paginationPageSize={20}
-          rowSelection={rowSelection}
-          paginationPageSizeSelector={[10, 20, 50, 100]}
-          columnMenu="new"
-          suppressRowClickSelection={true} // CRITICAL: This prevents row click from toggling selection
-          suppressRowDeselection={false} // Allow deselection by clicking checkbox again
-          rowMultiSelectWithClick={false} // Don't use click for multi-select
-          animateRows
-          alwaysShowHorizontalScroll={true}
-          onSelectionChanged={onSelectionChanged}
-          // Ensure selections persist when data changes
-          // immutableData={false}
-         getRowId={useCallback((params: any) => {
-  // Use id if available, otherwise fall back to categories_id
-  return params.data.id || params.data.categories_id || params.data._id;
-}, [])}
-
-        />
+      <div className="relative">
+        {loading && <Loader type="section" />}
+        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "660px" }}>
+          <AgGridReact
+            rowHeight={40}
+            ref={gridRef}
+            rowData={rowData}
+            columnDefs={columns || defaultColumns}
+            defaultColDef={defaultColDef}
+            pagination
+            paginationPageSize={20}
+            rowSelection={rowSelection}
+            paginationPageSizeSelector={[10, 20, 50, 100]}
+            columnMenu="new"
+            suppressRowClickSelection={true}
+            suppressRowDeselection={false}
+            rowMultiSelectWithClick={false}
+            animateRows
+            alwaysShowHorizontalScroll={true}
+            onSelectionChanged={onSelectionChanged}
+            getRowId={useCallback((params: any) => {
+              return params.data.id || params.data.categories_id || params.data._id;
+            }, [])}
+          />
+        </div>
       </div>
     </div>
   );
