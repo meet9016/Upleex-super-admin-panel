@@ -51,11 +51,11 @@ export default function VendorProductApprovalPage() {
       } else {
         setLoadingMore(true);
       }
-      
-      const res = await api.get(endPointApi.getAllVendors, { 
-        params: { page: pageNum, limit: LIMIT } 
+
+      const res = await api.get(endPointApi.getAllVendors, {
+        params: { page: pageNum, limit: LIMIT }
       });
-      
+
       const vendorList: Vendor[] = res?.data?.data || [];
       const totalPagesResp = res?.data?.totalPages;
       const pageResp = res?.data?.page || pageNum;
@@ -76,7 +76,7 @@ export default function VendorProductApprovalPage() {
 
       setVendors(prev => {
         if (pageNum === 1) return vendorsWithProducts;
-        
+
         const seen = new Set(prev.map(v => v._id || v.vendor_id));
         const merged = [...prev];
         vendorsWithProducts.forEach(v => {
@@ -160,15 +160,15 @@ export default function VendorProductApprovalPage() {
   useEffect(() => {
     const handleScroll = () => {
       if (!hasMore || loadingMore || loading) return;
-      
+
       const scrollPosition = window.innerHeight + window.scrollY;
       const threshold = document.documentElement.scrollHeight - 200;
-      
+
       if (scrollPosition >= threshold) {
         fetchVendorsWithProducts(page + 1);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [page, hasMore, loadingMore, loading]);
@@ -177,7 +177,7 @@ export default function VendorProductApprovalPage() {
     <div className="p-1">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Product Approval</h1>
-       
+
       </div>
 
       <div className="bg-white rounded-lg">
@@ -193,14 +193,14 @@ export default function VendorProductApprovalPage() {
         ) : (
           <>
             <VendorProductTreeTable
-            vendors={vendors}
-            onBulkApprove={handleBulkApprove}
-            onBulkReject={handleBulkReject}
-            onStatusChange={handleStatusChange}
-            approving={approving}
-            rejecting={rejecting}
-          />
-            
+              vendors={vendors}
+              onBulkApprove={handleBulkApprove}
+              onBulkReject={handleBulkReject}
+              onStatusChange={handleStatusChange}
+              approving={approving}
+              rejecting={rejecting}
+            />
+
             {/* Loading more indicator */}
             {loadingMore && (
               <div className="flex justify-center items-center py-6 border-t border-gray-200">
@@ -210,7 +210,7 @@ export default function VendorProductApprovalPage() {
                 </div>
               </div>
             )}
-            
+
             {/* End of list message */}
             {!hasMore && vendors.length > 0 && (
               <div className="flex justify-center py-6 border-t border-gray-200">

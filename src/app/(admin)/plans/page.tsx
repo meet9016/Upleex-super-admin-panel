@@ -33,6 +33,7 @@ export default function PlansPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [errors, setErrors] = useState<{ [k: string]: string }>({});
   const [form, setForm] = useState<Plan>({
     plan_type: "",
     months: 1,
@@ -78,15 +79,14 @@ export default function PlansPage() {
   };
 
   const savePlan = async () => {
-    // Client-side validation to avoid empty submissions
-    const typeOk = String(form.plan_type || '').trim().length > 0;
-    const monthsOk = form.months !== '' && Number(form.months) >= 1;
-    const maxOk = form.max_products !== '' && Number(form.max_products) >= 1;
-    const amountOk = form.amount !== '' && Number(form.amount) >= 0;
-    if (!typeOk || !monthsOk || !maxOk || !amountOk) {
-      toast.error("Please fill all required fields before creating a plan");
-      return;
-    }
+    const newErrors: { [k: string]: string } = {};
+    if (!String(form.plan_type || '').trim()) newErrors.plan_type = 'Plan type is required';
+    if (form.months === '' || Number(form.months) < 1) newErrors.months = 'Months must be at least 1';
+    if (form.max_products === '' || Number(form.max_products) < 1) newErrors.max_products = 'Max products must be at least 1';
+    if (form.amount === '' || Number(form.amount) < 0) newErrors.amount = 'Amount must be 0 or more';
+    if (!String(form.description || '').trim()) newErrors.description = 'Description is required';
+    if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+    setErrors({});
     try {
       const payload = {
         plan_type: String(form.plan_type).trim(),
@@ -130,32 +130,32 @@ export default function PlansPage() {
     setShowDeletePopup(true);
   };
 
- const handleConfirmDelete = async () => {
-  if (!planToDelete) return;
-  const id = planToDelete._id || (planToDelete as any).id;
-  if (!id) {
-    toast.error("Invalid plan id");
-    return;
-  }
-  setIsDeleting(true);
-  try {
-    await api.delete(`${endPointApi.deletePlan}/${id}`);
-    toast.success("Deleted successfully");
-    
-    // Check if the deleted plan is the one being edited
-    if (editingId === id) {
-      resetForm(); // This will clear the form
+  const handleConfirmDelete = async () => {
+    if (!planToDelete) return;
+    const id = planToDelete._id || (planToDelete as any).id;
+    if (!id) {
+      toast.error("Invalid plan id");
+      return;
     }
-    
-    setShowDeletePopup(false);
-    setPlanToDelete(null);
-    fetchData();
-  } catch (e: any) {
-    toast.error(e?.response?.data?.message || "Delete failed");
-  } finally {
-    setIsDeleting(false);
-  }
-};
+    setIsDeleting(true);
+    try {
+      await api.delete(`${endPointApi.deletePlan}/${id}`);
+      toast.success("Deleted successfully");
+
+      // Check if the deleted plan is the one being edited
+      if (editingId === id) {
+        resetForm(); // This will clear the form
+      }
+
+      setShowDeletePopup(false);
+      setPlanToDelete(null);
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Delete failed");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
@@ -167,7 +167,7 @@ export default function PlansPage() {
   };
 
   const deleteSelected = async () => {
-    if (!selected.length) { 
+    if (!selected.length) {
       toast.info("Select rows to delete");
       return;
     }
@@ -189,7 +189,7 @@ export default function PlansPage() {
 
   const columns: ColDef[] = [
     { field: "plan_type", headerName: "Plan Type", width: 160 },
-    { field: "months", headerName: "Months", width : 100 },
+    { field: "months", headerName: "Months", width: 100 },
     { field: "max_products", headerName: "Max Products", width: 100 },
     {
       field: "amount",
@@ -203,11 +203,12 @@ export default function PlansPage() {
       width: 100,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "popular", headerName: "Popular", width: 100, valueFormatter: (p)=> p.value ? '⭐ Yes' : 'No' },
+    { field: "popular", headerName: "Popular", width: 100, valueFormatter: (p) => p.value ? '⭐ Yes' : 'No' },
     { field: "description", headerName: "Description", width: 200 },
     {
       headerName: "Action",
       width: 140,
+      suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
       ),
@@ -228,13 +229,13 @@ export default function PlansPage() {
         </p> */}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 items-stretch" style={{ height: '770px' }}>
 
         {/* LEFT FORM */}
 
         <div className="lg:col-span-1">
 
-          <Card className="sticky top-16 border-slate-200">
+          <Card className="sticky top-16 border-slate-200 h-full flex flex-col">
 
             <CardHeader>
               <CardTitle>
@@ -251,123 +252,136 @@ export default function PlansPage() {
                   Plan Type
                 </label>
                 <input
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+                  className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.plan_type ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                  aria-invalid={!!errors.plan_type}
                   value={form.plan_type}
-                  onChange={(e) =>
-                    setForm({ ...form, plan_type: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setForm({ ...form, plan_type: v });
+                    if (errors.plan_type && v.trim()) setErrors(prev => ({ ...prev, plan_type: '' }));
+                  }}
                 />
+                {errors.plan_type ? (<p className="mt-1 text-xs text-red-600">{errors.plan_type}</p>) : null}
               </div>
 
               {/* Inputs */}
 
-               <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <label className="text-sm font-semibold text-slate-700">
-                            Months
-                          </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="99"
-                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                            value={form.months}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              // Allow empty string temporarily for better UX
-                              if (value === '') {
-                                setForm({ ...form, months: '' });
-                                return;
-                              }
-                              const numValue = Number(value);
-                              // Restrict to max 2 digits (1-99)
-                              if (!isNaN(numValue) && numValue >= 1 && numValue <= 99) {
-                                setForm({ ...form, months: numValue });
-                              }
-                            }}
-                            onBlur={(e) => {
-                              // Set default value if empty on blur
-                              if (e.target.value === '') {
-                                setForm({ ...form, months: 1 });
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-semibold text-slate-700">
-                            Max Products
-                          </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="9999"
-                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                            value={form.max_products}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              // Allow empty string temporarily for better UX
-                              if (value === '') {
-                                setForm({ ...form, max_products: '' });
-                                return;
-                              }
-                              const numValue = Number(value);
-                              // Restrict to max 4 digits (1-9999)
-                              if (!isNaN(numValue) && numValue >= 1 && numValue <= 9999) {
-                                setForm({ ...form, max_products: numValue });
-                              }
-                            }}
-                            onBlur={(e) => {
-                              // Set default value if empty on blur
-                              if (e.target.value === '') {
-                                setForm({ ...form, max_products: 1 });
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-semibold text-slate-700">
-                            Amount
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="999999"
-                            step="1"
-                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
-                            value={form.amount}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              // Allow empty string temporarily for better UX
-                              if (value === '') {
-                                setForm({ ...form, amount: '' });
-                                return;
-                              }
-                              const numValue = Number(value);
-                              // Restrict to max 6 digits (0-999999)
-                              if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
-                                setForm({ ...form, amount: numValue });
-                              }
-                            }}
-                            onBlur={(e) => {
-                              // Set default value if empty on blur
-                              if (e.target.value === '') {
-                                setForm({ ...form, amount: 0 });
-                              }
-                            }}
-                          />
-                        </div>
-              </div>
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Popular</label>
-                  <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <input
-                      type="checkbox"
-                      checked={!!form.popular}
-                      onChange={(e)=> setForm({ ...form, popular: e.target.checked })}
-                    />
-                    <span className="text-sm text-slate-700">⭐ Mark as popular (only one can be popular)</span>
-                  </div>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Months
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="99"
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.months ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    aria-invalid={!!errors.months}
+                    value={form.months}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string temporarily for better UX
+                      if (value === '') {
+                        setForm({ ...form, months: '' });
+                        return;
+                      }
+                      const numValue = Number(value);
+                      // Restrict to max 2 digits (1-99)
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 99) {
+                        setForm({ ...form, months: numValue });
+                        if (errors.months) setErrors(prev => ({ ...prev, months: '' }));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Set default value if empty on blur
+                      if (e.target.value === '') {
+                        setForm({ ...form, months: 1 });
+                      }
+                    }}
+                  />
+                  {errors.months ? (<p className="mt-1 text-xs text-red-600">{errors.months}</p>) : null}
                 </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Max Products
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="9999"
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.max_products ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    aria-invalid={!!errors.max_products}
+                    value={form.max_products}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string temporarily for better UX
+                      if (value === '') {
+                        setForm({ ...form, max_products: '' });
+                        return;
+                      }
+                      const numValue = Number(value);
+                      // Restrict to max 4 digits (1-9999)
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 9999) {
+                        setForm({ ...form, max_products: numValue });
+                        if (errors.max_products) setErrors(prev => ({ ...prev, max_products: '' }));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Set default value if empty on blur
+                      if (e.target.value === '') {
+                        setForm({ ...form, max_products: 1 });
+                      }
+                    }}
+                  />
+                  {errors.max_products ? (<p className="mt-1 text-xs text-red-600">{errors.max_products}</p>) : null}
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Amount
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="999999"
+                    step="1"
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.amount ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    aria-invalid={!!errors.amount}
+                    value={form.amount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string temporarily for better UX
+                      if (value === '') {
+                        setForm({ ...form, amount: '' });
+                        return;
+                      }
+                      const numValue = Number(value);
+                      // Restrict to max 6 digits (0-999999)
+                      if (!isNaN(numValue) && numValue >= 0 && numValue <= 999999) {
+                        setForm({ ...form, amount: numValue });
+                        if (errors.amount) setErrors(prev => ({ ...prev, amount: '' }));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Set default value if empty on blur
+                      if (e.target.value === '') {
+                        setForm({ ...form, amount: 0 });
+                      }
+                    }}
+                  />
+                  {errors.amount ? (<p className="mt-1 text-xs text-red-600">{errors.amount}</p>) : null}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Popular</label>
+                <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    checked={!!form.popular}
+                    onChange={(e) => setForm({ ...form, popular: e.target.checked })}
+                  />
+                  <span className="text-sm text-slate-700">⭐ Mark as popular (only one can be popular)</span>
+                </div>
+              </div>
 
               {/* Status */}
 
@@ -396,13 +410,17 @@ export default function PlansPage() {
                 </label>
 
                 <textarea
-                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2"
+                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                  aria-invalid={!!errors.description}
                   rows={3}
                   value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setForm({ ...form, description: v });
+                    if (errors.description && v.trim()) setErrors(prev => ({ ...prev, description: '' }));
+                  }}
                 />
+                {errors.description ? (<p className="mt-1 text-xs text-red-600">{errors.description}</p>) : null}
               </div>
 
               {/* Buttons */}
@@ -428,19 +446,16 @@ export default function PlansPage() {
         {/* TABLE */}
 
         <div className="lg:col-span-2">
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 overflow-hidden flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between ">
               <CardTitle>Plan List</CardTitle>
               <Button
-                size="sm"
+                size="md"
                 variant="destructive"
                 disabled={!selected.length || loading}
                 onClick={deleteSelected}
 
               >
-                {loading ? (
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                ) : null}
                 Delete Selected ({selected.length})
               </Button>
 
@@ -449,7 +464,7 @@ export default function PlansPage() {
             <CardContent className="p-0">
 
               <AgGridTable
-                columns={columns} 
+                columns={columns}
                 rowData={rows}
                 onSelectionChange={(sel: any[]) =>
                   setSelected(sel as Plan[])
@@ -457,6 +472,7 @@ export default function PlansPage() {
                 enableFilter={false}
                 enableSearch={false}
                 tableName="Plans"
+                gridHeight={700}
               />
 
             </CardContent>

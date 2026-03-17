@@ -37,6 +37,7 @@ interface AgGridTableProps {
   activeFilterCount?: number;
   onSelectionChange?: (selected: any[]) => void;
   loading?: boolean;
+  gridHeight?: number | string;
 }
 
 const AgGridTable: React.FC<AgGridTableProps> = ({
@@ -53,6 +54,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   activeFilterCount,
   onSelectionChange,
   loading = false,
+  gridHeight,
 }) => {
   const router = useRouter();
   const gridRef = useRef<any>(null);
@@ -112,6 +114,7 @@ const defaultColDef = useMemo<ColDef>(
       {
         headerName: "Action",
         width: 140,
+        suppressHeaderMenuButton: true,
         suppressSizeToFit: true,
         cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
         cellRenderer: (params: any) => {
@@ -181,7 +184,7 @@ const defaultColDef = useMemo<ColDef>(
 
   return (
      <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4 dark:text-gray-200 flex-shrink-0">
+      <div className="flex justify-between items-center  dark:text-gray-200 flex-shrink-0">
         <div className="flex items-center gap-3">
           {enableSearch && (
             <div className="relative">
@@ -227,7 +230,7 @@ const defaultColDef = useMemo<ColDef>(
 
       <div className="relative">
         {loading && <Loader type="section" />}
-        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: "660px" }}>
+        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: typeof gridHeight === 'number' ? `${gridHeight}px` : (gridHeight || "660px") }}>
           <AgGridReact
             rowHeight={40}
             ref={gridRef}

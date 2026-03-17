@@ -74,6 +74,8 @@ interface TreeDataItem {
   approval_status?: string;
   createdAt?: string;
   pending_count?: number;
+  approved_count?: number;
+  rejected_count?: number;
   product_count?: number;
   children?: TreeDataItem[];
   path?: string[];
@@ -106,10 +108,20 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
   if (props.data?.type !== "product") return null;
 
   const handleChange = async (val: string | string[]) => {
-    const status = Array.isArray(val) ? val[0] : val;
+    const next = (Array.isArray(val) ? val[0] : val) || '';
+    const nextStatus = String(next).toLowerCase();
+    const currentStatus = String(props.data?.approval_status || '').toLowerCase();
+
+    if (!nextStatus || nextStatus === currentStatus) {
+      return; // no change, avoid defaulting or redundant update
+    }
+
     setUpdating(true);
-    await onStatusChange(props.data.id, status);
-    setUpdating(false);
+    try {
+      await onStatusChange(props.data.id, nextStatus);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   // Style tag with unique class
@@ -133,19 +145,20 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
     <div onClick={(e) => e.stopPropagation()} className="w-40 mt-1">
       <div className={uniqueId}>
         <SearchableDropdown
+          key={`${props.data.id}-${String(props.data.approval_status || '').toLowerCase()}`}
           options={[
             { label: "Pending", value: "pending" },
             { label: "Approved", value: "approved" },
             { label: "Rejected", value: "rejected" },
           ]}
-          value={props.data.approval_status}
+          value={String(props.data.approval_status || '').toLowerCase()}
           onChange={handleChange}
           disabled={updating}
           placeholder="Select Status"
           usePortal={true}
           maxHeight="max-h-48"
           showClear={false}
-           buttonClassName="h-8 py-1"
+          buttonClassName="h-8 py-1"
         />
       </div>
     </div>
@@ -155,7 +168,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
 // Vendor group cell renderer - same as QuotesTreeTable
 const VendorGroupCellRenderer = (props: ICellRendererParams) => {
   const { data } = props;
-
+  console.log(data, "data");
   if (data.type === "vendor") {
     return (
       <div className="flex items-center gap-3 py-1">
@@ -166,10 +179,16 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
         </div>
         <div>
           <div className="text-sm font-medium text-gray-900">{data.name}</div>
-          <div className="text-xs text-gray-500">
-            {data.full_name} · {data.product_count} products
+          <div className="text-xs text-gray-500 flex items-center gap-2">
+            <span>{data.full_name} · {data.product_count} products</span>
             {data.pending_count > 0 && (
-              <span className="ml-2 text-amber-600">{data.pending_count} pending</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 font-medium">{data.pending_count} pending</span>
+            )}
+            {data.approved_count > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 font-medium">{data.approved_count} approved</span>
+            )}
+            {data.rejected_count > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-600 font-medium">{data.rejected_count} rejected</span>
             )}
           </div>
         </div>
@@ -206,7 +225,9 @@ export default function VendorProductTreeTable({
         name: vendor.business_name,
         full_name: vendor.full_name,
         type: "vendor",
-        pending_count: vendor.pendingCount,
+        pending_count: (vendor.products || []).filter(p => p.approval_status === "pending").length,
+        approved_count: (vendor.products || []).filter(p => p.approval_status === "approved").length,
+        rejected_count: (vendor.products || []).filter(p => p.approval_status === "rejected").length,
         product_count: vendor.products?.length || 0,
         path: vendorPath,
         children: (vendor.products || []).map((product) => ({
@@ -271,7 +292,7 @@ export default function VendorProductTreeTable({
       field: "category_name",
       valueGetter: (p: ValueGetterParams<TreeDataItem, string>) =>
         p.data?.type === "product" ? p.data.category_name || "" : "",
-      flex: 1,
+      minWidth: 100,
     },
     {
       headerName: "Price",
@@ -280,14 +301,14 @@ export default function VendorProductTreeTable({
         p.data?.type === "product" ? p.data.price : undefined,
       valueFormatter: (p: ValueFormatterParams<TreeDataItem, number>) =>
         p.value ? `₹${p.value}` : "",
-      width: 120,
+      minWidth: 100,
       cellStyle: () => ({ fontWeight: "bold", color: "#059669" }),
     },
     {
       headerName: "Status",
       field: "approval_status",
       cellRenderer: StatusCellRenderer,
-      width: 150,
+      width: 100,
     },
     {
       headerName: "Created",
@@ -296,12 +317,13 @@ export default function VendorProductTreeTable({
         if (p.data?.type !== "product") return "";
         return p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "";
       },
-      width: 130,
+      width: 100,
     },
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
-      width: 200,
+      suppressHeaderMenuButton: true,
+      width: 100,
     },
   ], []);
 
@@ -322,8 +344,7 @@ export default function VendorProductTreeTable({
       innerRenderer: VendorGroupCellRenderer,
       checkbox: true,
     },
-    flex: 2,
-    minWidth: 350,
+    minWidth: 500,
   }), []);
 
   const rowSelection = useMemo<any>(() => ({

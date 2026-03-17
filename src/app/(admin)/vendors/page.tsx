@@ -99,18 +99,18 @@ export default function VendorsPage() {
         {
             headerName: "Business Name",
             valueGetter: p => p.data?.Identity?.business_name || p.data?.business_name || 'N/A',
-            width: 350,
-             cellStyle: { color: "#475569" }
+            width: 268,
+            cellStyle: { color: "#475569" }
         },
         {
             headerName: "Email",
             valueGetter: p => p.data?.ContactDetails?.email || p.data?.email || 'N/A',
-            width: 400,
+            width: 300,
         },
         {
             headerName: "Phone",
             valueGetter: p => p.data?.ContactDetails?.mobile || p.data?.mobile || 'N/A',
-            width: 200,
+            width: 130,
         },
         {
             headerName: "KYC Progress",
@@ -146,10 +146,11 @@ export default function VendorsPage() {
             )
         },
         {
-            headerName: "Action / Update Status",
-            width: 220,
+            headerName: "Action",
+            width: 250,
             sortable: false,
             filter: false,
+            suppressHeaderMenuButton: true,
             cellRenderer: (params: any) => {
                 const kycId = params.data.id;
                 const vendorId = params.data.ContactDetails?.vendor_id;
@@ -158,14 +159,14 @@ export default function VendorsPage() {
                 return (
                     <div className="flex items-center gap-2 h-full">
                         <button
-                          type="button"
-                          onClick={() => { setDetailsRow(params.data); setShowDetails(true); }}
-                          className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50"
-                          title="View details"
+                            type="button"
+                            onClick={() => { setDetailsRow(params.data); setShowDetails(true); }}
+                            className="p-1.5 mt-1 w-12 flex justify-center rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
+                            title="View details"
                         >
-                          <Eye size={16} className="text-gray-600" />
+                            <Eye size={16} className="text-gray-600" />
                         </button>
-                        <div className="w-full">
+                        <div className="w-[100%]">
                             <SearchableDropdown
                                 options={[
                                     { label: "Pending", value: "pending" },
@@ -188,6 +189,7 @@ export default function VendorsPage() {
                                 maxHeight="max-h-48"
                                 showClear={false}
                                 buttonClassName="h-8 py-1"
+
                             />
                         </div>
                         {isUpdating === kycId && <Loader className="text-indigo-600" />}
@@ -198,10 +200,10 @@ export default function VendorsPage() {
     ];
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-4 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900">Vendor Requests</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-3">Vendor Requests</h2>
                 </div>
                 {/* <div className="flex items-center gap-3">
                     <Button
@@ -232,15 +234,16 @@ export default function VendorsPage() {
                                 </div>
                             ) : (
                                 <>
-                                  <AgGridTable
-                                    rowData={rowData}
-                                    columns={columnDefs as ColDef<any>[]}
-                                  />
-                                  {showDetails && detailsRow && (
-                                    <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />
-                                  )}
+                                    <AgGridTable
+                                        rowData={rowData}
+                                        columns={columnDefs as ColDef<any>[]}
+                                        gridHeight={790}
+                                    />
+                                    {showDetails && detailsRow && (
+                                        <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />
+                                    )}
                                 </>
-                            )}  
+                            )}
                         </div>
                     </CardContent>
                 </Card>
