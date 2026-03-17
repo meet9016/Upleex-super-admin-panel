@@ -123,7 +123,7 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "categories_name",
       headerName: "Category",
-      width: 400,
+      width: 500,
       cellRenderer: (params: any) => {
         const imageUrl = getImageUrl(params.data.image);
         return (
@@ -167,13 +167,13 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "created_at",
       headerName: "Created",
-      width: 200,
+      width: 250,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      width: 200,
+      width: 240,
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => (

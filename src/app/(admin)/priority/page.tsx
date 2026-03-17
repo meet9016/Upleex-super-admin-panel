@@ -11,6 +11,7 @@ import { Loader2, Plus } from "lucide-react";
 import ActionButtons from "@/components/common/ActionButtons";
 import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 type PPlan = {
   _id?: string;
@@ -90,8 +91,16 @@ export default function PriorityPlansPage() {
   };
 
   const savePlan = async () => {
+    const nameOk = String(form.name || '').trim().length > 0;
+    const monthlyOk = form.monthly_price !== '' && Number(form.monthly_price) >= 0;
+    const yearlyOk = form.yearly_price !== '' && Number(form.yearly_price) >= 0;
+    const slotsOk = form.product_slots !== '' && Number(form.product_slots) >= 1;
+    if (!nameOk || !monthlyOk || !yearlyOk || !slotsOk) {
+      toast.error("Please fill all required fields before creating a priority plan");
+      return;
+    }
     try {
-      const payload = { ...form };
+      const payload = { ...form, name: String(form.name).trim() };
       if (editingId) {
         await api.put(`${endPointApi.updatePriorityPlan}/${editingId}`, payload);
         toast.success("Priority plan updated");
@@ -202,10 +211,10 @@ export default function PriorityPlansPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-900">Priority Plans (Visibility & Placement)</h2>
-        <Button variant="destructive" size="sm" disabled={!selected.length || loading} onClick={deleteSelected}>
+        {/* <Button variant="destructive" size="sm" disabled={!selected.length || loading} onClick={deleteSelected}>
           {loading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
           Delete Selected ({selected.length})
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -434,7 +443,26 @@ export default function PriorityPlansPage() {
 
         {/* Table Section */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2">
+          <Card className="border-slate-200">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Plan List</CardTitle>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={!selected.length || loading}
+                onClick={deleteSelected}
+
+              >
+                {loading ? (
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                ) : null}
+                Delete Selected ({selected.length})
+              </Button>
+
+            </CardHeader>
+
+            <CardContent className="p-0">
+          {/* <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2"> */}
             <AgGridTable
               columns={columns}
               rowData={rows}
@@ -443,7 +471,9 @@ export default function PriorityPlansPage() {
               enableSearch={false}
               tableName="Priority Plans"
             />
-          </div>
+          {/* </div> */}
+          </CardContent>
+           </Card>
         </div>
       </div>
     </div>

@@ -118,8 +118,9 @@ export default function ListingPlanPurchasesPage() {
           if (key === 'amount') {
             params.append('amount', String(Number(value)));
           } else if (key === 'start_month' || key === 'expire_month') {
-            // Send month in YYYY-MM format as the backend expects
-            params.append(key, String(value));
+            const v = String(value);
+            const monthPart = v.length >= 7 ? v.slice(0, 7) : v; // YYYY-MM from YYYY-MM-DD
+            params.append(key, monthPart);
           } else {
             params.append(key, String(value));
           }
@@ -315,7 +316,17 @@ export default function ListingPlanPurchasesPage() {
       <div className="lg:col-span-2">
         <Card className="border-slate-200">
           <CardHeader className="flex flex-row items-center justify-end">
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between w-full">
+               <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search purchases..."
+                    value={searchText}
+                    onChange={handleSearchChange}
+                    className="pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
+                  />
+                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                </div>
               {/* All three elements at the end */}
               <div className="flex items-center gap-3">
                 {/* Delete Selected Button */}
@@ -332,16 +343,7 @@ export default function ListingPlanPurchasesPage() {
                 </Button>
 
                 {/* Search Input */}
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search purchases..."
-                    value={searchText}
-                    onChange={handleSearchChange}
-                    className="pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
-                  />
-                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                </div>
+               
 
                 {/* Filter Button */}
                 <div className="relative">
