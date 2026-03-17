@@ -481,7 +481,7 @@ const handleConfirmDelete = async () => {
   const columnDefs: ColDef<BlogRow>[] = [
     {
       headerName: "Blog Post",
-      width: 600,
+      minWidth: 600,
       cellRenderer: (params: { data: BlogRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -506,7 +506,7 @@ const handleConfirmDelete = async () => {
     {
       field: "blog_date",
       headerName: "Date",
-      width: 200,
+      minWidth: 200,
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full gap-1.5">
           <span className="text-sm text-slate-600">
@@ -517,7 +517,7 @@ const handleConfirmDelete = async () => {
     },
     {
       headerName: "Action",
-      width: 200,
+      minWidth: 200,
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

@@ -380,7 +380,7 @@ const handleConfirmDelete = async () => {
     {
       field: "name",
       headerName: "Sub Category",
-      width: 400,
+      minWidth : 400,
       cellRenderer: (params: { data: SubCategoryRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -412,7 +412,7 @@ const handleConfirmDelete = async () => {
     {
       field: "parent",
       headerName: "Category",
-      width: 200,
+      minWidth: 200,
       cellRenderer: (params: { data: SubCategoryRow }) => (
         <div className="flex items-center h-full">
           <span className="text-sm text-slate-600">{params.data.parent}</span>
@@ -422,13 +422,13 @@ const handleConfirmDelete = async () => {
     {
       field: "created_at",
       headerName: "Created",
-      width: 190,
+      minWidth: 190,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      width: 200,
+      minWidth: 200,
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

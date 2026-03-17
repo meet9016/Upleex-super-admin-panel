@@ -12,7 +12,6 @@ interface Vendor {
   vendor_id: string;
   business_name: string;
   full_name: string;
-  pendingCount: number;
   products?: Product[];
 }
 
@@ -66,7 +65,14 @@ export default function VendorProductApprovalPage() {
           if (!vendor.vendor_id) return { ...vendor, products: [] };
           try {
             const productRes = await api.get(`${endPointApi.getVendorProducts}/${vendor.vendor_id}`);
-            return { ...vendor, products: productRes.data?.data || [] };
+            const payload = productRes.data?.data;
+            const products = Array.isArray(payload) ? payload : payload?.products || [];
+            const counts = Array.isArray(payload) ? null : payload?.counts || null;
+            return {
+              ...vendor,
+              products,
+              ...(counts ? { pending_count: counts.pending, approved_count: counts.approved, rejected_count: counts.rejected } : {})
+            } as any;
           } catch (error) {
             console.error(`Failed to fetch products for vendor ${vendor.vendor_id}:`, error);
             return { ...vendor, products: [] };
@@ -108,10 +114,25 @@ export default function VendorProductApprovalPage() {
   const handleStatusChange = async (productId: string, status: string) => {
     try {
       setApproving(true);
-      await api.put(`${endPointApi.approveProduct}/${productId}`, { approval_status: status });
+      const res = await api.put(`${endPointApi.approveProduct}/${productId}`, { approval_status: status });
+      const vid = res?.data?.vendor_id;
+      const counts = res?.data?.counts;
+      setVendors(prev => prev.map(v => {
+        const updated = { ...v } as any;
+        if (vid && (v as any).vendor_id === vid) {
+          if (counts) {
+            updated.pending_count = counts.pending;
+            updated.approved_count = counts.approved;
+            updated.rejected_count = counts.rejected;
+          }
+        }
+        updated.products = (v.products || []).map(p => {
+          const pid = String((p as any).id || (p as any)._id || '');
+          return pid === String(productId) ? { ...p, approval_status: status } : p;
+        });
+        return updated;
+      }));
       toast.success(`Product ${status}`);
-      // Refresh the current page after status change
-      await fetchVendorsWithProducts(page);
     } catch (error) {
       console.error('Failed to update status:', error);
       toast.error("Failed to update status");
@@ -127,9 +148,26 @@ export default function VendorProductApprovalPage() {
     }
     try {
       setApproving(true);
-      await api.post(endPointApi.bulkApproveProducts, { product_ids: productIds });
+      const res = await api.post(endPointApi.bulkApproveProducts, { product_ids: productIds });
+      const map = res?.data?.countsByVendor || {};
+      setVendors(prev => prev.map(v => {
+        const vid = (v as any).vendor_id;
+        const counts = map[vid];
+        const updated = { ...v } as any;
+        if (counts) {
+          updated.pending_count = counts.pending;
+          updated.approved_count = counts.approved;
+          updated.rejected_count = counts.rejected;
+        }
+        if ((v.products || []).length) {
+          updated.products = (v.products || []).map(p => {
+            const pid = String((p as any).id || (p as any)._id || '');
+            return productIds.includes(pid) ? { ...p, approval_status: 'approved' } : p;
+          });
+        }
+        return updated;
+      }));
       toast.success(`${productIds.length} products approved`);
-      await fetchVendorsWithProducts(page);
     } catch (error) {
       console.error('Failed to bulk approve:', error);
       toast.error("Failed to approve");
@@ -145,9 +183,26 @@ export default function VendorProductApprovalPage() {
     }
     try {
       setRejecting(true);
-      await api.post(endPointApi.bulkRejectProducts, { product_ids: productIds });
+      const res = await api.post(endPointApi.bulkRejectProducts, { product_ids: productIds });
+      const map = res?.data?.countsByVendor || {};
+      setVendors(prev => prev.map(v => {
+        const vid = (v as any).vendor_id;
+        const counts = map[vid];
+        const updated = { ...v } as any;
+        if (counts) {
+          updated.pending_count = counts.pending;
+          updated.approved_count = counts.approved;
+          updated.rejected_count = counts.rejected;
+        }
+        if ((v.products || []).length) {
+          updated.products = (v.products || []).map(p => {
+            const pid = String((p as any).id || (p as any)._id || '');
+            return productIds.includes(pid) ? { ...p, approval_status: 'rejected' } : p;
+          });
+        }
+        return updated;
+      }));
       toast.success(`${productIds.length} products rejected`);
-      await fetchVendorsWithProducts(page);
     } catch (error) {
       console.error('Failed to bulk reject:', error);
       toast.error("Failed to reject");

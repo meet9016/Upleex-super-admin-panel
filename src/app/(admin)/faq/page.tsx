@@ -281,18 +281,18 @@ const handleConfirmDelete = async () => {
     {
       field: "question",
       headerName: "Question",
-      width: 350,
+      minWidth: 350,
       cellStyle: { fontWeight: "600", color: "#1e293b", display: 'flex', alignItems: 'center' }
     },
     {
       field: "answer",
       headerName: "Answer",
-      width: 490,
+      minWidth: 490,
       cellStyle: { color: "#64748b", fontSize: "0.8rem", display: 'flex', alignItems: 'center' }
     },
     {
       headerName: "Action",
-      width: 150,
+      minWidth: 150,
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

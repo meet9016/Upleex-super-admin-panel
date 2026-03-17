@@ -93,28 +93,28 @@ export default function VendorsPage() {
         {
             headerName: "Vendor Name",
             valueGetter: p => p.data?.ContactDetails?.full_name || p.data?.full_name || 'N/A',
-            width: 250,
+            minWidth: 250,
             cellStyle: { fontWeight: "600", color: "#1e293b" }
         },
         {
             headerName: "Business Name",
             valueGetter: p => p.data?.Identity?.business_name || p.data?.business_name || 'N/A',
-            width: 268,
+            minWidth: 268,
             cellStyle: { color: "#475569" }
         },
         {
             headerName: "Email",
             valueGetter: p => p.data?.ContactDetails?.email || p.data?.email || 'N/A',
-            width: 300,
+            minWidth: 300,
         },
         {
             headerName: "Phone",
             valueGetter: p => p.data?.ContactDetails?.mobile || p.data?.mobile || 'N/A',
-            width: 130,
+            minWidth: 130,
         },
         {
             headerName: "KYC Progress",
-            width: 200,
+            minWidth: 200,
             cellRenderer: (params: any) => {
                 const completed = params.data.completed_pages?.length || 0;
                 const total = 5;
@@ -218,7 +218,7 @@ export default function VendorsPage() {
             </div>
 
             <div className="grid gap-6">
-                <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
+                <Card className="border-none rounded-none shadow-xl shadow-slate-200/50 overflow-hidden">
                     <CardContent className="p-0">
                         <div className="h-full w-full relative">
                             {isLoading ? (
