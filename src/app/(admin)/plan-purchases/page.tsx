@@ -305,6 +305,7 @@ export default function ListingPlanPurchasesPage() {
     {
       headerName: "Action",
       minWidth: 120,
+      suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons showEdit={false} onDelete={() => deleteOne(params.data)} />
       ),
@@ -317,40 +318,37 @@ export default function ListingPlanPurchasesPage() {
         <Card className="border-slate-200">
           <CardHeader className="flex flex-row items-center justify-end">
             <div className="flex items-center justify-between w-full">
-               <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search purchases..."
-                    value={searchText}
-                    onChange={handleSearchChange}
-                    className="pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
-                  />
-                  <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search purchases..."
+                  value={searchText}
+                  onChange={handleSearchChange}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
+                />
+                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              </div>
               {/* All three elements at the end */}
               <div className="flex items-center gap-3">
                 {/* Delete Selected Button */}
                 <Button
-                  size="sm"
+                  size="md"
                   variant="destructive"
-                  disabled={!selected.length || loading}
+                  disabled={!selected.length}
                   onClick={deleteSelected}
                 >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  ) : null}
                   Delete Selected ({selected.length})
                 </Button>
 
                 {/* Search Input */}
-               
+
 
                 {/* Filter Button */}
                 <div className="relative">
                   <button
                     ref={filterButtonRef}
                     onClick={openFilterModal}
-                    className="px-4 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative text-sm"
+                    className="px-4 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative text-sm"
                   >
                     <CiFilter size={20} />
                     Filter
@@ -460,6 +458,7 @@ export default function ListingPlanPurchasesPage() {
               onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
               filter={false}
               tableName="Purchases"
+              gridHeight={750}
             />
           </CardContent>
         </Card>

@@ -124,7 +124,7 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 
   const styles = getStatusStyles(status);
   const label = getStatusLabel(status);
-  const Icon = label === "Approved"  ? CheckCircle : label === "Rejected" ? XCircle : Clock;
+  const Icon = label === "Approved" ? CheckCircle : label === "Rejected" ? XCircle : Clock;
 
   return (
     <div className="flex items-center h-full">
@@ -271,7 +271,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.category_name || '' : '';
       },
       flex: 1,
-       cellStyle: () => ({ textAlign: 'left' }),
+      cellStyle: () => ({ textAlign: 'left' }),
     },
     {
       headerName: "Sub Category",
@@ -280,7 +280,7 @@ export default function QuotesTreeTable({
         return params.data?.type === 'quote' ? params.data.sub_category_name || '' : '';
       },
       flex: 1,
-       cellStyle: () => ({ textAlign: 'left' }),
+      cellStyle: () => ({ textAlign: 'left' }),
     },
     {
       headerName: "Product Type",
@@ -342,6 +342,7 @@ export default function QuotesTreeTable({
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
+      suppressHeaderMenuButton: true,
       suppressSizeToFit: true,
       width: 100,
     }
@@ -395,7 +396,7 @@ export default function QuotesTreeTable({
   }), [onViewDetails]);
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-2 h-full flex flex-col">
       <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden flex-1">
         <AgGridReact
           ref={gridRef}

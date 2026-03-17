@@ -293,6 +293,7 @@ const handleConfirmDelete = async () => {
     {
       headerName: "Action",
       width: 150,
+      suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
       cellRenderer: (params: { data: FAQRow }) => (
@@ -403,7 +404,7 @@ const handleConfirmDelete = async () => {
                 <div className="flex items-center gap-2">
                    <Button
                     variant="destructive"
-                    size="sm"
+                    size="md"
                     disabled={selectedRows.length === 0}
                     onClick={async () => {
                       if (selectedRows.length === 0) return;
@@ -441,7 +442,7 @@ const handleConfirmDelete = async () => {
                       placeholder="Search FAQs..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 text-sm"
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 text-sm"
                     />
                     <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     {searchText && (
@@ -495,6 +496,7 @@ const handleConfirmDelete = async () => {
                   }}
                   enableSearch={false} // Since you have your own search
                   enableFilter={false}
+                  gridHeight={680}
                 />
               )}
             </CardContent>

@@ -174,6 +174,7 @@ if (res?.data?.success && res?.data?.data) {
     {
       headerName: "Action",
       width: 240,
+      suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
       cellRenderer: (params: any) => (
@@ -363,7 +364,7 @@ const handleConfirmDelete = async () => {
     : null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 animate-in fade-in duration-500">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Categories</h2>
       </div>
@@ -535,7 +536,7 @@ const handleConfirmDelete = async () => {
                 <div className="flex items-center gap-3">
                    <Button
                     variant="destructive"
-                    size="sm"
+                    size="md"
                     disabled={selectedRows.length === 0}
                     onClick={async () => {
                       if (selectedRows.length === 0) return;
@@ -574,7 +575,7 @@ const handleConfirmDelete = async () => {
                       placeholder="Search categories..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
                     />
                     <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     {searchText && (
@@ -628,6 +629,7 @@ const handleConfirmDelete = async () => {
                   }}
                   enableSearch={false} // Since you have your own search
                   enableFilter={false}
+                  gridHeight={700}
                 />
               )}
             </CardContent>
