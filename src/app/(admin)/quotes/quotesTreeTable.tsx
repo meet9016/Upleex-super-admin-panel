@@ -296,7 +296,7 @@ export default function QuotesTreeTable({
       valueGetter: (params: ValueGetterParams<TreeDataItem, number>) => {
         return params.data?.type === 'quote' ? params.data.quantity : undefined;
       },
-      width: 100,
+      minWidth: 100,
       cellStyle: () => ({ textAlign: 'left' }),
     },
     {
@@ -305,7 +305,7 @@ export default function QuotesTreeTable({
       valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
         return params.data?.type === 'quote' ? params.data.formattedPrice : '';
       },
-      width: 150,
+      minWidth: 150,
       cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'left' }),
     },
     {
@@ -314,7 +314,7 @@ export default function QuotesTreeTable({
       valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
         return params.data?.type === 'quote' ? params.data.displayDates : '';
       },
-      width: 200,
+      minWidth: 200,
     },
     {
       headerName: "Month",
@@ -322,13 +322,13 @@ export default function QuotesTreeTable({
       valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
         return params.data?.type === 'quote' ? params.data.monthName : '';
       },
-      width: 120,
+      minWidth: 120,
     },
     {
       headerName: "Status",
       field: "status",
       cellRenderer: StatusCellRenderer,
-      width: 150,
+      minWidth: 150,
     },
     {
       headerName: "Created",
@@ -337,14 +337,14 @@ export default function QuotesTreeTable({
         if (params.data?.type !== 'quote') return '';
         return params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
       },
-      width: 120,
+      minWidth: 120,
     },
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
       suppressHeaderMenuButton: true,
       suppressSizeToFit: true,
-      width: 100,
+      minWidth: 100,
     }
   ], []);
 
@@ -397,7 +397,7 @@ export default function QuotesTreeTable({
 
   return (
     <div className="space-y-2 h-full flex flex-col">
-      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden flex-1">
+      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden rounded-none flex-1">
         <AgGridReact
           ref={gridRef}
           rowData={rowData}

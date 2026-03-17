@@ -182,29 +182,29 @@ export default function PriorityPlansPage() {
   };
 
   const columns: ColDef[] = [
-    { field: "name", headerName: "Name", width: 160 },
-    { field: "monthly_price", headerName: "Monthly", width: 100, valueFormatter: (p) => `₹${p.value}` },
-    { field: "yearly_price", headerName: "Yearly", width: 100, valueFormatter: (p) => `₹${p.value}` },
-    { field: "product_slots", headerName: "Slots", width: 100 },
+    { field: "name", headerName: "Name", minWidth: 160 },
+    { field: "monthly_price", headerName: "Monthly", minWidth: 100, valueFormatter: (p) => `₹${p.value}` },
+    { field: "yearly_price", headerName: "Yearly", minWidth: 100, valueFormatter: (p) => `₹${p.value}` },
+    { field: "product_slots", headerName: "Slots", minWidth: 100 },
     {
       field: "status",
       headerName: "Status",
-      width: 120,
+      minWidth: 120,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "addon_available_for_yearly", headerName: "Annual Add-on", width: 100, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
-    { field: "addon_price_per_year", headerName: "Add-on Price", width: 100, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
-    { field: "addon_max_slots", headerName: "Add-on Slots", width: 100 },
+    { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth : 100, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
+    { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 100, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
+    { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 100 },
     {
       field: "is_popular",
       headerName: "Popular",
-      width: 80,
+      minWidth: 80,
       cellRenderer: PopularCellRenderer,
       cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     },
     {
       headerName: "Action",
-      width: 140,
+      minWidth: 140,
       suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />

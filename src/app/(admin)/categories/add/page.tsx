@@ -123,7 +123,7 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "categories_name",
       headerName: "Category",
-      width: 500,
+      minWidth: 500,
       cellRenderer: (params: any) => {
         const imageUrl = getImageUrl(params.data.image);
         return (
@@ -159,7 +159,7 @@ if (res?.data?.success && res?.data?.data) {
     // {
     //   field: "subcategories",
     //   headerName: "Sub Categories",
-    //   width: 130,
+    //   minWidth: 130,
     //   valueGetter: (params) => params.data?.subcategories?.length || 0,
     //   cellStyle: { textAlign: "center" }
     // },
@@ -167,13 +167,13 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "created_at",
       headerName: "Created",
-      width: 250,
+      minWidth: 250,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      width: 240,
+      minWidth: 240,
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

@@ -60,7 +60,6 @@ interface Vendor {
   vendor_id?: string;
   business_name: string;
   full_name: string;
-  pendingCount: number;
   products?: Product[];
 }
 
@@ -165,10 +164,31 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
   );
 };
 
-// Vendor group cell renderer - same as QuotesTreeTable
+// Vendor group cell renderer - reads live counts from context.vendorMap
 const VendorGroupCellRenderer = (props: ICellRendererParams) => {
-  const { data } = props;
-  console.log(data, "data");
+  const { data, context } = props;
+  const [counts, setCounts] = useState({
+    pending_count: data.pending_count ?? 0,
+    approved_count: data.approved_count ?? 0,
+    rejected_count: data.rejected_count ?? 0,
+  });
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const map = (e as CustomEvent).detail;
+      const live = map?.[data.id];
+      if (live) {
+        setCounts({
+          pending_count: (live as any).pending_count ?? 0,
+          approved_count: (live as any).approved_count ?? 0,
+          rejected_count: (live as any).rejected_count ?? 0,
+        });
+      }
+    };
+    window.addEventListener("vendor-counts-updated", handler);
+    return () => window.removeEventListener("vendor-counts-updated", handler);
+  }, [data.id]);
+
   if (data.type === "vendor") {
     return (
       <div className="flex items-center gap-3 py-1">
@@ -181,14 +201,14 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
           <div className="text-sm font-medium text-gray-900">{data.name}</div>
           <div className="text-xs text-gray-500 flex items-center gap-2">
             <span>{data.full_name} · {data.product_count} products</span>
-            {data.pending_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 font-medium">{data.pending_count} pending</span>
+            {counts.pending_count > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 font-medium">{counts.pending_count} pending</span>
             )}
-            {data.approved_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 font-medium">{data.approved_count} approved</span>
+            {counts.approved_count > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 font-medium">{counts.approved_count} approved</span>
             )}
-            {data.rejected_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-600 font-medium">{data.rejected_count} rejected</span>
+            {counts.rejected_count > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-600 font-medium">{counts.rejected_count} rejected</span>
             )}
           </div>
         </div>
@@ -217,20 +237,22 @@ export default function VendorProductTreeTable({
   const [rejectableCount, setRejectableCount] = useState(0);
 
 
-  const rowData: TreeDataItem[] = useMemo(() => {
-    return vendors.map((vendor) => {
+  const buildRowData = (vendorList: Vendor[]): TreeDataItem[] =>
+    vendorList.map((vendor) => {
+      const v = vendor as any;
       const vendorPath = [vendor._id];
+      const products = vendor.products || [];
       return {
         id: vendor._id,
         name: vendor.business_name,
         full_name: vendor.full_name,
-        type: "vendor",
-        pending_count: (vendor.products || []).filter(p => p.approval_status === "pending").length,
-        approved_count: (vendor.products || []).filter(p => p.approval_status === "approved").length,
-        rejected_count: (vendor.products || []).filter(p => p.approval_status === "rejected").length,
-        product_count: vendor.products?.length || 0,
+        type: "vendor" as const,
+        pending_count: v.pending_count ?? 0,
+        approved_count: v.approved_count ?? 0,
+        rejected_count: v.rejected_count ?? 0,
+        product_count: products.length,
         path: vendorPath,
-        children: (vendor.products || []).map((product) => ({
+        children: products.map((product) => ({
           id: product.id || product._id || "",
           name: product.product_name,
           type: "product" as const,
@@ -242,6 +264,11 @@ export default function VendorProductTreeTable({
         })),
       };
     });
+
+  const [rowData, setRowData] = useState<TreeDataItem[]>(() => buildRowData(vendors));
+
+  useEffect(() => {
+    setRowData(buildRowData(vendors));
   }, [vendors]);
 
   const handleBulkApprove = useCallback(() => {
@@ -308,7 +335,7 @@ export default function VendorProductTreeTable({
       headerName: "Status",
       field: "approval_status",
       cellRenderer: StatusCellRenderer,
-      width: 100,
+      minWidth: 100,
     },
     {
       headerName: "Created",
@@ -317,13 +344,13 @@ export default function VendorProductTreeTable({
         if (p.data?.type !== "product") return "";
         return p.value ? new Date(p.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "";
       },
-      width: 100,
+      minWidth: 100,
     },
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
       suppressHeaderMenuButton: true,
-      width: 100,
+      minWidth: 100,
     },
   ], []);
 
@@ -356,7 +383,17 @@ export default function VendorProductTreeTable({
   const getRowId = useCallback((params: any) =>
     params.data.type === "vendor" ? `vendor-${params.data.id}` : `product-${params.data.id}`, []);
 
-  const context = useMemo(() => ({ onStatusChange }), [onStatusChange]);
+  const vendorMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    vendors.forEach((v) => { map[(v as any)._id] = v; });
+    return map;
+  }, [vendors]);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("vendor-counts-updated", { detail: vendorMap }));
+  }, [vendorMap]);
+
+  const context = useMemo(() => ({ onStatusChange, vendorMap }), [onStatusChange, vendorMap]);
 
   return (
     <div className="space-y-4">

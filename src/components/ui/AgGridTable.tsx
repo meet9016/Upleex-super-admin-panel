@@ -83,8 +83,7 @@ const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
       resizable: true,
-      suppressMenuHide: true,
-      menuTabs: ['filterMenuTab'],
+      suppressHeaderMenuButton: true,
       cellStyle: {
         display: 'flex',
         alignItems: 'center',

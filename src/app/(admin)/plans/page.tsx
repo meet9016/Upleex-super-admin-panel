@@ -188,26 +188,26 @@ export default function PlansPage() {
   };
 
   const columns: ColDef[] = [
-    { field: "plan_type", headerName: "Plan Type", width: 160 },
-    { field: "months", headerName: "Months", width: 100 },
-    { field: "max_products", headerName: "Max Products", width: 100 },
+    { field: "plan_type", headerName: "Plan Type", minWidth: 160 },
+    { field: "months", headerName: "Months", minWidth: 100 },
+    { field: "max_products", headerName: "Max Products", minWidth: 100 },
     {
       field: "amount",
       headerName: "Amount",
-      width: 100,
+      minWidth: 100,
       valueFormatter: (p) => `₹${p.value}`,
     },
     {
       field: "status",
       headerName: "Status",
-      width: 100,
+      minWidth: 100,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "popular", headerName: "Popular", width: 100, valueFormatter: (p) => p.value ? '⭐ Yes' : 'No' },
-    { field: "description", headerName: "Description", width: 200 },
+    { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p) => p.value ? '⭐ Yes' : 'No' },
+    { field: "description", headerName: "Description", minWidth: 200 },
     {
       headerName: "Action",
-      width: 140,
+      minWidth: 140,
       suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
@@ -217,7 +217,6 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-
       {/* TITLE */}
 
       <div>
