@@ -508,11 +508,7 @@ const handleConfirmDelete = async () => {
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
               </div>
-              <CardDescription>
-                {editingSubCategory
-                  ? "Update the selected sub-category"
-                  : "Link a new sub-category to a parent."}
-              </CardDescription>
+          
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">

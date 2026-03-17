@@ -174,12 +174,10 @@ export default function VendorProductApprovalPage() {
   }, [page, hasMore, loadingMore, loading]);
 
   return (
-    <div className="p-6">
+    <div className="p-1">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Product Approval</h1>
-        <p className="text-sm text-gray-500 mt-1">
-         Manage vendor product approvals
-        </p>
+       
       </div>
 
       <div className="bg-white rounded-lg">

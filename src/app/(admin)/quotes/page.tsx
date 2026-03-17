@@ -80,10 +80,10 @@ export default function QuotesPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Vendor Quotes</h2>
-                        <p className="text-sm text-slate-500 font-medium">
+                        <h2 className="text-3xl font-bold tracking-tight text-slate-900 ">Vendor Quotes</h2>
+                        {/* <p className="text-sm text-slate-500 font-medium">
                             Total {totalQuotes} approved quotes found across all vendors
-                        </p>
+                        </p> */}
                     </div>
                 </div>
             </div>

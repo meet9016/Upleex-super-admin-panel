@@ -78,9 +78,18 @@ export default function PlansPage() {
   };
 
   const savePlan = async () => {
+    // Client-side validation to avoid empty submissions
+    const typeOk = String(form.plan_type || '').trim().length > 0;
+    const monthsOk = form.months !== '' && Number(form.months) >= 1;
+    const maxOk = form.max_products !== '' && Number(form.max_products) >= 1;
+    const amountOk = form.amount !== '' && Number(form.amount) >= 0;
+    if (!typeOk || !monthsOk || !maxOk || !amountOk) {
+      toast.error("Please fill all required fields before creating a plan");
+      return;
+    }
     try {
       const payload = {
-        plan_type: form.plan_type,
+        plan_type: String(form.plan_type).trim(),
         months: Number(form.months),
         max_products: Number(form.max_products),
         amount: Number(form.amount),
@@ -214,9 +223,9 @@ export default function PlansPage() {
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">
           Plan Management
         </h2>
-        <p className="text-sm text-slate-500 mt-1">
+        {/* <p className="text-sm text-slate-500 mt-1">
           Manage subscription plans and pricing
-        </p>
+        </p> */}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -420,7 +429,7 @@ export default function PlansPage() {
 
         <div className="lg:col-span-2">
           <Card className="border-slate-200">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between ">
               <CardTitle>Plan List</CardTitle>
               <Button
                 size="sm"
