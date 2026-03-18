@@ -204,9 +204,14 @@ export default function PriorityPlansPage() {
     },
     {
       headerName: "Action",
-      minWidth: 140,
+      width: 100,
+      minWidth: 100,
+      maxWidth: 100,
       pinned: "right",
       suppressHeaderMenuButton: true,
+      sortable: false,
+      filter: false,
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
       ),

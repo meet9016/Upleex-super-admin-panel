@@ -206,6 +206,20 @@
   overflow: hidden;
   box-shadow: 0 1px 3px 0 rgba(16, 24, 40, 0.1);
 }
+.cute-ag-grid *::-webkit-scrollbar {
+  width: 2px !important;
+  height: 2px !important;
+}
+.cute-ag-grid *::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.cute-ag-grid *::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #0ea5e9) !important;
+  border-radius: 8px !important;
+}
+.cute-ag-grid *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #4f46e5, #0284c7) !important;
+}
 .ag-theme-alpine,
 .ag-theme-alpine-dark {
   border-radius: 0 !important;

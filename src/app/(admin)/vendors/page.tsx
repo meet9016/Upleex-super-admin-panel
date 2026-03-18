@@ -147,11 +147,14 @@ export default function VendorsPage() {
         },
         {
             headerName: "Action",
-            width: 250,
+            width: 200,
+            minWidth: 200,
+            maxWidth: 200,
             pinned: "right",
             sortable: false,
             filter: false,
             suppressHeaderMenuButton: true,
+            cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
             cellRenderer: (params: any) => {
                 const kycId = params.data.id;
                 const vendorId = params.data.ContactDetails?.vendor_id;

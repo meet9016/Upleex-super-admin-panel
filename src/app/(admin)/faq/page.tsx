@@ -292,11 +292,14 @@ const handleConfirmDelete = async () => {
     },
     {
       headerName: "Action",
-      minWidth: 150,
+      width: 100,
+      minWidth: 100,
+      maxWidth: 100,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
       cellRenderer: (params: { data: FAQRow }) => (
         <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )

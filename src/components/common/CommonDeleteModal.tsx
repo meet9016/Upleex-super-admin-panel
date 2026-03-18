@@ -22,42 +22,32 @@ export default function CommonDeleteModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         
         <div className="p-6 text-center">
           {/* Icon */}
-          <div className="mx-auto flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mb-4">
-            <svg
-              className="w-7 h-7 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v2m0 4h.01M5.455 19h13.09c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.723 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+          <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-5 relative">
+            <div className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+              <Trash2 className="w-6 h-6 text-red-600" />
+            </div>
           </div>
 
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-xl font-bold text-slate-900">
             {title}
           </h3>
 
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-[15px] leading-relaxed text-slate-500 mt-2 px-2">
             {description}
           </p>
         </div>
 
-        <div className="flex gap-3 p-4 bg-gray-50">
+        <div className="flex gap-3 p-5 bg-slate-50 border-t border-slate-100">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="flex-1 rounded-xl"
+            className="flex-1 rounded-xl bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             disabled={isLoading}
           >
             Cancel
@@ -65,7 +55,7 @@ export default function CommonDeleteModal({
 
           <Button
             variant="destructive"
-            className="bg-red-600 hover:bg-red-700 text-white min-w-[100px]"
+            className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm shadow-red-200"
             onClick={onConfirm}
             disabled={isLoading}
           >

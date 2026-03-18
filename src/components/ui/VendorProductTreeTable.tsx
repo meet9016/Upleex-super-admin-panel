@@ -267,6 +267,17 @@ export default function VendorProductTreeTable({
 
   const [rowData, setRowData] = useState<TreeDataItem[]>(() => buildRowData(vendors));
 
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    checkDarkMode();
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     setRowData(buildRowData(vendors));
   }, [vendors]);
@@ -348,10 +359,15 @@ export default function VendorProductTreeTable({
     },
     {
       headerName: "Action",
-      cellRenderer: ActionCellRenderer,
+      width: 140,
+      minWidth: 140,
+      maxWidth: 140,
       pinned: "right",
       suppressHeaderMenuButton: true,
-      minWidth: 100,
+      sortable: false,
+      filter: false,
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
+      cellRenderer: ActionCellRenderer,
     },
   ], []);
 
@@ -424,7 +440,7 @@ export default function VendorProductTreeTable({
         </div>
       )}
 
-      <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden" style={{ height: "700px" }}>
+      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'} w-full border border-gray-200 overflow-hidden`} style={{ height: "700px" }}>
         <AgGridReact
           ref={gridRef}
           rowData={rowData}

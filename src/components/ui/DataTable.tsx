@@ -19,6 +19,7 @@ interface DataTableProps<TData> {
   paginationPageSizeSelector?: number[];
   height?: string | number;
   rowSelection?: "single" | "multiple";
+  onSelectionChanged?: (event: any) => void;
 }
 
 export function DataTable<TData>({
@@ -30,6 +31,7 @@ export function DataTable<TData>({
   paginationPageSizeSelector = [10, 20, 50],
   height = "100%",
   rowSelection = "multiple",
+  onSelectionChanged,
 }: DataTableProps<TData>) {
   console.log("🚀 ~ DataTable ~ rowData:", rowData)
   return (
@@ -52,6 +54,7 @@ export function DataTable<TData>({
         pagination={pagination}
         paginationPageSize={paginationPageSize}
         paginationPageSizeSelector={paginationPageSizeSelector}
+        onSelectionChanged={onSelectionChanged}
       />
     </div>
   );

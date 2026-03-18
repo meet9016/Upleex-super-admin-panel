@@ -63,7 +63,7 @@ export default function AddCategoryPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
- const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
+  const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
   const debouncedSearch = useDebounce(searchText, 600);
 
   // Fetch categories with search
@@ -123,7 +123,8 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "categories_name",
       headerName: "Category",
-      minWidth: 500,
+      minWidth: 200,
+      flex: 1,
       cellRenderer: (params: any) => {
         const imageUrl = getImageUrl(params.data.image);
         return (
@@ -167,17 +168,20 @@ if (res?.data?.success && res?.data?.data) {
     {
       field: "created_at",
       headerName: "Created",
-      minWidth: 250,
+      minWidth: 150,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
-      minWidth: 240,
+      width: 100,
+      minWidth: 100,
+      maxWidth: 100,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )
@@ -628,7 +632,7 @@ const handleConfirmDelete = async () => {
                   onSelectionChange={(selected) => {
                     setSelectedRows(selected);
                   }}
-                  enableSearch={false} // Since you have your own search
+                  enableSearch={false}
                   enableFilter={false}
                   gridHeight={700}
                 />

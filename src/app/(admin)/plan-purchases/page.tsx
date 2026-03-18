@@ -375,11 +375,14 @@ export default function ListingPlanPurchasesPage() {
     },
     {
       headerName: "Action",
-      flex: 1,
-      minWidth: 80,
+      width: 100,
+      minWidth: 100,
       maxWidth: 100,
       pinned: "right",
       suppressHeaderMenuButton: true,
+      sortable: false,
+      filter: false,
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
       cellRenderer: (params: any) => (
         <ActionButtons
           showEdit={false}
