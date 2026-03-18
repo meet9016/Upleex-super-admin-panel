@@ -174,6 +174,7 @@ if (res?.data?.success && res?.data?.data) {
     {
       headerName: "Action",
       minWidth: 240,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

@@ -42,6 +42,8 @@ interface SubCategory {
   subcategory_name: string;
   image: string;
   parent_category?: string;
+  created_at?: string;
+  createdAt?: string;
 }
 
 interface SubCategoryRow {
@@ -179,7 +181,7 @@ export default function AddSubCategoryPage() {
                 parentId: category.categories_id,
                 image: sub.image || "",
                 status: "Active",
-                created_at: new Date().toISOString(), // You might have this from API
+                created_at: sub.created_at || sub.createdAt || new Date().toISOString(),
               });
             });
           }
@@ -381,6 +383,7 @@ const handleConfirmDelete = async () => {
       field: "name",
       headerName: "Sub Category",
       minWidth : 400,
+      cellClass: "ag-cell-with-border",
       cellRenderer: (params: { data: SubCategoryRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -413,6 +416,7 @@ const handleConfirmDelete = async () => {
       field: "parent",
       headerName: "Category",
       minWidth: 200,
+      cellClass: "ag-cell-with-border",
       cellRenderer: (params: { data: SubCategoryRow }) => (
         <div className="flex items-center h-full">
           <span className="text-sm text-slate-600">{params.data.parent}</span>
@@ -423,12 +427,14 @@ const handleConfirmDelete = async () => {
       field: "created_at",
       headerName: "Created",
       minWidth: 190,
+      cellClass: "ag-cell-with-border",
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },
     {
       headerName: "Action",
       minWidth: 200,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

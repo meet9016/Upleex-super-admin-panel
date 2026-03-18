@@ -511,7 +511,7 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
               >
                 Close
               </Button>
-              {status === 'pending' && (
+              {/* {status === 'pending' && (
                 <>
                   <Button
                     variant="destructive"
@@ -526,7 +526,7 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
                     Approve
                   </Button>
                 </>
-              )}
+              )} */}
             </div>
           </div>
         </div>

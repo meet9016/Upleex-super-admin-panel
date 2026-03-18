@@ -349,6 +349,7 @@ export default function VendorProductTreeTable({
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       minWidth: 100,
     },

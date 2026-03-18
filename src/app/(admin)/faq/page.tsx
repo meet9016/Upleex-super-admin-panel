@@ -293,6 +293,7 @@ const handleConfirmDelete = async () => {
     {
       headerName: "Action",
       minWidth: 150,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,

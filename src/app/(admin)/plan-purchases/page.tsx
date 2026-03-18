@@ -547,7 +547,7 @@ export default function ListingPlanPurchasesPage() {
               onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
               filter={false}
               tableName="Purchases"
-              gridHeight={850}
+              gridHeight={750}
             />
           </CardContent>
         </Card>
