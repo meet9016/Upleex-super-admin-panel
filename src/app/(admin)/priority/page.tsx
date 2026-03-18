@@ -205,6 +205,7 @@ export default function PriorityPlansPage() {
     {
       headerName: "Action",
       minWidth: 140,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />
@@ -453,7 +454,7 @@ export default function PriorityPlansPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
-                <Button onClick={savePlan} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={savePlan} className="flex-1 btn-primary">
                   <Plus className="mr-2 h-4 w-4" />
                   {editingId ? "Update Priority Plan" : "Create Priority Plan"}
                 </Button>

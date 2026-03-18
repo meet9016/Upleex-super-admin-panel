@@ -342,6 +342,7 @@ export default function QuotesTreeTable({
     {
       headerName: "Action",
       cellRenderer: ActionCellRenderer,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       suppressSizeToFit: true,
       minWidth: 100,

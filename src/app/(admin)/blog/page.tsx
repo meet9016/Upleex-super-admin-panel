@@ -27,7 +27,7 @@ const blogSchema = z.object({
   sort_description: z.string().min(10, "Short description is required"),
   long_description: z.string().min(20, "Long description is required"),
   date: z.string().min(1, "Publish Date is required"),
-    image: z.any().refine((files) => files && files.length > 0, "Image is required"),
+  image: z.any().refine((files) => files && files.length > 0, "Image is required"),
 
 });
 
@@ -67,7 +67,7 @@ export default function BlogPage() {
   const [selectedRows, setSelectedRows] = useState<BlogRow[]>([]);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
-  
+
   const debouncedSearch = useDebounce(searchText, 600);
 
   const {
@@ -136,28 +136,28 @@ export default function BlogPage() {
   // Helper function to format date to DD/MM/YYYY
   const formatDateToDDMMYYYY = (dateString: string): string => {
     if (!dateString) return '';
-    
+
     console.log("Original date from API:", dateString);
-    
+
     try {
       // If it's already in DD/MM/YYYY format
       if (dateString.includes('/') && dateString.split('/').length === 3) {
         return dateString;
       }
-      
+
       // If it's in YYYY-MM-DD format (ISO)
       if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
         const [year, month, day] = dateString.split('-');
         return `${day}/${month}/${year}`;
       }
-      
+
       // If it's in YYYY-MM-DDTHH:mm:ss.sssZ format (ISO with time)
       if (dateString.includes('T')) {
         const datePart = dateString.split('T')[0];
         const [year, month, day] = datePart.split('-');
         return `${day}/${month}/${year}`;
       }
-      
+
       // If it's a timestamp number
       if (!isNaN(Number(dateString))) {
         const date = new Date(Number(dateString));
@@ -166,7 +166,7 @@ export default function BlogPage() {
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
       }
-      
+
       // Try to parse with Date object
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -178,26 +178,26 @@ export default function BlogPage() {
     } catch (error) {
       console.error("Error formatting date:", error);
     }
-    
+
     return dateString; // Return original if parsing fails
   };
 
   // Helper function to convert DD/MM/YYYY to YYYY-MM-DD for DatePicker
   const convertToDatePickerFormat = (dateString: string): string => {
     if (!dateString) return '';
-    
+
     try {
       // If it's in DD/MM/YYYY format
       if (dateString.includes('/')) {
         const [day, month, year] = dateString.split('/');
         return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
       }
-      
+
       // If it's already in YYYY-MM-DD format
       if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
         return dateString;
       }
-      
+
       // Try to parse with Date object
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
@@ -209,7 +209,7 @@ export default function BlogPage() {
     } catch (error) {
       console.error("Error converting date:", error);
     }
-    
+
     return dateString;
   };
 
@@ -230,7 +230,7 @@ export default function BlogPage() {
           // Format the date to DD/MM/YYYY
           blog_date: formatDateToDDMMYYYY(item.blog_date || item.date || item.createdAt || ''),
         }));
-        
+
         console.log("🚀 ~ fetchBlogs ~ transformed data:", transformedData);
         setBlogs(transformedData);
         setFilteredBlogs(transformedData);
@@ -318,57 +318,57 @@ export default function BlogPage() {
     }
   };
 
-const onSubmit = async (data: BlogFormValues) => {
-  try {
-    setIsLoading(true);
+  const onSubmit = async (data: BlogFormValues) => {
+    try {
+      setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("sort_description", data.sort_description);
-    formData.append("long_description", data.long_description);
-    formData.append("date", data.date);
-    console.log("📅 Sending date to API:", data.date);
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("sort_description", data.sort_description);
+      formData.append("long_description", data.long_description);
+      formData.append("date", data.date);
+      console.log("📅 Sending date to API:", data.date);
 
-    if (editingId) {
-      if (data.image && data.image[0] && data.image[0] instanceof File) {
-        // New image uploaded - append it
-        formData.append("image", data.image[0]);
+      if (editingId) {
+        if (data.image && data.image[0] && data.image[0] instanceof File) {
+          // New image uploaded - append it
+          formData.append("image", data.image[0]);
+        } else {
+          console.log("Keeping existing image");
+        }
       } else {
-        console.log("Keeping existing image");
+        // For create mode - image is required
+        if (data.image && data.image[0] && data.image[0] instanceof File) {
+          formData.append("image", data.image[0]);
+        }
       }
-    } else {
-      // For create mode - image is required
-      if (data.image && data.image[0] && data.image[0] instanceof File) {
-        formData.append("image", data.image[0]);
+
+      let success;
+      if (editingId) {
+        success = await updateBlog(editingId, formData);
+      } else {
+        success = await createBlog(formData);
       }
-    }
 
-    let success;
-    if (editingId) {
-      success = await updateBlog(editingId, formData);
-    } else {
-      success = await createBlog(formData);
+      if (success) {
+        reset({
+          title: "",
+          sort_description: "",
+          long_description: "",
+          date: "",
+          image: undefined
+        });
+        setPreviewImage(null);
+        setEditingId(null);
+        await fetchBlogs(debouncedSearch);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(error?.response?.data?.message || 'Operation failed');
+    } finally {
+      setIsLoading(false);
     }
-
-    if (success) {
-      reset({
-        title: "",
-        sort_description: "",
-        long_description: "",
-        date: "",
-        image: undefined
-      });
-      setPreviewImage(null);
-      setEditingId(null);
-      await fetchBlogs(debouncedSearch);
-    }
-  } catch (error: any) {
-    console.error("Error:", error);
-    toast.error(error?.response?.data?.message || 'Operation failed');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleEdit = async (blog: BlogRow) => {
     try {
@@ -408,31 +408,31 @@ const onSubmit = async (data: BlogFormValues) => {
     setShowDeletePopup(true);
   };
 
-const handleConfirmDelete = async () => {
-  if (!blogToDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!blogToDelete) return;
 
-  setIsDeleting(true);
-  const success = await deleteBlog(blogToDelete.id);
-  if (success) {
-    // Check if the deleted blog is the one being edited
-    if (editingId === blogToDelete.id) {
-      setEditingId(null);
-      setPreviewImage(null);
-      reset({
-        title: "",
-        sort_description: "",
-        long_description: "",
-        date: "",
-        image: undefined
-      }); // Clear the form
+    setIsDeleting(true);
+    const success = await deleteBlog(blogToDelete.id);
+    if (success) {
+      // Check if the deleted blog is the one being edited
+      if (editingId === blogToDelete.id) {
+        setEditingId(null);
+        setPreviewImage(null);
+        reset({
+          title: "",
+          sort_description: "",
+          long_description: "",
+          date: "",
+          image: undefined
+        }); // Clear the form
+      }
+
+      setShowDeletePopup(false);
+      setBlogToDelete(null);
+      await fetchBlogs(debouncedSearch);
     }
-    
-    setShowDeletePopup(false);
-    setBlogToDelete(null);
-    await fetchBlogs(debouncedSearch);
-  }
-  setIsDeleting(false);
-};
+    setIsDeleting(false);
+  };
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
@@ -446,13 +446,13 @@ const handleConfirmDelete = async () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
-     reset({
-    title: "",
-    sort_description: "",
-    long_description: "",
-    date: "",
-    image: undefined
-  });
+    reset({
+      title: "",
+      sort_description: "",
+      long_description: "",
+      date: "",
+      image: undefined
+    });
   };
 
   // Custom Image Component to prevent infinite loop
@@ -481,7 +481,9 @@ const handleConfirmDelete = async () => {
   const columnDefs: ColDef<BlogRow>[] = [
     {
       headerName: "Blog Post",
+      field: "title",
       minWidth: 600,
+      cellClass: "ag-cell-with-border",
       cellRenderer: (params: { data: BlogRow }) => {
         const imageUrl = getImageUrl(params.data.image);
 
@@ -506,7 +508,8 @@ const handleConfirmDelete = async () => {
     {
       field: "blog_date",
       headerName: "Date",
-      minWidth: 200,
+      minWidth: 100,
+      cellClass: "ag-cell-with-border",
       cellRenderer: (params: { value: string }) => (
         <div className="flex items-center h-full gap-1.5">
           <span className="text-sm text-slate-600">
@@ -518,6 +521,7 @@ const handleConfirmDelete = async () => {
     {
       headerName: "Action",
       minWidth: 200,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
@@ -649,25 +653,25 @@ const handleConfirmDelete = async () => {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                               <div className="flex gap-2">
-                                                <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const url = previewImage || getImageUrl(blogs.find(b => b.id === editingId)?.image || '');
-                            setModalImageUrl(url);
-                            setImageModalOpen(true);
-                          }}
-                           className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
-                             title="View Image"
-                        >
-                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const url = previewImage || getImageUrl(blogs.find(b => b.id === editingId)?.image || '');
+                                setModalImageUrl(url);
+                                setImageModalOpen(true);
+                              }}
+                              className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
+                              title="View Image"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                               View
                             </button>
-                          <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
-                            <Edit size={14} />
-                            Change
-                          </div>
+                            <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
+                              <Edit size={14} />
+                              Change
+                            </div>
                           </div>
                         </div>
                         {/* Remove Button for new uploads */}
@@ -870,7 +874,7 @@ const handleConfirmDelete = async () => {
 
       {/* Image Modal */}
       {imageModalOpen && modalImageUrl && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           onClick={() => setImageModalOpen(false)}
         >

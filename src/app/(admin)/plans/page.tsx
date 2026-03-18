@@ -208,6 +208,7 @@ export default function PlansPage() {
     {
       headerName: "Action",
       minWidth: 140,
+      pinned: "right",
       suppressHeaderMenuButton: true,
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => startEdit(params.data)} onDelete={() => deleteOne(params.data)} />

@@ -148,6 +148,7 @@ export default function VendorsPage() {
         {
             headerName: "Action",
             width: 250,
+            pinned: "right",
             sortable: false,
             filter: false,
             suppressHeaderMenuButton: true,

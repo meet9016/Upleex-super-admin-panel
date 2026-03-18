@@ -14,7 +14,7 @@ console.error = (...args) => {
 import React, { useMemo, useRef, memo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AgGridReact } from "ag-grid-react";
-import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions,ColumnMenuTab } from "ag-grid-community";
+import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions, ColumnMenuTab } from "ag-grid-community";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ColumnMenuModule, ContextMenuModule } from "ag-grid-enterprise";
 import Loader from "@/components/common/Loader";
@@ -79,21 +79,21 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
 
     return () => observer.disconnect();
   }, []);
-const defaultColDef = useMemo<ColDef>(
-    () => ({
-      sortable: true,
-      resizable: true,
-      suppressHeaderMenuButton: true,
-      cellStyle: {
-        display: 'flex',
-        alignItems: 'center',
-        paddingLeft: '16px'
-      },
-      headerClass: "ag-left-aligned-header",
-      cellClass: "ag-cell-with-border",
-    }),
-    []
-  );
+  const defaultColDef = useMemo<ColDef>(() => ({
+    flex: 1,
+    minWidth: 100,
+    sortable: true,
+    resizable: true,
+    suppressMenuHide: true,
+    menuTabs: ['filterMenuTab'],
+    cellStyle: {
+      display: 'flex',
+      alignItems: 'center',
+      paddingLeft: '16px',
+    },
+    headerClass: "ag-left-aligned-header",
+    cellClass: "ag-cell-with-border",
+  }), []);
 
   const defaultColumns: ColDef[] = useMemo(
     () => [
@@ -113,6 +113,7 @@ const defaultColDef = useMemo<ColDef>(
       {
         headerName: "Action",
         width: 140,
+        pinned: "right",
         suppressHeaderMenuButton: true,
         suppressSizeToFit: true,
         cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
@@ -149,7 +150,7 @@ const defaultColDef = useMemo<ColDef>(
   );
 
   const rowSelection = useMemo<RowSelectionOptions>(
-    () => ({ 
+    () => ({
       mode: "multiRow",
       checkboxes: true, // Enable checkboxes for selection
       enableSelectionWithoutKeys: true, // Allow selection without holding Ctrl key
@@ -182,7 +183,7 @@ const defaultColDef = useMemo<ColDef>(
   }, [onSelectionChange]);
 
   return (
-     <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="flex justify-between items-center  dark:text-gray-200 flex-shrink-0">
         <div className="flex items-center gap-3">
           {enableSearch && (

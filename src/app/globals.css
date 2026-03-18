@@ -115,17 +115,63 @@
   }
 
   /* Vendor-style AgGrid header and borders */
-  .ag-theme-alpine .ag-header { background-color: #e6f0fa !important; }
+  .ag-theme-alpine .ag-header {
+    background-color: #e6f0fa !important;
+  }
+
   .ag-theme-alpine .ag-cell,
-  .ag-theme-alpine-dark .ag-cell { border-right: 1px dashed #d9dcde !important; }
+  .ag-theme-alpine-dark .ag-cell {
+    border-right: 1px dashed #d9dcde !important;
+  }
+
   .ag-theme-alpine .ag-cell:last-child,
-  .ag-theme-alpine-dark .ag-cell:last-child { border-right: none !important; }
+  .ag-theme-alpine-dark .ag-cell:last-child {
+    border-right: 1px dashed #d9dcde !important;
+  }
+
+  .ag-theme-alpine-dark .ag-cell:last-child {
+    border-right: 1px dashed #334155 !important;
+  }
+
   .ag-theme-alpine .ag-header-cell,
-  .ag-theme-alpine-dark .ag-header-cell { border-right: 1px dashed #d9dcde !important; }
+  .ag-theme-alpine-dark .ag-header-cell {
+    border-right: 1px dashed #d9dcde !important;
+  }
+
   .ag-theme-alpine .ag-header-cell:last-child,
-  .ag-theme-alpine-dark .ag-header-cell:last-child { border-right: none !important; }
-  .ag-theme-alpine .ag-row { border-bottom: 1px solid #f3f4f6; }
-  .ag-theme-alpine-dark .ag-row { border-bottom: 1px solid #1a2231; }
+  .ag-theme-alpine-dark .ag-header-cell:last-child {
+    border-right: none !important;
+  }
+
+  .ag-theme-alpine .ag-row {
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .ag-theme-alpine-dark .ag-row {
+    border-bottom: 1px solid #1a2231;
+  }
+
+  /* Added class to fix missing column borders specifically */
+  .ag-cell-with-border {
+    border-right: 1px dashed #d9dcde !important;
+  }
+
+  .ag-theme-alpine-dark .ag-cell-with-border {
+    border-right: 1px dashed #334155 !important;
+  }
+
+  /* Fix missing right border on active (focused) cell and ensure focus shadow is not clipped */
+  .ag-theme-alpine .ag-cell-focus,
+  .ag-theme-alpine-dark .ag-cell-focus {
+    z-index: 10 !important;
+    outline: none !important;
+    box-shadow: inset 0 0 0 1.5px #468be5 !important;
+    border-right: transparent !important;
+  }
+
+  .ag-theme-alpine .ag-cell-focus {
+    box-shadow: inset 0 0 0 1.5px #468be5 !important;
+  }
 
   .ag-theme-quartz .ag-header-cell-label {
     font-weight: 700;
@@ -135,7 +181,7 @@
   }
 
   .ag-theme-quartz .ag-root-wrapper {
-   border-radius: 0 !important;
+    border-radius: 0 !important;
     border: none;
   }
 

@@ -203,7 +203,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
     };
 
     const StatBadge = ({ icon: Icon, label, value, color }: any) => (
-        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">.\
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
             <div className={`p-2 rounded-lg ${color}`}>
                 <Icon size={16} className="text-white" />
             </div>
