@@ -65,6 +65,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         ],
       },
       { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
+      { name: "Vendor Payments", href: "/vendor-payments", icon: FileText, },
     ],
   },
   {
