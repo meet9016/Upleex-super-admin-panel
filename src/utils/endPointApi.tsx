@@ -26,6 +26,13 @@ export interface EndPointApi {
     deleteCategory: string;
     bulkDeleteCategory: string;
 
+    // Service Categories CRUD
+    getServiceCategoryList: string;
+    postServiceCategoryList: string;
+    updateServiceCategory: string;
+    deleteServiceCategory: string;
+    bulkDeleteServiceCategory: string;
+
     // Subcategories CRUD
     getSubCategoryList: string;
     createSubCategory: string;
@@ -112,6 +119,13 @@ const endPointApi: EndPointApi = {
     updateCategory: 'categories/update',
     deleteCategory: 'categories/delete',
     bulkDeleteCategory: 'categories/bulk-delete',
+
+    // Service Categories CRUD
+    getServiceCategoryList: 'service-categories/getall',
+    postServiceCategoryList: 'service-categories/create-category',
+    updateServiceCategory: 'service-categories/update',
+    deleteServiceCategory: 'service-categories/delete',
+    bulkDeleteServiceCategory: 'service-categories/bulk-delete',
 
     // Subcategories CRUD
     getSubCategoryList: 'subcategories/getall',

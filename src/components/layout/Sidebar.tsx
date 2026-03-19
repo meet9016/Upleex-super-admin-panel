@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Shield,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -52,6 +53,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         subItems: [
           { name: "Add Category", href: "/categories/add", icon: FolderPlus, permission: "categories" },
           { name: "Add Sub Category", href: "/categories/sub/add", icon: Layers, permission: "subcategories" },
+          { name: "Service Category", href: "/categories/service/add", icon: FolderPlus, permission: "categories" },
         ],
       },
       {
@@ -107,7 +109,6 @@ export function Sidebar({
   const shouldShowItem = (item: MenuItem) => {
     // If no permission specified, show the item
     if (!item.permission) return true;
-
     // Check if user has permission
     return hasPermission(item.permission);
   };
@@ -122,15 +123,70 @@ export function Sidebar({
     });
   };
 
+  // Show skeleton loading state
   if (loading) {
     return (
-      <aside className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r bg-white transition-all duration-300 ease-in-out shadow-sm",
-        isCollapsed ? "w-20" : "w-64",
-        isMobile && "w-64"
-      )}>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen border-r bg-white transition-all duration-300 ease-in-out shadow-sm",
+          isCollapsed ? "w-20" : "w-64",
+          isMobile && "w-64"
+        )}
+      >
+        <div className="flex h-16 items-center justify-between px-6 border-b border-gray-100">
+          {(!isCollapsed || isMobile) && (
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          )}
+          {!isMobile && (
+            <div className={cn("h-8 w-8 bg-gray-200 rounded animate-pulse", !isCollapsed && "ml-auto")} />
+          )}
+        </div>
+
+        <div className="flex flex-col h-[calc(100vh-64px)] justify-between py-6">
+          <nav className="space-y-6 px-4">
+            {/* Skeleton groups */}
+            {[1, 2, 3].map((group) => (
+              <div key={group} className="space-y-2">
+                {(!isCollapsed || isMobile) && (
+                  <div className="px-3">
+                    <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      key={item}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-2.5",
+                        (isCollapsed && !isMobile) && "justify-center"
+                      )}
+                    >
+                      <div className="h-5 w-5 bg-gray-200 rounded animate-pulse shrink-0"></div>
+                      {(!isCollapsed || isMobile) && (
+                        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          <div className="px-4 mt-auto border-t border-gray-100 pt-6">
+            <div
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5",
+                (isCollapsed && !isMobile) && "justify-center"
+              )}
+            >
+              <div className="h-5 w-5 bg-gray-200 rounded animate-pulse shrink-0"></div>
+              {(!isCollapsed || isMobile) && (
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+              )}
+            </div>
+          </div>
         </div>
       </aside>
     );
@@ -163,7 +219,7 @@ export function Sidebar({
             size="icon"
             onClick={onToggle}
             className={cn(
-              "h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-50",
+              "h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all",
               !isCollapsed && "ml-auto"
             )}
           >
@@ -173,7 +229,7 @@ export function Sidebar({
       </div>
 
       <div className="flex flex-col h-[calc(100vh-64px)] justify-between py-6">
-        <nav className="space-y-6 px-4">
+        <nav className="space-y-6 px-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent hover:scrollbar-thumb-gray-300">
           {menuItems.filter(shouldShowGroup).map((group) => (
             <div key={group.group} className="space-y-2">
               {(!isCollapsed || isMobile) && (
@@ -217,13 +273,13 @@ export function Sidebar({
                         <Icon
                           size={20}
                           className={cn(
-                            "transition-colors",
+                            "transition-colors shrink-0",
                             (isActive || isGroupActive)
                               ? "text-blue-600"
                               : "text-gray-400 group-hover:text-gray-600"
                           )}
                         />
-                        {(!isCollapsed || isMobile) && <span>{item.name}</span>}
+                        {(!isCollapsed || isMobile) && <span className="truncate">{item.name}</span>}
                       </Link>
                     );
                   }
@@ -242,31 +298,33 @@ export function Sidebar({
                           (isCollapsed && !isMobile) && "justify-center px-2"
                         )}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <Icon
                             size={20}
                             className={cn(
-                              "transition-colors",
+                              "transition-colors shrink-0",
                               isGroupActive
                                 ? "text-blue-600"
                                 : "text-gray-400 group-hover:text-gray-600"
                             )}
                           />
-                          {(!isCollapsed || isMobile) && <span>{item.name}</span>}
+                          {(!isCollapsed || isMobile) && <span className="truncate">{item.name}</span>}
                         </div>
 
                         {(!isCollapsed || isMobile) && (
-                          isOpen ? (
-                            <ChevronDown size={16} />
-                          ) : (
-                            <ChevronRight size={16} />
-                          )
+                          <ChevronDown
+                            size={16}
+                            className={cn(
+                              "shrink-0 transition-transform duration-200",
+                              isOpen ? "rotate-0" : "-rotate-90"
+                            )}
+                          />
                         )}
                       </button>
 
                       {/* Submenu items */}
                       {isOpen && (!isCollapsed || isMobile) && (
-                        <div className="ml-8 mt-1 space-y-1">
+                        <div className="ml-8 mt-1 space-y-1 overflow-hidden animate-in slide-in-from-top-1 duration-200">
                           {item.subItems!.filter(shouldShowItem).map((sub) => {
                             const SubIcon = sub.icon;
                             const subActive = pathname === sub.href;
@@ -286,10 +344,11 @@ export function Sidebar({
                                 <SubIcon
                                   size={18}
                                   className={cn(
+                                    "shrink-0",
                                     subActive ? "text-blue-600" : "text-gray-400"
                                   )}
                                 />
-                                <span>{sub.name}</span>
+                                <span className="truncate">{sub.name}</span>
                               </Link>
                             );
                           })}
@@ -313,8 +372,8 @@ export function Sidebar({
                 (isCollapsed && !isMobile) && "justify-center px-2"
               )}
             >
-              <Settings size={20} className="text-gray-400 group-hover:text-gray-600" />
-              {(!isCollapsed || isMobile) && <span>Settings</span>}
+              <Settings size={20} className="text-gray-400 group-hover:text-gray-600 shrink-0" />
+              {(!isCollapsed || isMobile) && <span className="truncate">Settings</span>}
             </Link>
           )}
           {/* <button
@@ -324,8 +383,8 @@ export function Sidebar({
               (isCollapsed && !isMobile) && "justify-center px-2"
             )}
           >
-            <LogOut size={20} className="text-red-400 group-hover:text-red-500" />
-            {(!isCollapsed || isMobile) && <span>Logout</span>}
+            <LogOut size={20} className="text-red-400 group-hover:text-red-500 shrink-0" />
+            {(!isCollapsed || isMobile) && <span className="truncate">Logout</span>}
           </button> */}
         </div>
       </div>
