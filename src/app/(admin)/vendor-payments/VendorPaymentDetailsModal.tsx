@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { X, Calendar, DollarSign, Package, User, CreditCard, Hash, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { VendorPayment } from "@/types/vendorPayment";
+import { VendorPayment, SafeOrderInfo } from "@/types/vendorPayment";
 
 interface VendorPaymentDetailsModalProps {
     open: boolean;
@@ -25,12 +25,18 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     
     if (!open || !data) return null;
 
-    // Safety check for order_id
-    const orderInfo = data.order_id || {
+    // Safety check for order_id with proper typing
+    const defaultOrderInfo: SafeOrderInfo = {
         order_id: 'N/A',
         user_name: 'Unknown Customer',
         total_amount: 0
     };
+    
+    const orderInfo: SafeOrderInfo = data.order_id ? {
+        order_id: data.order_id.order_id || 'N/A',
+        user_name: data.order_id.user_name || 'Unknown Customer',
+        total_amount: data.order_id.total_amount || 0
+    } : defaultOrderInfo;
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-IN', {

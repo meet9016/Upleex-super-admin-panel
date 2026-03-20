@@ -1,4 +1,5 @@
 import endPointApi from '@/utils/endPointApi';
+import type { VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse } from '@/types/vendorPayment';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3688/api/v1';
 
@@ -66,7 +67,7 @@ class ApiService {
   }
 
   // Vendor Payments
-  async getAllVendorPayments(params?: { page?: number; limit?: number; status?: string; vendor_id?: string }) {
+  async getAllVendorPayments(params?: { page?: number; limit?: number; status?: string; vendor_id?: string }): Promise<VendorPaymentResponse> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -77,36 +78,36 @@ class ApiService {
       ? `${endPointApi.getAllVendorPayments}?${queryParams.toString()}`
       : endPointApi.getAllVendorPayments;
     
-    return this.request(endpoint);
+    return this.request<VendorPaymentResponse>(endpoint);
   }
 
-  async getVendorPaymentStats(vendorId?: string) {
+  async getVendorPaymentStats(vendorId?: string): Promise<VendorPaymentStatsResponse> {
     const endpoint = vendorId 
       ? `${endPointApi.getVendorPaymentStats}?vendor_id=${vendorId}`
       : endPointApi.getVendorPaymentStats;
-    return this.request(endpoint);
+    return this.request<VendorPaymentStatsResponse>(endpoint);
   }
 
-  async releasePayment(paymentId: string, notes?: string) {
+  async releasePayment(paymentId: string, notes?: string): Promise<ReleasePaymentResponse> {
     const endpoint = endPointApi.releasePayment.replace(':paymentId', paymentId);
-    return this.request(endpoint, {
+    return this.request<ReleasePaymentResponse>(endpoint, {
       method: 'PUT',
       body: JSON.stringify({ notes }),
     });
   }
 
-  async releaseOrderPayment(orderId: string, vendorId: string, notes?: string) {
+  async releaseOrderPayment(orderId: string, vendorId: string, notes?: string): Promise<ReleasePaymentResponse> {
     const endpoint = endPointApi.releaseOrderPayment
       .replace(':orderId', orderId)
       .replace(':vendorId', vendorId);
-    return this.request(endpoint, {
+    return this.request<ReleasePaymentResponse>(endpoint, {
       method: 'PUT',
       body: JSON.stringify({ notes }),
     });
   }
 
-  async releaseScheduledPayments() {
-    return this.request(endPointApi.releaseScheduledPayments, {
+  async releaseScheduledPayments(): Promise<ReleasePaymentResponse> {
+    return this.request<ReleasePaymentResponse>(endPointApi.releaseScheduledPayments, {
       method: 'POST',
     });
   }

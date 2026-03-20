@@ -7,7 +7,7 @@ import Loader from "@/components/common/Loader";
 import VendorPaymentDetailsModal from "./VendorPaymentDetailsModal";
 import VendorPaymentTreeTable from "./VendorPaymentTreeTable";
 import { apiService } from "@/services/api";
-import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData } from "@/types/vendorPayment";
+import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData, VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse, SafeOrderInfo } from "@/types/vendorPayment";
 
 export default function VendorPaymentsPage() {
     const [payments, setPayments] = useState<VendorPayment[]>([]);
@@ -30,7 +30,7 @@ export default function VendorPaymentsPage() {
     const fetchVendorPayments = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await apiService.getAllVendorPayments({
+            const response: VendorPaymentResponse = await apiService.getAllVendorPayments({
                 page: pagination.page,
                 limit: pagination.limit,
                 ...filters
@@ -65,7 +65,7 @@ export default function VendorPaymentsPage() {
 
     const fetchPaymentStats = useCallback(async () => {
         try {
-            const response = await apiService.getVendorPaymentStats();
+            const response: VendorPaymentStatsResponse = await apiService.getVendorPaymentStats();
             if (response && response.success) {
                 setStats(response.data?.stats || null);
             } else {
@@ -88,9 +88,9 @@ export default function VendorPaymentsPage() {
         setIsReleasing(paymentId);
         
         try {
-            const response = await apiService.releasePayment(paymentId, notes);
+            const response: ReleasePaymentResponse = await apiService.releasePayment(paymentId, notes);
             
-            if (response.success) {
+            if (response && response.success) {
                 toast.success("Payment released successfully");
                 // Update the payment in the list
                 setPayments(prev => 
@@ -103,7 +103,7 @@ export default function VendorPaymentsPage() {
                 // Refresh stats
                 fetchPaymentStats();
             } else {
-                toast.error(response.message || "Failed to release payment");
+                toast.error(response?.message || "Failed to release payment");
             }
         } catch (error: any) {
             console.error("Error releasing payment:", error);
@@ -115,13 +115,13 @@ export default function VendorPaymentsPage() {
 
     const handleReleaseScheduledPayments = async () => {
         try {
-            const response = await apiService.releaseScheduledPayments();
-            if (response.success) {
-                toast.success(`Released ${response.data.releasedCount || 0} scheduled payments`);
+            const response: ReleasePaymentResponse = await apiService.releaseScheduledPayments();
+            if (response && response.success) {
+                toast.success(`Released ${response.data?.releasedCount || 0} scheduled payments`);
                 fetchVendorPayments();
                 fetchPaymentStats();
             } else {
-                toast.error(response.message || "Failed to release scheduled payments");
+                toast.error(response?.message || "Failed to release scheduled payments");
             }
         } catch (error: any) {
             console.error("Error releasing scheduled payments:", error);
@@ -177,11 +177,22 @@ export default function VendorPaymentsPage() {
                 vendorPaymentCount: vendorPayments.length,
                 path: [`vendor-${vendorId}`],
                 children: vendorPayments.map(payment => {
-                    // Additional safety checks
-                    const orderInfo = payment.order_id || {};
-                    const orderId = orderInfo.order_id || 'N/A';
-                    const userName = orderInfo.user_name || 'Unknown Customer';
-                    const totalAmount = orderInfo.total_amount || 0;
+                    // Additional safety checks with proper typing
+                    const defaultOrderInfo: SafeOrderInfo = {
+                        order_id: 'N/A',
+                        user_name: 'Unknown Customer',
+                        total_amount: 0
+                    };
+                    
+                    const orderInfo: SafeOrderInfo = payment.order_id ? {
+                        order_id: payment.order_id.order_id || 'N/A',
+                        user_name: payment.order_id.user_name || 'Unknown Customer',
+                        total_amount: payment.order_id.total_amount || 0
+                    } : defaultOrderInfo;
+                    
+                    const orderId = orderInfo.order_id;
+                    const userName = orderInfo.user_name;
+                    const totalAmount = orderInfo.total_amount;
                     
                     return {
                         id: payment._id,

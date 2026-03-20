@@ -24,6 +24,13 @@ export interface VendorPayment {
   };
 }
 
+// Helper interface for safe order info handling
+export interface SafeOrderInfo {
+  order_id: string;
+  user_name: string;
+  total_amount: number;
+}
+
 export interface VendorPaymentStats {
   pending: {
     count: number;
@@ -72,7 +79,9 @@ export interface ReleasePaymentResponse {
   success: boolean;
   message: string;
   data: {
-    payment: VendorPayment;
+    payment?: VendorPayment;
+    releasedCount?: number;
+    payments?: any[];
   };
 }
 
