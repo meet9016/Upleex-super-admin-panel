@@ -32,9 +32,12 @@ import {
   Package,
   User,
   Loader2,
+  RefreshCw,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData } from "@/types/vendorPayment";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -106,14 +109,24 @@ interface TreeDataItem {
 }
 
 interface VendorPaymentTreeTableProps {
-  data: VendorPaymentData[];
-  onViewDetails: (data: TreeDataItem | VendorPaymentData) => void;
-  onReleasePayment: (vendorId: string, productId?: string) => void;
+  data: VendorPaymentTreeData[];
+  stats: VendorPaymentStats | null;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  onViewDetails: (payment: VendorPayment) => void;
+  onReleasePayment: (paymentId: string, notes?: string) => void;
+  onReleaseScheduledPayments: () => void;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filters: { status: string; vendor_id: string }) => void;
   isReleasing?: string | null;
 }
 
 // Status cell renderer
-const StatusCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
+const StatusCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
   if (props.data?.type === 'vendor') return null;
 
   const status = props.value;
@@ -121,20 +134,23 @@ const StatusCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
   const getStatusStyles = (status: string) => {
     const s = String(status || '').toLowerCase();
     if (s === 'released') return "text-green-700 bg-green-50 border-green-200";
-    if (s === 'ready_for_release') return "text-blue-700 bg-blue-50 border-blue-200";
-    return "text-orange-700 bg-orange-50 border-orange-200";
+    if (s === 'pending') return "text-orange-700 bg-orange-50 border-orange-200";
+    if (s === 'failed') return "text-red-700 bg-red-50 border-red-200";
+    return "text-gray-700 bg-gray-50 border-gray-200";
   };
 
   const getStatusLabel = (status: string) => {
     const s = String(status || '').toLowerCase();
     if (s === 'released') return "Released";
-    if (s === 'ready_for_release') return "Ready for Release";
-    return "Pending";
+    if (s === 'pending') return "Pending";
+    if (s === 'failed') return "Failed";
+    if (s === 'cancelled') return "Cancelled";
+    return "Unknown";
   };
 
   const styles = getStatusStyles(status);
   const label = getStatusLabel(status);
-  const Icon = label === "Released" ? CheckCircle : label === "Ready for Release" ? Clock : XCircle;
+  const Icon = label === "Released" ? CheckCircle : label === "Pending" ? Clock : XCircle;
 
   return (
     <div className="flex items-center h-full">
@@ -147,71 +163,50 @@ const StatusCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
 };
 
 // Action cell renderer
-const ActionCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
+const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
   const { onViewDetails, onReleasePayment, isReleasing } = props.context;
   const data = props.data;
 
   if (!data) return null;
 
-  const canReleasePayment = (paymentDate: string) => {
-    const paymentTime = new Date(paymentDate).getTime();
-    const oneWeekLater = paymentTime + (7 * 24 * 60 * 60 * 1000);
-    return Date.now() >= oneWeekLater;
+  const canReleasePayment = (releaseDate: string) => {
+    return new Date() >= new Date(releaseDate);
   };
 
   const isVendor = data.type === 'vendor';
-  const isProduct = data.type === 'product';
+  const isPayment = data.type === 'payment';
   
-  // For vendor row - show bulk release option
+  // For vendor row - show view details only
   if (isVendor) {
-    const hasReadyProducts = data.children?.some((child: TreeDataItem) => 
-      child.paymentStatus === 'ready_for_release' && child.orderDate && canReleasePayment(child.orderDate)
-    );
-
     return (
       <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
         <button
-          onClick={() => onViewDetails(data)}
+          onClick={() => console.log('Vendor details not implemented')}
           className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
           title="View Vendor Details"
         >
           <Eye size={16} />
         </button>
-        {hasReadyProducts && (
-          <button
-            onClick={() => onReleasePayment(data.id)}
-            disabled={isReleasing === data.id}
-            className="px-3 py-1.5 text-xs rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
-            title="Release All Ready Payments"
-          >
-            {isReleasing === data.id ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : (
-              <DollarSign size={12} />
-            )}
-            Release All
-          </button>
-        )}
       </div>
     );
   }
 
-  // For product row - show individual release option
-  if (isProduct) {
-    const canRelease = data.paymentStatus === 'ready_for_release' && data.orderDate && canReleasePayment(data.orderDate);
+  // For payment row - show individual release option
+  if (isPayment && data.originalData) {
+    const canRelease = data.paymentStatus === 'pending' && data.releaseDate && canReleasePayment(data.releaseDate);
 
     return (
       <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
         <button
-          onClick={() => onViewDetails(data)}
+          onClick={() => onViewDetails(data.originalData)}
           className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
-          title="View Product Details"
+          title="View Payment Details"
         >
           <Eye size={16} />
         </button>
         {canRelease && (
           <button
-            onClick={() => onReleasePayment(data.vendorName || '', data.id)}
+            onClick={() => onReleasePayment(data.id)}
             disabled={isReleasing === data.id}
             className="px-2 py-1.5 text-xs rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
             title="Release Payment"
@@ -232,7 +227,7 @@ const ActionCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
 };
 
 // Custom group cell renderer
-const VendorGroupCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
+const VendorGroupCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
   const { data } = props;
 
   if (!data) return null;
@@ -244,24 +239,24 @@ const VendorGroupCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
           <User size={20} className="text-indigo-600" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-gray-900">{data.businessName}</div>
+          <div className="text-sm font-semibold text-gray-900">{data.name}</div>
           <div className="text-xs text-gray-500">
-            {data.vendorProductCount} products • ₹{data.vendorTotalAmount?.toLocaleString('en-IN')}
+            {data.vendorPaymentCount} payments • ₹{data.vendorTotalAmount?.toLocaleString('en-IN')}
           </div>
         </div>
       </div>
     );
   }
 
-  // Product row
+  // Payment row
   return (
     <div className="flex items-center gap-3 ml-4">
       <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
         <Package size={16} className="text-blue-600" />
       </div>
       <div>
-        <div className="text-sm font-medium text-gray-800">{data.productName}</div>
-        <div className="text-xs text-gray-500">{data.category} • Qty: {data.quantity}</div>
+        <div className="text-sm font-medium text-gray-800">{data.orderNumber}</div>
+        <div className="text-xs text-gray-500">Customer: {data.customerName}</div>
       </div>
     </div>
   );
@@ -269,59 +264,28 @@ const VendorGroupCellRenderer = (props: ICellRendererParams<TreeDataItem>) => {
 
 export default function VendorPaymentTreeTable({
   data,
+  stats,
+  pagination,
   onViewDetails,
   onReleasePayment,
+  onReleaseScheduledPayments,
+  onPageChange,
+  onFilterChange,
   isReleasing,
 }: VendorPaymentTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [quickFilterText, setQuickFilterText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [vendorFilter, setVendorFilter] = useState('');
 
   // Format amount function
   const formatAmount = (amount: number): string => {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
 
-  // Transform data for tree structure
-  const rowData: TreeDataItem[] = useMemo(() => {
-    if (!data || !Array.isArray(data)) return [];
-
-    return data.map((vendor, vendorIndex) => {
-      const vendorPath = [`vendor-${vendor.vendorId}-${vendorIndex}`];
-      const vendorTotalAmount = vendor.products.reduce((sum, product) => sum + product.totalAmount, 0);
-
-      return {
-        id: `vendor-${vendor.vendorId}-${vendorIndex}`,
-        name: vendor.businessName,
-        type: 'vendor' as const,
-        vendorName: vendor.vendorName,
-        businessName: vendor.businessName,
-        vendorTotalAmount: vendorTotalAmount,
-        vendorProductCount: vendor.products.length,
-        paymentMethod: vendor.paymentMethod,
-        transactionId: vendor.transactionId,
-        originalData: vendor,
-        path: vendorPath,
-        children: vendor.products.map((product, productIndex) => ({
-          id: `product-${product.productId}-${productIndex}`,
-          name: product.productName,
-          type: 'product' as const,
-          vendorName: vendor.vendorName,
-          productName: product.productName,
-          productId: product.productId,
-          category: product.category,
-          quantity: product.quantity,
-          unitPrice: product.unitPrice,
-          totalAmount: product.totalAmount,
-          formattedAmount: formatAmount(product.totalAmount),
-          customerName: product.customerName,
-          orderDate: product.orderDate,
-          deliveryStatus: product.deliveryStatus,
-          paymentStatus: product.paymentStatus,
-          originalData: product,
-          path: [...vendorPath, `product-${product.productId}-${productIndex}`],
-        }))
-      };
-    });
+  // Transform data for tree structure - data is already in the correct format
+  const rowData: VendorPaymentTreeData[] = useMemo(() => {
+    return data || [];
   }, [data]);
 
   // Quick filter handler
@@ -331,57 +295,39 @@ export default function VendorPaymentTreeTable({
   }, []);
 
   // Column definitions
-  const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
-    {
-      headerName: "Category",
-      field: "category",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? params.data.category || '' : '';
-      },
-      flex: 1,
-      minWidth: 120,
-    },
+  const columnDefs: ColDef<VendorPaymentTreeData>[] = useMemo(() => [
     {
       headerName: "Customer",
       field: "customerName",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? params.data.customerName || '' : '';
+      valueGetter: (params: ValueGetterParams<VendorPaymentTreeData, string>) => {
+        return params.data?.type === 'payment' ? params.data.customerName || '' : '';
       },
       flex: 1,
       minWidth: 150,
     },
     {
-      headerName: "Quantity",
-      field: "quantity",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, number>) => {
-        return params.data?.type === 'product' ? params.data.quantity : undefined;
-      },
-      minWidth: 100,
-      cellStyle: () => ({ textAlign: 'center' }),
-    },
-    {
-      headerName: "Unit Price",
-      field: "unitPrice",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? formatAmount(params.data.unitPrice || 0) : '';
+      headerName: "Order Amount",
+      field: "formattedAmount",
+      valueGetter: (params: ValueGetterParams<VendorPaymentTreeData, string>) => {
+        return params.data?.type === 'payment' ? params.data.formattedAmount : '';
       },
       minWidth: 120,
       cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'right' }),
     },
     {
-      headerName: "Total Amount",
-      field: "formattedAmount",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? params.data.formattedAmount : '';
+      headerName: "Vendor Amount",
+      field: "formattedVendorAmount",
+      valueGetter: (params: ValueGetterParams<VendorPaymentTreeData, string>) => {
+        return params.data?.type === 'payment' ? params.data.formattedVendorAmount : '';
       },
       minWidth: 140,
-      cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'right' }),
+      cellStyle: () => ({ fontWeight: 'bold', color: '#7c3aed', textAlign: 'right' }),
     },
     {
-      headerName: "Order Date",
-      field: "orderDate",
-      valueFormatter: (params: ValueFormatterParams<TreeDataItem, string>) => {
-        if (params.data?.type !== 'product') return '';
+      headerName: "Delivered Date",
+      field: "deliveredAt",
+      valueFormatter: (params: ValueFormatterParams<VendorPaymentTreeData, string>) => {
+        if (params.data?.type !== 'payment') return '';
         return params.value ? new Date(params.value).toLocaleDateString('en-IN', { 
           day: '2-digit', 
           month: '2-digit', 
@@ -391,34 +337,45 @@ export default function VendorPaymentTreeTable({
       minWidth: 120,
     },
     {
-      headerName: "Delivery Status",
-      field: "deliveryStatus",
-      valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
-        return params.data?.type === 'product' ? params.data.deliveryStatus || '' : '';
+      headerName: "Release Date",
+      field: "releaseDate",
+      valueFormatter: (params: ValueFormatterParams<VendorPaymentTreeData, string>) => {
+        if (params.data?.type !== 'payment') return '';
+        return params.value ? new Date(params.value).toLocaleDateString('en-IN', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric' 
+        }) : '';
       },
-      minWidth: 130,
-      cellRenderer: (params: ICellRendererParams<TreeDataItem>) => {
-        if (params.data?.type !== 'product') return '';
-        const status = params.value;
-        const isDelivered = status === 'delivered';
-        return (
-          <div className="flex items-center h-full">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              isDelivered 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
-              {status}
-            </span>
-          </div>
-        );
-      }
+      minWidth: 120,
     },
     {
       headerName: "Payment Status",
       field: "paymentStatus",
       cellRenderer: StatusCellRenderer,
       minWidth: 160,
+    },
+    {
+      headerName: "Released By",
+      field: "releasedBy",
+      valueGetter: (params: ValueGetterParams<VendorPaymentTreeData, string>) => {
+        return params.data?.type === 'payment' ? params.data.releasedBy || '-' : '';
+      },
+      minWidth: 100,
+      cellRenderer: (params: ICellRendererParams<VendorPaymentTreeData>) => {
+        if (params.data?.type !== 'payment') return '';
+        const releasedBy = params.value;
+        if (!releasedBy || releasedBy === '-') return '-';
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            releasedBy === 'admin' 
+              ? 'bg-blue-100 text-blue-800' 
+              : 'bg-green-100 text-green-800'
+          }`}>
+            {releasedBy === 'admin' ? 'Admin' : 'System'}
+          </span>
+        );
+      }
     },
     {
       headerName: "Action",
@@ -441,8 +398,8 @@ export default function VendorPaymentTreeTable({
   }), []);
 
   // Auto group column definition
-  const autoGroupColumnDef: ColDef<TreeDataItem> = useMemo(() => ({
-    headerName: "Vendor / Product",
+  const autoGroupColumnDef: ColDef<VendorPaymentTreeData> = useMemo(() => ({
+    headerName: "Vendor / Order",
     field: "name",
     cellRenderer: 'agGroupCellRenderer',
     cellRendererParams: {
@@ -455,12 +412,12 @@ export default function VendorPaymentTreeTable({
   }), []);
 
   // Get data path for tree structure
-  const getDataPath = useCallback((data: TreeDataItem) => {
+  const getDataPath = useCallback((data: VendorPaymentTreeData) => {
     return data.path || [data.id];
   }, []);
 
   // Get row ID
-  const getRowId = useCallback((params: { data: TreeDataItem }) => {
+  const getRowId = useCallback((params: { data: VendorPaymentTreeData }) => {
     return params.data.id;
   }, []);
 
@@ -471,13 +428,22 @@ export default function VendorPaymentTreeTable({
     isReleasing,
   }), [onViewDetails, onReleasePayment, isReleasing]);
 
-  // Calculate summary stats
+  // Handle filter changes
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status);
+    onFilterChange({ status, vendor_id: vendorFilter });
+  };
+
+  const handleVendorFilterChange = (vendorId: string) => {
+    setVendorFilter(vendorId);
+    onFilterChange({ status: statusFilter, vendor_id: vendorId });
+  };
+
+  // Calculate summary stats from props
   const totalVendors = data.length;
-  const totalProducts = data.reduce((sum, vendor) => sum + vendor.products.length, 0);
-  const totalAmount = data.reduce((sum, vendor) => sum + vendor.totalPaymentAmount, 0);
-  const readyForRelease = data.reduce((sum, vendor) => 
-    sum + vendor.products.filter(p => p.paymentStatus === 'ready_for_release').length, 0
-  );
+  const totalPayments = data.reduce((sum, vendor) => sum + (vendor.vendorPaymentCount || 0), 0);
+  const totalAmount = data.reduce((sum, vendor) => sum + (vendor.vendorTotalAmount || 0), 0);
+  const pendingPayments = stats?.pending.count || 0;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -509,8 +475,8 @@ export default function VendorPaymentTreeTable({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Total Products</p>
-                <p className="text-2xl font-bold text-slate-900">{totalProducts}</p>
+                <p className="text-sm font-medium text-slate-600">Total Payments</p>
+                <p className="text-2xl font-bold text-slate-900">{totalPayments}</p>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
                 <Package className="h-6 w-6 text-green-600" />
@@ -523,8 +489,8 @@ export default function VendorPaymentTreeTable({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Ready for Release</p>
-                <p className="text-2xl font-bold text-orange-600">{readyForRelease}</p>
+                <p className="text-sm font-medium text-slate-600">Pending Payments</p>
+                <p className="text-2xl font-bold text-orange-600">{pendingPayments}</p>
               </div>
               <div className="p-2 bg-orange-100 rounded-lg">
                 <Clock className="h-6 w-6 text-orange-600" />
@@ -548,26 +514,52 @@ export default function VendorPaymentTreeTable({
         </Card>
       </div>
 
-      {/* Search Bar */}
+      {/* Filters and Actions */}
       <Card className="border-none shadow-lg">
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search vendors, products, customers..."
-              value={quickFilterText}
-              onChange={onQuickFilterChanged}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <Button
-              variant="outline"
-              onClick={() => {
-                setQuickFilterText('');
-                gridRef.current?.api.setGridOption('quickFilterText', '');
-              }}
-            >
-              Clear
-            </Button>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 flex items-center gap-4">
+              <input
+                type="text"
+                placeholder="Search vendors, orders, customers..."
+                value={quickFilterText}
+                onChange={onQuickFilterChanged}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="released">Released</option>
+                <option value="failed">Failed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setQuickFilterText('');
+                  setStatusFilter('');
+                  setVendorFilter('');
+                  onFilterChange({ status: '', vendor_id: '' });
+                  gridRef.current?.api.setGridOption('quickFilterText', '');
+                }}
+              >
+                <Filter size={16} className="mr-2" />
+                Clear Filters
+              </Button>
+              <Button
+                onClick={onReleaseScheduledPayments}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <RefreshCw size={16} className="mr-2" />
+                Release Scheduled
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

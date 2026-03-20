@@ -64,6 +64,52 @@ class ApiService {
   async getMyPermissions() {
     return this.request(endPointApi.getMyPermissions);
   }
+
+  // Vendor Payments
+  async getAllVendorPayments(params?: { page?: number; limit?: number; status?: string; vendor_id?: string }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.vendor_id) queryParams.append('vendor_id', params.vendor_id);
+    
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.getAllVendorPayments}?${queryParams.toString()}`
+      : endPointApi.getAllVendorPayments;
+    
+    return this.request(endpoint);
+  }
+
+  async getVendorPaymentStats(vendorId?: string) {
+    const endpoint = vendorId 
+      ? `${endPointApi.getVendorPaymentStats}?vendor_id=${vendorId}`
+      : endPointApi.getVendorPaymentStats;
+    return this.request(endpoint);
+  }
+
+  async releasePayment(paymentId: string, notes?: string) {
+    const endpoint = endPointApi.releasePayment.replace(':paymentId', paymentId);
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify({ notes }),
+    });
+  }
+
+  async releaseOrderPayment(orderId: string, vendorId: string, notes?: string) {
+    const endpoint = endPointApi.releaseOrderPayment
+      .replace(':orderId', orderId)
+      .replace(':vendorId', vendorId);
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify({ notes }),
+    });
+  }
+
+  async releaseScheduledPayments() {
+    return this.request(endPointApi.releaseScheduledPayments, {
+      method: 'POST',
+    });
+  }
 }
 
 export const apiService = new ApiService();
