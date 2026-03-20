@@ -53,7 +53,14 @@ export default function SearchableDropdown({
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
-    const [portalStyle, setPortalStyle] = useState<React.CSSProperties>();
+    const [portalStyle, setPortalStyle] = useState<React.CSSProperties>({
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: 200,
+        zIndex: 9999,
+        opacity: 0,
+    });
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
     const selectedValues = multiple
@@ -103,23 +110,30 @@ export default function SearchableDropdown({
     const updatePortalPosition = () => {
         if (!ref.current) return;
         const r = ref.current.getBoundingClientRect();
-        setPortalStyle({
-            position: "fixed",
+        const newStyle = {
+            position: "fixed" as const,
             top: r.bottom + 4,
             left: r.left,
             width: r.width,
             zIndex: 9999,
-        });
+            opacity: 1,
+        };
+        setPortalStyle(newStyle);
     };
 
     useEffect(() => {
         if (!usePortal || !open) return;
+        // Immediate positioning without delay
         updatePortalPosition();
-        window.addEventListener("scroll", updatePortalPosition, true);
-        window.addEventListener("resize", updatePortalPosition);
+        // Use passive listeners for better performance
+        const handleScroll = () => updatePortalPosition();
+        const handleResize = () => updatePortalPosition();
+        
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("resize", handleResize, { passive: true });
         return () => {
-            window.removeEventListener("scroll", updatePortalPosition, true);
-            window.removeEventListener("resize", updatePortalPosition);
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
         };
     }, [usePortal, open]);
 

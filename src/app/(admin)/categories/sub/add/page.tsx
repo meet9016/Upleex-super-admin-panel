@@ -24,7 +24,7 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
   name: z.string().min(2, "Sub-category name is required"),
-   image: z.any().refine((files) => files && files.length > 0, "Image is required"),
+  image: z.any().refine((files) => files && files.length > 0, "Image is required"),
 });
 
 type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
@@ -73,14 +73,15 @@ export default function AddSubCategoryPage() {
   const [searchText, setSearchText] = useState("");
   const [editingSubCategory, setEditingSubCategory] = useState<SubCategoryRow | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedRows, setSelectedRows] = useState<SubCategoryRow[]>([]);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   // Delete popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showBulkDeletePopup, setShowBulkDeletePopup] = useState(false);
   const [subCategoryToDelete, setSubCategoryToDelete] = useState<SubCategoryRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -89,6 +90,7 @@ export default function AddSubCategoryPage() {
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     watch,
     control,
     formState: { errors },
@@ -136,15 +138,6 @@ export default function AddSubCategoryPage() {
     }
   }, [watchImage]);
 
-  // Auto-hide notification after 3 seconds
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -190,10 +183,7 @@ export default function AddSubCategoryPage() {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      setNotification({
-        type: 'error',
-        message: 'Failed to fetch categories'
-      });
+      toast.error('Failed to fetch categories');
     } finally {
       setIsFetching(false);
     }
@@ -231,26 +221,20 @@ export default function AddSubCategoryPage() {
       });
 
       if (res.data) {
-        setNotification({
-          type: 'success',
-          message: 'Sub-category created successfully'
-        });
+        toast.success('Sub-category created successfully');
 
         // Refresh the list
         fetchCategories();
         reset({
-    categoryId: "",
-    name: "",
-    image: undefined
-  });
+          categoryId: "",
+          name: "",
+          image: undefined
+        });
         setPreviewImage(null);
       }
     } catch (error: any) {
       console.error("Error creating subcategory:", error);
-      setNotification({
-        type: 'error',
-        message: error.response?.data?.message || 'Failed to create sub-category'
-      });
+      toast.error(error.response?.data?.message || 'Failed to create sub-category');
     } finally {
       setIsLoading(false);
     }
@@ -261,6 +245,7 @@ export default function AddSubCategoryPage() {
     setValue("categoryId", subCategory.parentId);
     setValue("name", subCategory.name);
     setValue("image", "existing");
+    clearErrors();
     setPreviewImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -291,27 +276,21 @@ export default function AddSubCategoryPage() {
       );
 
       if (res.data) {
-        setNotification({
-          type: 'success',
-          message: 'Sub-category updated successfully'
-        });
+        toast.success('Sub-category updated successfully');
 
         // Refresh the list
         fetchCategories();
         setEditingSubCategory(null);
-         reset({
-    categoryId: "",
-    name: "",
-    image: undefined
-  });
+        reset({
+          categoryId: "",
+          name: "",
+          image: undefined
+        });
         setPreviewImage(null);
       }
     } catch (error: any) {
       console.error("Error updating subcategory:", error);
-      setNotification({
-        type: 'error',
-        message: error.response?.data?.message || 'Failed to update sub-category'
-      });
+      toast.error(error.response?.data?.message || 'Failed to update sub-category');
     } finally {
       setIsLoading(false);
     }
@@ -324,43 +303,68 @@ export default function AddSubCategoryPage() {
   };
 
   // Confirm delete handler
-const handleConfirmDelete = async () => {
-  if (!subCategoryToDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!subCategoryToDelete) return;
 
-  setIsDeleting(true);
-  try {
-    const res = await api.delete(`${endPointApi.deleteSubCategory}/${subCategoryToDelete.id}`);
+    setIsDeleting(true);
+    try {
+      const res = await api.delete(`${endPointApi.deleteSubCategory}/${subCategoryToDelete.id}`);
 
-    if (res.data) {
-      // Check if the deleted sub-category is the one being edited
-      if (editingSubCategory?.id === subCategoryToDelete.id) {
-        setEditingSubCategory(null);
-        setPreviewImage(null);
-        reset({
-          categoryId: "",
-          name: "",
-          image: undefined
-        }); // Clear the form
+      if (res.data) {
+        // Check if the deleted sub-category is the one being edited
+        if (editingSubCategory?.id === subCategoryToDelete.id) {
+          setEditingSubCategory(null);
+          setPreviewImage(null);
+          reset({
+            categoryId: "",
+            name: "",
+            image: undefined
+          }); // Clear the form
+        }
+
+        toast.success('Sub-category deleted successfully');
+        fetchCategories();
+        setShowDeletePopup(false);
+        setSubCategoryToDelete(null);
       }
-      
-      setNotification({
-        type: 'success',
-        message: 'Sub-category deleted successfully'
-      });
-      fetchCategories();
-      setShowDeletePopup(false);
-      setSubCategoryToDelete(null);
+    } catch (error: any) {
+      console.error("Error deleting subcategory:", error);
+      toast.error(error.response?.data?.message || 'Failed to delete sub-category');
+    } finally {
+      setIsDeleting(false);
     }
-  } catch (error: any) {
-    console.error("Error deleting subcategory:", error);
-    setNotification({
-      type: 'error',
-      message: error.response?.data?.message || 'Failed to delete sub-category'
-    });
-  } finally {
-    setIsDeleting(false);
-  }
-};
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+
+    try {
+      setIsBulkDeleting(true);
+      const ids = selectedRows.map(r => r.id).filter(Boolean);
+
+      const res = await api.delete(endPointApi.bulkDeleteSubCategory, {
+        data: { ids }
+      });
+
+      if (res?.data?.message || res?.data?.success) {
+        toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
+        setSelectedRows([]);
+        await fetchCategories();
+      } else {
+        toast.error(res?.data?.message || 'Bulk delete failed');
+      }
+    } catch (error: any) {
+      console.error("Bulk delete error:", error);
+      toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
+    } finally {
+      setIsBulkDeleting(false);
+      setShowBulkDeletePopup(false);
+    }
+  };
+
+  const handleCancelBulkDelete = () => {
+    setShowBulkDeletePopup(false);
+  };
 
   // Cancel delete handler
   const handleCancelDelete = () => {
@@ -382,7 +386,7 @@ const handleConfirmDelete = async () => {
     {
       field: "name",
       headerName: "Sub Category",
-      minWidth : 400,
+      minWidth: 400,
       cellClass: "ag-cell-with-border",
       cellRenderer: (params: { data: SubCategoryRow }) => {
         const imageUrl = getImageUrl(params.data.image);
@@ -458,11 +462,11 @@ const handleConfirmDelete = async () => {
   const handleCancelEdit = () => {
     setEditingSubCategory(null);
     setPreviewImage(null);
-     reset({
-    categoryId: "",
-    name: "",
-    image: undefined
-  });
+    reset({
+      categoryId: "",
+      name: "",
+      image: undefined
+    });
   };
 
   const currentEditingCategory = editingSubCategory
@@ -471,34 +475,6 @@ const handleConfirmDelete = async () => {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      {/* Notification */}
-      {notification && (
-        <div
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all transform animate-in slide-in-from-top-2 ${notification.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
-            }`}
-        >
-          <div className="flex items-center gap-2">
-            {notification.type === 'success' ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            )}
-            <p className="text-sm font-medium">{notification.message}</p>
-            <button
-              onClick={() => setNotification(null)}
-              className="ml-auto text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
 
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
@@ -507,10 +483,10 @@ const handleConfirmDelete = async () => {
       <div className="grid gap-8 lg:grid-cols-3 items-stretch">
         {/* Left: Form */}
         <div className="lg:col-span-1">
-        <Card 
-  className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col" 
-  style={{ height: '770px' }}
->
+          <Card
+            className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col"
+            style={{ height: '770px' }}
+          >
             <CardHeader>
               <div className="flex items-center gap-2">
                 {/* <Layers className="h-5 w-5 text-primary" /> */}
@@ -518,7 +494,7 @@ const handleConfirmDelete = async () => {
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
               </div>
-          
+
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
@@ -605,7 +581,7 @@ const handleConfirmDelete = async () => {
                               }}
                               className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                               View
                             </button>
                             <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
@@ -660,34 +636,34 @@ const handleConfirmDelete = async () => {
                   </p>
                 </div>
 
-<div className="flex gap-3">
-  <Button
-    type="submit"
-    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary"
-    disabled={isLoading || isFetching}
-  >
-    {isLoading ? (
-      <>
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        {editingSubCategory ? "Updating..." : "Saving..."}
-      </>
-    ) : (
-      <>
-        <Plus className="mr-2 h-4 w-4" />
-        {editingSubCategory ? "Update Sub Category" : "Add Sub Category"}
-      </>
-    )}
-  </Button>
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary"
+                    disabled={isLoading || isFetching}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {editingSubCategory ? "Updating..." : "Saving..."}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        {editingSubCategory ? "Update Sub Category" : "Add Sub Category"}
+                      </>
+                    )}
+                  </Button>
 
-  <Button
-    type="button"
-    variant="outline"
-    className="flex-1 h-11 rounded-xl"
-    onClick={handleCancelEdit}
-  >
-    Cancel
-  </Button>
-</div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-11 rounded-xl"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </form>
             </CardContent>
           </Card>
@@ -710,32 +686,9 @@ const handleConfirmDelete = async () => {
                     variant="destructive"
                     size="md"
                     disabled={selectedRows.length === 0}
-                    onClick={async () => {
+                    onClick={() => {
                       if (selectedRows.length === 0) return;
-                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
-
-                      try {
-                        const ids = selectedRows.map(r => r.id).filter(Boolean);
-
-                        // Option 1: Use POST for bulk delete (recommended)
-                        const res = await api.delete(endPointApi.bulkDeleteSubCategory, {
-                          data: { ids }
-                        });
-
-                        // Option 2: If you must use DELETE, send data in config
-                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
-
-                        if (res?.data?.message || res?.data?.success) {
-                          toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
-                          setSelectedRows([]);
-                          await fetchCategories();
-                        } else {
-                          toast.error(res?.data?.message || 'Bulk delete failed');
-                        }
-                      } catch (error: any) {
-                        console.error("Bulk delete error:", error);
-                        toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
-                      }
+                      setShowBulkDeletePopup(true);
                     }}
                   >
                     Delete Selected ({selectedRows.length})
@@ -809,7 +762,7 @@ const handleConfirmDelete = async () => {
       </div>
 
       {/* Delete Confirmation Popup */}
-     <CommonDeleteModal
+      <CommonDeleteModal
         open={showDeletePopup}
         title="Delete Sub Category?"
         description={subCategoryToDelete ? `Are you sure you want to delete "${subCategoryToDelete.name}"? This action cannot be undone.` : "This action cannot be undone."}
@@ -818,9 +771,18 @@ const handleConfirmDelete = async () => {
         onConfirm={handleConfirmDelete}
       />
 
+      <CommonDeleteModal
+        open={showBulkDeletePopup}
+        title="Delete Selected Sub-categories?"
+        description={`Are you sure you want to delete ${selectedRows.length} selected sub-categories? This action cannot be undone.`}
+        isLoading={isBulkDeleting}
+        onCancel={handleCancelBulkDelete}
+        onConfirm={handleConfirmBulkDelete}
+      />
+
       {/* Image Modal */}
       {imageModalOpen && modalImageUrl && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           onClick={() => setImageModalOpen(false)}
         >

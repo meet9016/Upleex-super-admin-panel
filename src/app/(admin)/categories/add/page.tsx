@@ -61,8 +61,10 @@ export default function AddCategoryPage() {
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   // Delete popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showBulkDeletePopup, setShowBulkDeletePopup] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -193,6 +195,7 @@ if (res?.data?.success && res?.data?.data) {
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     watch,
     formState: { errors },
   } = useForm<CategoryFormValues>({
@@ -301,6 +304,7 @@ if (res?.data?.success && res?.data?.data) {
     setEditingId(String(id));
     setValue('name', category.categories_name || '');
     setValue('image', 'existing');
+    clearErrors();
     setPreviewImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -349,6 +353,37 @@ const handleConfirmDelete = async () => {
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
     setCategoryToDelete(null);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+    
+    try {
+      setIsBulkDeleting(true);
+      const ids = selectedRows.map(r => r._id || r.id).filter(Boolean);
+
+      const res = await api.delete(endPointApi.bulkDeleteCategory, {
+        data: { ids }
+      });
+
+      if (res?.data?.message || res?.data?.success) {
+        toast.success(`${selectedRows.length} categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
+        setSelectedRows([]);
+        await fetchCategories();
+      } else {
+        toast.error(res?.data?.message || 'Bulk delete failed');
+      }
+    } catch (error: any) {
+      console.error("Bulk delete error:", error);
+      toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
+    } finally {
+      setIsBulkDeleting(false);
+      setShowBulkDeletePopup(false);
+    }
+  };
+
+  const handleCancelBulkDelete = () => {
+    setShowBulkDeletePopup(false);
   };
 
   const handleCancelEdit = () => {
@@ -543,32 +578,9 @@ const handleConfirmDelete = async () => {
                     variant="destructive"
                     size="md"
                     disabled={selectedRows.length === 0}
-                    onClick={async () => {
+                    onClick={() => {
                       if (selectedRows.length === 0) return;
-                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
-
-                      try {
-                        const ids = selectedRows.map(r => r.id).filter(Boolean);
-
-                        // Option 1: Use POST for bulk delete (recommended)
-                        const res = await api.delete(endPointApi.bulkDeleteCategory, {
-                          data: { ids }
-                        });
-
-                        // Option 2: If you must use DELETE, send data in config
-                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
-
-                        if (res?.data?.message || res?.data?.success) {
-                          toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
-                          setSelectedRows([]);
-                          await fetchCategories();
-                        } else {
-                          toast.error(res?.data?.message || 'Bulk delete failed');
-                        }
-                      } catch (error: any) {
-                        console.error("Bulk delete error:", error);
-                        toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
-                      }
+                      setShowBulkDeletePopup(true);
                     }}
                   >
                     Delete Selected ({selectedRows.length})
@@ -650,6 +662,15 @@ const handleConfirmDelete = async () => {
         isLoading={isDeleting}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
+      />
+
+      <CommonDeleteModal
+        open={showBulkDeletePopup}
+        title="Delete Selected Categories?"
+        description={`Are you sure you want to delete ${selectedRows.length} selected categories? This action cannot be undone.`}
+        isLoading={isBulkDeleting}
+        onCancel={handleCancelBulkDelete}
+        onConfirm={handleConfirmBulkDelete}
       />
 
         {/* Image Modal */}

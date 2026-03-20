@@ -122,6 +122,7 @@ export default function PlansPage() {
       description: p.description || "",
       popular: !!p.popular,
     });
+    setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
