@@ -23,7 +23,7 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name is required"),
-   image: z.any().refine((files) => files && files.length > 0, "Image is required"),
+  image: z.any().refine((files) => files && files.length > 0, "Image is required"),
 
 });
 
@@ -60,8 +60,10 @@ export default function AddServiceCategoryPage() {
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   // Delete popup states
   const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showBulkDeletePopup, setShowBulkDeletePopup] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -75,13 +77,13 @@ export default function AddServiceCategoryPage() {
 
       const res = await api.get(endPointApi.getServiceCategoryList, { params });
 
-    if (res?.data?.success && res?.data?.data) {
-      const transformedData = res.data.data.map((category: any) => ({
-        ...category,
-        id: category.categories_id || category._id
-      }));
-      setCategories(transformedData);
-    } else if (res?.data?.data) {
+      if (res?.data?.success && res?.data?.data) {
+        const transformedData = res.data.data.map((category: any) => ({
+          ...category,
+          id: category.categories_id || category._id
+        }));
+        setCategories(transformedData);
+      } else if (res?.data?.data) {
         setCategories(res.data.data);
       }
     } catch (error) {
@@ -175,6 +177,7 @@ export default function AddServiceCategoryPage() {
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     watch,
     formState: { errors },
   } = useForm<CategoryFormValues>({
@@ -255,7 +258,7 @@ export default function AddServiceCategoryPage() {
       }
 
       if (res?.data) {
-          reset({ name: "", image: undefined });
+        reset({ name: "", image: undefined });
         setPreviewImage(null);
         await fetchCategories(debouncedSearch);
       }
@@ -275,6 +278,7 @@ export default function AddServiceCategoryPage() {
     setEditingId(String(id));
     setValue('name', category.categories_name || '');
     setValue('image', 'existing');
+    clearErrors();
     setPreviewImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -284,42 +288,71 @@ export default function AddServiceCategoryPage() {
     setShowDeletePopup(true);
   };
 
-const handleConfirmDelete = async () => {
-  if (!categoryToDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
 
-  setIsDeleting(true);
-  try {
-    const id = categoryToDelete._id || categoryToDelete.categories_id;
+    setIsDeleting(true);
+    try {
+      const id = categoryToDelete._id || categoryToDelete.categories_id;
 
-    await api.delete(`${endPointApi.deleteServiceCategory}/${id}`);
-    toast.success("Service Category deleted successfully");
-    
-    if (editingId === id) {
-      setEditingId(null);
-      setPreviewImage(null);
-      reset({ name: "", image: undefined });
+      await api.delete(`${endPointApi.deleteServiceCategory}/${id}`);
+      toast.success("Service Category deleted successfully");
+
+      if (editingId === id) {
+        setEditingId(null);
+        setPreviewImage(null);
+        reset({ name: "", image: undefined });
+      }
+
+      await fetchCategories(debouncedSearch);
+      setShowDeletePopup(false);
+      setCategoryToDelete(null);
+    } catch (error: any) {
+      console.error("Error deleting service category:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete service category");
+    } finally {
+      setIsDeleting(false);
     }
-    
-    await fetchCategories(debouncedSearch);
-    setShowDeletePopup(false);
-    setCategoryToDelete(null);
-  } catch (error: any) {
-    console.error("Error deleting service category:", error);
-    toast.error(error?.response?.data?.message || "Failed to delete service category");
-  } finally {
-    setIsDeleting(false);
-  }
-};
+  };
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
     setCategoryToDelete(null);
   };
 
+  const handleConfirmBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+
+    try {
+      setIsBulkDeleting(true);
+      const ids = selectedRows.map(r => r._id || r.categories_id).filter(Boolean);
+
+      const res = await api.post(endPointApi.bulkDeleteServiceCategory, { ids });
+
+      if (res?.data?.message || res?.data?.success) {
+        toast.success(`${selectedRows.length} categories deleted successfully`);
+        setSelectedRows([]);
+        await fetchCategories(debouncedSearch);
+      } else {
+        toast.error(res?.data?.message || 'Bulk delete failed');
+      }
+    } catch (error: any) {
+      console.error("Bulk delete error:", error);
+      toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
+    } finally {
+      setIsBulkDeleting(false);
+      setShowBulkDeletePopup(false);
+    }
+  };
+
+  const handleCancelBulkDelete = () => {
+    setShowBulkDeletePopup(false);
+  };
+
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
-     reset({ name: "", image: undefined });
+    reset({ name: "", image: undefined });
   };
 
   const handleClearSearch = () => {
@@ -390,7 +423,7 @@ const handleConfirmDelete = async () => {
                               }}
                               className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                               View
                             </button>
                             <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
@@ -426,23 +459,23 @@ const handleConfirmDelete = async () => {
                   </div>
                   {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>}
                 </div>
-              <div className="flex gap-3">
-                <Button type="submit" className="flex-1 h-11 rounded-xl btn-primary" disabled={isLoading}>
-                  {isLoading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
-                  ) : (
-                    <><Plus className="mr-2 h-4 w-4" /> {editingId ? 'Update' : 'Add'} Category</>
-                  )}
-                </Button>
-                <Button type="button" variant="outline" className="flex-1 h-11" onClick={handleCancelEdit}> Cancel </Button>
-              </div>
+                <div className="flex gap-3">
+                  <Button type="submit" className="flex-1 h-11 rounded-xl btn-primary" disabled={isLoading}>
+                    {isLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
+                    ) : (
+                      <><Plus className="mr-2 h-4 w-4" /> {editingId ? 'Update' : 'Add'} Category</>
+                    )}
+                  </Button>
+                  <Button type="button" variant="outline" className="flex-1 h-11" onClick={handleCancelEdit}> Cancel </Button>
+                </div>
               </form>
             </CardContent>
           </Card>
         </div>
 
         <div className="lg:col-span-2">
-         <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -450,23 +483,13 @@ const handleConfirmDelete = async () => {
                   <p className="text-xs text-slate-500 mt-1"> Total: {categories.length} categories </p>
                 </div>
                 <div className="flex items-center gap-3">
-                   <Button
+                  <Button
                     variant="destructive"
                     size="md"
                     disabled={selectedRows.length === 0}
-                    onClick={async () => {
-                      if (selectedRows.length === 0 || !confirm(`Delete ${selectedRows.length} selected categories?`)) return;
-                      try {
-                        const ids = selectedRows.map(r => r.id).filter(Boolean);
-                        const res = await api.post(endPointApi.bulkDeleteServiceCategory, { ids });
-                        if (res?.data?.message || res?.data?.success) {
-                          toast.success(`${selectedRows.length} categories deleted successfully`);
-                          setSelectedRows([]);
-                          fetchCategories();
-                        }
-                      } catch (error: any) {
-                        toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
-                      }
+                    onClick={() => {
+                      if (selectedRows.length === 0) return;
+                      setShowBulkDeletePopup(true);
                     }}
                   >
                     Delete Selected ({selectedRows.length})
@@ -509,7 +532,7 @@ const handleConfirmDelete = async () => {
         </div>
       </div>
 
-       <CommonDeleteModal
+      <CommonDeleteModal
         open={showDeletePopup}
         title="Delete Service Category?"
         description={categoryToDelete ? `Are you sure you want to delete "${categoryToDelete.categories_name}"?` : "This action cannot be undone."}
@@ -518,14 +541,23 @@ const handleConfirmDelete = async () => {
         onConfirm={handleConfirmDelete}
       />
 
-            {imageModalOpen && modalImageUrl && (
-              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setImageModalOpen(false)}>
-                <div className="relative max-w-4xl max-h-[90vh]">
-                  <button onClick={() => setImageModalOpen(false)} className="absolute -top-10 right-0 text-white"><X size={32} /></button>
-                  <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
-                </div>
-              </div>
-            )}
+      <CommonDeleteModal
+        open={showBulkDeletePopup}
+        title="Delete Selected Categories?"
+        description={`Are you sure you want to delete ${selectedRows.length} selected categories? This action cannot be undone.`}
+        isLoading={isBulkDeleting}
+        onCancel={handleCancelBulkDelete}
+        onConfirm={handleConfirmBulkDelete}
+      />
+
+      {imageModalOpen && modalImageUrl && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setImageModalOpen(false)}>
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button onClick={() => setImageModalOpen(false)} className="absolute -top-10 right-0 text-white"><X size={32} /></button>
+            <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

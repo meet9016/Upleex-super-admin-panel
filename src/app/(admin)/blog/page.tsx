@@ -75,6 +75,7 @@ export default function BlogPage() {
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     watch,
     control,
     formState: { errors },
@@ -392,6 +393,7 @@ export default function BlogPage() {
         }
 
         setValue("image", "existing"); // Placeholder to indicate existing image
+        clearErrors();
         setPreviewImage(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }

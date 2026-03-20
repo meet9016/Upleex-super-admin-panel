@@ -62,9 +62,12 @@ export default function FAQPage() {
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<FAQFormValues>({
     resolver: zodResolver(faqSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   });
 
   // Fetch FAQs on mount
@@ -228,6 +231,7 @@ export default function FAQPage() {
     setEditingId(faq.id);
     setValue("question", faq.question);
     setValue("answer", faq.answer);
+    clearErrors();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

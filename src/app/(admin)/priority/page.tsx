@@ -131,6 +131,7 @@ export default function PriorityPlansPage() {
       is_popular: !!p.is_popular,
     });
     setSelectedPlanType(p.name.toLowerCase());
+    setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
