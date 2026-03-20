@@ -33,11 +33,12 @@ export default function VendorsPage() {
     const [dropdownStatuses, setDropdownStatuses] = useState<any[]>([]);
     const [showDetails, setShowDetails] = useState(false);
     const [detailsRow, setDetailsRow] = useState<any | null>(null);
-
+    console.log(rowData)
     const fetchVendors = useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await api.get(endPointApi.getVendorList);
+            console.log(response)
             if (response.data.status === 200 || response.data.success) {
                 setRowData(response.data.data || []);
             }

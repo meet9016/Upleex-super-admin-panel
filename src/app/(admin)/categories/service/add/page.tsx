@@ -148,12 +148,6 @@ export default function AddServiceCategoryPage() {
       }
     },
     {
-      field: "service_count",
-      headerName: "Services",
-      minWidth: 100,
-      cellStyle: { textAlign: "center" }
-    },
-    {
       field: "created_at",
       headerName: "Created",
       minWidth: 150,
@@ -162,9 +156,9 @@ export default function AddServiceCategoryPage() {
     },
     {
       headerName: "Action",
-      width: 100,
-      minWidth: 100,
-      maxWidth: 100,
+      width: 200,
+      minWidth: 200,
+      maxWidth: 200,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
