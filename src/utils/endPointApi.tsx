@@ -90,6 +90,12 @@ export interface EndPointApi {
     changeQuoteStatus: string;
     getQuoteStatuses: string;
 
+    // Vendor Payments
+    getAllVendorPayments: string;
+    getVendorPaymentStats: string;
+    releasePayment: string;
+    releaseOrderPayment: string;
+    releaseScheduledPayments: string;
     // Vendor Services Approval
     getAllServiceVendors: string;
     getVendorServices: string;
@@ -192,6 +198,12 @@ const endPointApi: EndPointApi = {
     changeQuoteStatus: 'quote/change-status',
     getQuoteStatuses: 'quote/status-dropdown',
 
+    // Vendor Payments
+    getAllVendorPayments: 'vendor/payments/admin',
+    getVendorPaymentStats: 'vendor/payments/admin/stats',
+    releasePayment: 'vendor/payments/admin/:paymentId/release',
+    releaseOrderPayment: 'vendor/payments/admin/order/:orderId/vendor/:vendorId/release',
+    releaseScheduledPayments: 'vendor/payments/admin/release-scheduled'
     // Vendor Services Approval
     getAllServiceVendors: 'services/vendors/getall',
     getVendorServices: 'services/vendor',
