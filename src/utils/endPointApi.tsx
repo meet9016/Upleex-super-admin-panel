@@ -203,7 +203,7 @@ const endPointApi: EndPointApi = {
     getVendorPaymentStats: 'vendor/payments/admin/stats',
     releasePayment: 'vendor/payments/admin/:paymentId/release',
     releaseOrderPayment: 'vendor/payments/admin/order/:orderId/vendor/:vendorId/release',
-    releaseScheduledPayments: 'vendor/payments/admin/release-scheduled'
+    releaseScheduledPayments: 'vendor/payments/admin/release-scheduled',
     // Vendor Services Approval
     getAllServiceVendors: 'services/vendors/getall',
     getVendorServices: 'services/vendor',
