@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Upleex Super Admin Panel",
   description: "Advanced management dashboard for Upleex",
+  icons: {
+      icon: '/favicon.png',
+    },
 };
 
 import { ToastContainer } from "react-toastify";

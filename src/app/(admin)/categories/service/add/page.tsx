@@ -35,8 +35,7 @@ interface CategoryRow {
   categories_name: string;
   categories_id?: string;
   image?: string;
-  subcategories?: any[];
-  status?: string;
+  service_count?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -50,7 +49,7 @@ function useDebounce<T>(value: T, delay: number = 500): T {
   return debouncedValue;
 }
 
-export default function AddCategoryPage() {
+export default function AddServiceCategoryPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
@@ -74,25 +73,20 @@ export default function AddCategoryPage() {
 
       if (search) params.search = search;
 
-      console.log("🚀 ~ API Request Params:", params);
+      const res = await api.get(endPointApi.getServiceCategoryList, { params });
 
-      const res = await api.get(endPointApi.getCategoryList, { params });
-      console.log("🚀 ~ API Response:", res);
-
-    // When setting categories from API response
-if (res?.data?.success && res?.data?.data) {
-  // Transform data to include id field
-  const transformedData = res.data.data.map((category: any) => ({
-    ...category,
-    id: category.categories_id || category._id // Add id field for AG Grid
-  }));
-  setCategories(transformedData);
-}else if (res?.data?.data) {
+    if (res?.data?.success && res?.data?.data) {
+      const transformedData = res.data.data.map((category: any) => ({
+        ...category,
+        id: category.categories_id || category._id
+      }));
+      setCategories(transformedData);
+    } else if (res?.data?.data) {
         setCategories(res.data.data);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      toast.error("Failed to fetch categories");
+      console.error("Error fetching service categories:", error);
+      toast.error("Failed to fetch service categories");
     } finally {
       setIsFetching(false);
     }
@@ -102,20 +96,16 @@ if (res?.data?.success && res?.data?.data) {
     fetchCategories();
   }, []);
 
-  // Search effect
   useEffect(() => {
     fetchCategories(debouncedSearch);
   }, [debouncedSearch]);
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "";
-
     if (imagePath.startsWith('http')) return imagePath;
-
     if (imagePath.startsWith('/uploads')) {
       return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
     }
-
     return imagePath;
   };
 
@@ -157,14 +147,6 @@ if (res?.data?.success && res?.data?.data) {
         );
       }
     },
-    // {
-    //   field: "subcategories",
-    //   headerName: "Sub Categories",
-    //   minWidth: 130,
-    //   valueGetter: (params) => params.data?.subcategories?.length || 0,
-    //   cellStyle: { textAlign: "center" }
-    // },
-  
     {
       field: "created_at",
       headerName: "Created",
@@ -174,9 +156,9 @@ if (res?.data?.success && res?.data?.data) {
     },
     {
       headerName: "Action",
-      width: 100,
-      minWidth: 100,
-      maxWidth: 100,
+      width: 200,
+      minWidth: 200,
+      maxWidth: 200,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
@@ -228,7 +210,6 @@ if (res?.data?.success && res?.data?.data) {
       setPreviewImage(objectUrl);
       return () => URL.revokeObjectURL(objectUrl);
     } else if (watchImage === 'existing') {
-      // Keep existing image, don't set preview
       return;
     } else {
       setPreviewImage(null);
@@ -239,49 +220,42 @@ if (res?.data?.success && res?.data?.data) {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("categories_name", data.name);
+      formData.append("name", data.name);
 
-      if (data.image && data.image[0] instanceof File) {
+      if (data.image && data.image[0] && data.image[0] instanceof File) {
         formData.append("image", data.image[0]);
       }
 
       let res;
       if (editingId) {
         res = await api.put(
-          `${endPointApi.updateCategory}/${editingId}`,
+          `${endPointApi.updateServiceCategory}/${editingId}`,
           formData,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            headers: { "Content-Type": "multipart/form-data" },
           }
         );
 
         if (res?.data) {
-          toast.success('Category updated successfully');
+          toast.success('Service Category updated successfully');
           setEditingId(null);
         }
       } else {
         res = await api.post(
-          endPointApi.postCategoryList,
+          endPointApi.postServiceCategoryList,
           formData,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            headers: { "Content-Type": "multipart/form-data" },
           }
         );
 
         if (res?.data?.success || res?.data?.status === 200) {
-          toast.success(res?.data?.message || 'Category created successfully');
+          toast.success(res?.data?.message || 'Service Category created successfully');
         }
       }
 
       if (res?.data) {
-         reset({
-    name: "",
-    image: undefined
-  });
+          reset({ name: "", image: undefined });
         setPreviewImage(null);
         await fetchCategories(debouncedSearch);
       }
@@ -289,7 +263,7 @@ if (res?.data?.success && res?.data?.data) {
       console.error("Error:", error);
       toast.error(
         error?.response?.data?.message ||
-        (editingId ? 'Failed to update category' : 'Failed to create category')
+        (editingId ? 'Failed to update service category' : 'Failed to create service category')
       );
     } finally {
       setIsLoading(false);
@@ -305,13 +279,11 @@ if (res?.data?.success && res?.data?.data) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Delete click handler - opens popup
   const handleDeleteClick = (category: CategoryRow) => {
     setCategoryToDelete(category);
     setShowDeletePopup(true);
   };
 
-  // Confirm delete handler
 const handleConfirmDelete = async () => {
   if (!categoryToDelete) return;
 
@@ -319,33 +291,26 @@ const handleConfirmDelete = async () => {
   try {
     const id = categoryToDelete._id || categoryToDelete.categories_id;
 
-    await api.delete(`${endPointApi.deleteCategory}/${id}`);
-    toast.success("Category deleted successfully");
+    await api.delete(`${endPointApi.deleteServiceCategory}/${id}`);
+    toast.success("Service Category deleted successfully");
     
-    // Check if the deleted category is the one being edited
     if (editingId === id) {
       setEditingId(null);
       setPreviewImage(null);
-      reset({
-        name: "",
-        image: undefined
-      }); // Clear the form
+      reset({ name: "", image: undefined });
     }
     
     await fetchCategories(debouncedSearch);
-
-    // Close popup
     setShowDeletePopup(false);
     setCategoryToDelete(null);
   } catch (error: any) {
-    console.error("Error deleting category:", error);
-    toast.error(error?.response?.data?.message || "Failed to delete category");
+    console.error("Error deleting service category:", error);
+    toast.error(error?.response?.data?.message || "Failed to delete service category");
   } finally {
     setIsDeleting(false);
   }
 };
 
-  // Cancel delete handler
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
     setCategoryToDelete(null);
@@ -354,10 +319,7 @@ const handleConfirmDelete = async () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
-     reset({
-    name: "",
-    image: undefined
-  });
+     reset({ name: "", image: undefined });
   };
 
   const handleClearSearch = () => {
@@ -371,39 +333,32 @@ const handleConfirmDelete = async () => {
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Categories</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Service Categories</h2>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3 items-stretch" style={{ height: '770px' }}>
-        {/* Left: Form */}
         <div className="lg:col-span-1">
           <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col">
             <CardHeader>
               <CardTitle className="text-lg">
-                {editingId ? 'Edit Category' : 'Add New Category'}
+                {editingId ? 'Edit Service Category' : 'Add New Service Category'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-semibold text-slate-700">
-                    Name
-                  </label>
+                  <label htmlFor="name" className="text-sm font-semibold text-slate-700"> Name </label>
                   <Input
                     id="name"
-                    placeholder="e.g. Electronics"
+                    placeholder="e.g. Cleaning"
                     className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
                     {...register("name")}
                     error={errors.name?.message}
                   />
                 </div>
 
-                {/* Image Upload Field */}
                 <div className="space-y-2">
-                  <label htmlFor="image" className="text-sm font-semibold text-slate-700">
-                    Category Image
-                  </label>
-
+                  <label htmlFor="image" className="text-sm font-semibold text-slate-700"> Category Image </label>
                   <div
                     {...getRootProps()}
                     className={cn(
@@ -413,8 +368,6 @@ const handleConfirmDelete = async () => {
                     )}
                   >
                     <input {...getInputProps()} />
-
-                    {/* Show Preview Image (New or Existing) */}
                     {(previewImage || (editingId && currentEditingCategory?.image)) ? (
                       <div className="absolute inset-0 w-full h-full group">
                         <img
@@ -441,12 +394,10 @@ const handleConfirmDelete = async () => {
                               View
                             </button>
                             <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
-                              <Edit size={14} />
-                              Change
+                              <Edit size={14} /> Change
                             </div>
                           </div>
                         </div>
-                        {/* Remove Button for new uploads */}
                         {previewImage && (
                           <button
                             type="button"
@@ -466,77 +417,37 @@ const handleConfirmDelete = async () => {
                         <div className="bg-slate-100 p-2 rounded-full mb-2">
                           <Plus className="h-5 w-5 text-slate-500" />
                         </div>
-                        {isDragActive ? (
-                          <p className="text-sm font-medium text-primary">Drop the image here...</p>
-                        ) : (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-slate-700">
-                              Click or drag image to upload
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              SVG, PNG, JPG or GIF (max. 5MB)
-                            </p>
-                          </div>
-                        )}
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-slate-700"> Click or drag image to upload </p>
+                          <p className="text-xs text-slate-500"> SVG, PNG, JPG or GIF (max. 5MB) </p>
+                        </div>
                       </>
                     )}
                   </div>
-
-                  {errors.image && (
-                    <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
-                  )}
-                  <p className="text-xs text-slate-500 mt-1">
-                    {editingId
-                      ? 'Upload a new image to replace the existing one'
-                      : 'Upload an image for the category (JPEG, PNG, etc.)'}
-                  </p>
+                  {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>}
                 </div>
               <div className="flex gap-3">
-  <Button
-    type="submit"
-    className="flex-1 h-11 rounded-xl btn-primary"
-    disabled={isLoading}
-  >
-    {isLoading ? (
-      <>
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        {editingId ? 'Updating...' : 'Adding...'}
-      </>
-    ) : (
-      <>
-        <Plus className="mr-2 h-4 w-4" />
-        {editingId ? 'Update Category' : 'Add Category'}
-      </>
-    )}
-  </Button>
-
-  <Button
-    type="button"
-    variant="outline"
-    className="flex-1 h-11"
-    onClick={handleCancelEdit}
-  >
-    Cancel
-  </Button>
-</div>
+                <Button type="submit" className="flex-1 h-11 rounded-xl btn-primary" disabled={isLoading}>
+                  {isLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
+                  ) : (
+                    <><Plus className="mr-2 h-4 w-4" /> {editingId ? 'Update' : 'Add'} Category</>
+                  )}
+                </Button>
+                <Button type="button" variant="outline" className="flex-1 h-11" onClick={handleCancelEdit}> Cancel </Button>
+              </div>
               </form>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right: List */}
         <div className="lg:col-span-2">
          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-lg">
-                    Category List
-                  </CardTitle>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Total: {categories.length} categories
-                    {searchText && ` • Searching: "${searchText}"`}
-                  </p>
+                  <CardTitle className="text-lg"> Service Category List </CardTitle>
+                  <p className="text-xs text-slate-500 mt-1"> Total: {categories.length} categories </p>
                 </div>
                 <div className="flex items-center gap-3">
                    <Button
@@ -544,53 +455,32 @@ const handleConfirmDelete = async () => {
                     size="md"
                     disabled={selectedRows.length === 0}
                     onClick={async () => {
-                      if (selectedRows.length === 0) return;
-                      if (!confirm(`Delete ${selectedRows.length} selected sub-categories?`)) return;
-
+                      if (selectedRows.length === 0 || !confirm(`Delete ${selectedRows.length} selected categories?`)) return;
                       try {
                         const ids = selectedRows.map(r => r.id).filter(Boolean);
-
-                        // Option 1: Use POST for bulk delete (recommended)
-                        const res = await api.delete(endPointApi.bulkDeleteCategory, {
-                          data: { ids }
-                        });
-
-                        // Option 2: If you must use DELETE, send data in config
-                        // const res = await api.delete(endPointApi.bulkDeleteSubCategory, { data: { ids } });
-
+                        const res = await api.post(endPointApi.bulkDeleteServiceCategory, { ids });
                         if (res?.data?.message || res?.data?.success) {
-                          toast.success(`${selectedRows.length} sub-categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
+                          toast.success(`${selectedRows.length} categories deleted successfully`);
                           setSelectedRows([]);
-                          await fetchCategories();
-                        } else {
-                          toast.error(res?.data?.message || 'Bulk delete failed');
+                          fetchCategories();
                         }
                       } catch (error: any) {
-                        console.error("Bulk delete error:", error);
-                        toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
                       }
                     }}
                   >
                     Delete Selected ({selectedRows.length})
                   </Button>
-                  {/* Search Input */}
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search categories..."
+                      placeholder="Search..."
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
                       className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
                     />
                     <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    {searchText && (
-                      <button
-                        onClick={handleClearSearch}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        ×
-                      </button>
-                    )}
+                    {searchText && <button onClick={handleClearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"> × </button>}
                   </div>
                 </div>
               </div>
@@ -598,40 +488,17 @@ const handleConfirmDelete = async () => {
             <CardContent className="p-0 flex-1 relative">
               {isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                  <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-sm text-slate-500">
-                      {searchText ? 'Searching...' : 'Loading categories...'}
-                    </p>
-                  </div>
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : categories.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                  <div className="text-center">
-                    <p className="text-slate-500 mb-2">
-                      {searchText
-                        ? `No categories found matching "${searchText}"`
-                        : 'No categories found'}
-                    </p>
-                    {searchText && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleClearSearch}
-                        className="text-xs"
-                      >
-                        Clear Search
-                      </Button>
-                    )}
-                  </div>
+                  <p className="text-slate-500"> No categories found </p>
                 </div>
               ) : (
                 <AgGridTable
                   rowData={categories}
                   columns={columnDefs as ColDef[]}
-                  onSelectionChange={(selected) => {
-                    setSelectedRows(selected);
-                  }}
+                  onSelectionChange={(selected) => setSelectedRows(selected)}
                   enableSearch={false}
                   enableFilter={false}
                   gridHeight={700}
@@ -642,35 +509,20 @@ const handleConfirmDelete = async () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Popup */}
        <CommonDeleteModal
         open={showDeletePopup}
-        title="Delete Category?"
-        description={categoryToDelete ? `Are you sure you want to delete "${categoryToDelete.categories_name}"? This action cannot be undone.` : "This action cannot be undone."}
+        title="Delete Service Category?"
+        description={categoryToDelete ? `Are you sure you want to delete "${categoryToDelete.categories_name}"?` : "This action cannot be undone."}
         isLoading={isDeleting}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
       />
 
-        {/* Image Modal */}
             {imageModalOpen && modalImageUrl && (
-              <div 
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-                onClick={() => setImageModalOpen(false)}
-              >
+              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setImageModalOpen(false)}>
                 <div className="relative max-w-4xl max-h-[90vh]">
-                  <button
-                    onClick={() => setImageModalOpen(false)}
-                    className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
-                  >
-                    <X size={32} />
-                  </button>
-                  <img
-                    src={modalImageUrl}
-                    alt="Preview"
-                    className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                  <button onClick={() => setImageModalOpen(false)} className="absolute -top-10 right-0 text-white"><X size={32} /></button>
+                  <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
                 </div>
               </div>
             )}
