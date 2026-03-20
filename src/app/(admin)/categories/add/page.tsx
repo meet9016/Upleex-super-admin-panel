@@ -241,7 +241,7 @@ if (res?.data?.success && res?.data?.data) {
       const formData = new FormData();
       formData.append("categories_name", data.name);
 
-      if (data.image && data.image[0]) {
+      if (data.image && data.image[0] instanceof File) {
         formData.append("image", data.image[0]);
       }
 

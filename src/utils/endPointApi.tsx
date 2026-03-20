@@ -89,6 +89,13 @@ export interface EndPointApi {
     updateQuote: string;
     changeQuoteStatus: string;
     getQuoteStatuses: string;
+
+    // Vendor Services Approval
+    getAllServiceVendors: string;
+    getVendorServices: string;
+    approveService: string;
+    bulkApproveServices: string;
+    bulkRejectServices: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -183,7 +190,14 @@ const endPointApi: EndPointApi = {
     getQuoteById: 'quote/getById',
     updateQuote: 'quote/update',
     changeQuoteStatus: 'quote/change-status',
-    getQuoteStatuses: 'quote/status-dropdown'
+    getQuoteStatuses: 'quote/status-dropdown',
+
+    // Vendor Services Approval
+    getAllServiceVendors: 'services/vendors/getall',
+    getVendorServices: 'services/vendor',
+    approveService: 'services/approve',
+    bulkApproveServices: 'services/bulk-approve',
+    bulkRejectServices: 'services/bulk-reject',
 };
 
 export default endPointApi;

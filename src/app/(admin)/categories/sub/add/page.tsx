@@ -220,7 +220,7 @@ export default function AddSubCategoryPage() {
       formData.append("name", data.name);
 
       // Add image if selected
-      if (data.image && data.image[0]) {
+      if (data.image && data.image[0] instanceof File) {
         formData.append("image", data.image[0]);
       }
 
@@ -276,7 +276,7 @@ export default function AddSubCategoryPage() {
       formData.append("name", data.name);
 
       // Add image if selected
-      if (data.image && data.image[0]) {
+      if (data.image && data.image[0] instanceof File) {
         formData.append("image", data.image[0]);
       }
 
