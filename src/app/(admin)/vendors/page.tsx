@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
-import { Loader2, Search, Eye } from "lucide-react";
+import { Loader2, Search, Eye, X, Filter } from "lucide-react";
 import StatusBadge from "@/components/common/StatusBadge";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { DataTable } from "@/components/ui/DataTable";
@@ -26,6 +26,15 @@ interface VendorRow {
     created_at?: string;
 }
 
+function useDebounce<T>(value: T, delay: number = 500): T {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
 export default function VendorsPage() {
     const [rowData, setRowData] = useState<VendorRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,11 +42,46 @@ export default function VendorsPage() {
     const [dropdownStatuses, setDropdownStatuses] = useState<any[]>([]);
     const [showDetails, setShowDetails] = useState(false);
     const [detailsRow, setDetailsRow] = useState<any | null>(null);
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [vendorNameFilter, setVendorNameFilter] = useState("");
+    const [businessNameFilter, setBusinessNameFilter] = useState("");
+    const [kycProgressFilter, setKycProgressFilter] = useState("");
+
+    // Filter Modal state and refs
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const filterModalRef = useRef<HTMLDivElement>(null);
+    const filterButtonRef = useRef<HTMLButtonElement>(null);
+    const [pendingStatusFilter, setPendingStatusFilter] = useState("");
+    const [pendingVendorName, setPendingVendorName] = useState("");
+    const [pendingBusinessName, setPendingBusinessName] = useState("");
+    const [pendingKycProgress, setPendingKycProgress] = useState("");
+
+    const debouncedSearch = useDebounce(searchText, 500);
+
+    const activeFilterCount = [statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter].filter(v => v !== "").length;
+
     console.log(rowData)
-    const fetchVendors = useCallback(async () => {
+    const fetchVendors = useCallback(async (
+        searchQuery = '',
+        statusQuery = '',
+        vendorName = '',
+        businessName = '',
+        kycProgress = ''
+    ) => {
         setIsLoading(true);
         try {
-            const response = await api.get(endPointApi.getVendorList);
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (statusQuery) params.append('status', statusQuery);
+            if (vendorName) params.append('vendor_name', vendorName);
+            if (businessName) params.append('business_name', businessName);
+            if (kycProgress) params.append('kyc_progress', kycProgress);
+
+            const queryString = params.toString();
+            const url = queryString ? `${endPointApi.getVendorList}?${queryString}` : endPointApi.getVendorList;
+
+            const response = await api.get(url);
             console.log(response)
             if (response.data.status === 200 || response.data.success) {
                 setRowData(response.data.data || []);
@@ -62,9 +106,24 @@ export default function VendorsPage() {
     }, []);
 
     useEffect(() => {
-        fetchVendors();
+        fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
+    }, [fetchVendors, debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter]);
+
+    useEffect(() => {
         fetchDropdowns();
-    }, [fetchVendors, fetchDropdowns]);
+    }, [fetchDropdowns]);
+
+    // Handle click outside to close filter modal
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (filterModalRef.current && !filterModalRef.current.contains(event.target as Node) &&
+                filterButtonRef.current && !filterButtonRef.current.contains(event.target as Node)) {
+                setShowFilterModal(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string) => {
         setIsUpdating(kycId);
@@ -78,7 +137,7 @@ export default function VendorsPage() {
 
             if (response.data.status === 200 || response.data.success) {
                 toast.success(`Vendor status updated to ${newStatus}`);
-                fetchVendors();
+                fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
             } else {
                 toast.error(response.data.message || "Failed to update status");
             }
@@ -210,16 +269,150 @@ export default function VendorsPage() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-3">Vendor Requests</h2>
                 </div>
-                {/* <div className="flex items-center gap-3">
-                    <Button
-                        variant="outline"
-                        className="rounded-xl border-slate-200 text-slate-600 space-x-2"
-                        onClick={fetchVendors}
-                    >
-                        <Clock size={16} />
-                        <span>Refresh</span>
-                    </Button>
-                </div> */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <div className="relative w-full sm:w-64">
+                        <input
+                            type="text"
+                            placeholder="Search vendors..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            className="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        {searchText && (
+                            <button
+                                onClick={() => setSearchText('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
+                    <div className="relative mt-2 sm:mt-0">
+                        <button
+                            ref={filterButtonRef}
+                            onClick={() => {
+                                setPendingStatusFilter(statusFilter);
+                                setShowFilterModal(!showFilterModal);
+                            }}
+                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative h-[38px] text-sm"
+                        >
+                            <Filter size={18} />
+                            Filter
+                            {activeFilterCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </button>
+
+                        {showFilterModal && (
+                            <div
+                                ref={filterModalRef}
+                                className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl w-80 z-50 border border-gray-200"
+                            >
+                                <div className="p-5">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-semibold text-gray-900">Filter Vendors</h3>
+                                        <button
+                                            onClick={() => setShowFilterModal(false)}
+                                            className="p-1 hover:bg-gray-100 rounded"
+                                        >
+                                            <X size={18} className="text-gray-500" />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-4 pr-1">
+                                        <div>
+                                            <label className="block font-semibold mb-2 text-sm text-gray-700">Vendor Name</label>
+                                            <input
+                                                type="text"
+                                                value={pendingVendorName}
+                                                onChange={(e) => setPendingVendorName(e.target.value)}
+                                                placeholder="Enter vendor name"
+                                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-2 text-sm text-gray-700">Business Name</label>
+                                            <input
+                                                type="text"
+                                                value={pendingBusinessName}
+                                                onChange={(e) => setPendingBusinessName(e.target.value)}
+                                                placeholder="Enter business name"
+                                                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-2 text-sm text-gray-700">KYC Progress</label>
+                                            <SearchableDropdown
+                                                options={[
+                                                    { label: "0 Pages", value: "0" },
+                                                    { label: "1 Page", value: "1" },
+                                                    { label: "2 Pages", value: "2" },
+                                                    { label: "3 Pages", value: "3" },
+                                                    { label: "4 Pages", value: "4" },
+                                                    { label: "Completed (5 Pages)", value: "5" }
+                                                ]}
+                                                value={pendingKycProgress}
+                                                onChange={(val) => setPendingKycProgress(Array.isArray(val) ? val[0] : val)}
+                                                placeholder="Select Progress"
+                                                maxHeight="max-h-60"
+                                                showClear={false}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-2 text-sm text-gray-700">Status</label>
+                                            <SearchableDropdown
+                                                options={[
+                                                    { label: "Pending", value: "pending" },
+                                                    { label: "Approved", value: "approved" },
+                                                    { label: "Rejected", value: "rejected" }
+                                                ]}
+                                                value={pendingStatusFilter}
+                                                onChange={(val) => setPendingStatusFilter(Array.isArray(val) ? val[0] : val)}
+                                                placeholder="Select Status"
+                                                maxHeight="max-h-60"
+                                                showClear={false}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200">
+                                        <button
+                                            onClick={() => {
+                                                setPendingStatusFilter('');
+                                                setPendingVendorName('');
+                                                setPendingBusinessName('');
+                                                setPendingKycProgress('');
+                                                setStatusFilter('');
+                                                setVendorNameFilter('');
+                                                setBusinessNameFilter('');
+                                                setKycProgressFilter('');
+                                                setShowFilterModal(false);
+                                            }}
+                                            className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+                                        >
+                                            Clear All
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setStatusFilter(pendingStatusFilter);
+                                                setVendorNameFilter(pendingVendorName);
+                                                setBusinessNameFilter(pendingBusinessName);
+                                                setKycProgressFilter(pendingKycProgress);
+                                                setShowFilterModal(false);
+                                            }}
+                                            className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+                                        >
+                                            Apply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="grid gap-6">
