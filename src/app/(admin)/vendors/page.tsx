@@ -23,6 +23,7 @@ interface VendorRow {
     mobile: string;
     business_name: string;
     status: "pending" | "approved" | "rejected";
+    vendor_type?: "service" | "product" | "both";
     created_at?: string;
 }
 
@@ -173,21 +174,31 @@ export default function VendorsPage() {
             minWidth: 130,
         },
         {
+            headerName: "Vendor Type",
+            valueGetter: p => {
+                const type = p.data?.vendor_type || 'N/A';
+                return type.charAt(0).toUpperCase() + type.slice(1);
+            },
+            minWidth: 120,
+            cellStyle: { color: "#475569" }
+        },
+        {
             headerName: "KYC Progress",
             minWidth: 200,
             cellRenderer: (params: any) => {
                 const completed = params.data.completed_pages?.length || 0;
-                const total = 5;
-                const percentage = (completed / total) * 100;
+                const vendorType = params.data.vendor_type;
+                const totalSteps = vendorType === 'service' ? 2 : 5;
+                const percentage = Math.min((completed / totalSteps) * 100, 100);
 
                 return (
                     <div className="flex flex-col justify-center h-full space-y-1 w-full max-w-[120px]">
                         <div className="flex justify-between text-xs text-slate-500 font-medium">
-                            <span>{completed}/{total} Pages</span>
+                            <span>{completed}/{totalSteps} Pages</span>
                         </div>
                         <div className="w-full bg-slate-200 rounded-full h-1.5">
                             <div
-                                className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500"
+                                className={`h-1.5 rounded-full transition-all duration-500 ${percentage === 100 ? 'bg-green-600' : 'bg-indigo-600'}`}
                                 style={{ width: `${percentage}%` }}
                             ></div>
                         </div>
@@ -241,8 +252,11 @@ export default function VendorsPage() {
                                 onChange={(val) => {
                                     const next = Array.isArray(val) ? val[0] : val;
                                     const completed = params.data.completed_pages?.length || 0;
-                                    if (next === 'approved' && completed < 5) {
-                                        toast.error('Complete all 5 pages before approving');
+                                    const vendorType = params.data.vendor_type;
+                                    const requiredSteps = vendorType === 'service' ? 2 : 5;
+
+                                    if (next === 'approved' && completed < requiredSteps) {
+                                        toast.error(`Complete all ${requiredSteps} pages before approving`);
                                         return;
                                     }
                                     handleStatusChange(kycId, vendorId, next);
