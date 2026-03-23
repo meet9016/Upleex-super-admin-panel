@@ -125,15 +125,22 @@ export default function VendorsPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string) => {
+    const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
         setIsUpdating(kycId);
         try {
             // Send both kyc_id and vendor_id in payload
-            const response = await api.post(endPointApi.updateVendorStatus, {
+            const payload: any = {
                 kyc_id: kycId,
                 vendor_id: vendorId,
                 status: newStatus.toLowerCase(),
-            });
+            };
+            
+            // Add rejection reason if status is rejected
+            if (newStatus.toLowerCase() === 'rejected' && rejectionReason) {
+                payload.rejection_reason = rejectionReason;
+            }
+
+            const response = await api.post(endPointApi.updateVendorStatus, payload);
 
             if (response.data.status === 200 || response.data.success) {
                 toast.success(`Vendor status updated to ${newStatus}`);
@@ -245,7 +252,14 @@ export default function VendorsPage() {
                                         toast.error('Complete all 5 pages before approving');
                                         return;
                                     }
-                                    handleStatusChange(kycId, vendorId, next);
+                                    
+                                    // If rejecting, ask for reason
+                                    if (next === 'rejected') {
+                                        // const reason = prompt('Please provide a reason for rejection (optional):');
+                                        handleStatusChange(kycId, vendorId, next );
+                                    } else {
+                                        handleStatusChange(kycId, vendorId, next);
+                                    }
                                 }}
                                 disabled={isUpdating === kycId}
                                 placeholder="Select Status"
