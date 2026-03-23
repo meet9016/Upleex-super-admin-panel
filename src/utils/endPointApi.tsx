@@ -94,6 +94,7 @@ export interface EndPointApi {
     getAllVendorPayments: string;
     getVendorPaymentStats: string;
     releasePayment: string;
+    cancelPayment: string;
     releaseOrderPayment: string;
     releaseScheduledPayments: string;
     // Vendor Services Approval
@@ -202,6 +203,7 @@ const endPointApi: EndPointApi = {
     getAllVendorPayments: 'vendor/payments/admin',
     getVendorPaymentStats: 'vendor/payments/admin/stats',
     releasePayment: 'vendor/payments/admin/:paymentId/release',
+    cancelPayment: 'vendor/payments/admin/:paymentId/cancel',
     releaseOrderPayment: 'vendor/payments/admin/order/:orderId/vendor/:vendorId/release',
     releaseScheduledPayments: 'vendor/payments/admin/release-scheduled',
     // Vendor Services Approval
