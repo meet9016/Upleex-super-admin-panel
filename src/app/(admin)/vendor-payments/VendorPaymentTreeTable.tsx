@@ -119,6 +119,7 @@ interface VendorPaymentTreeTableProps {
   };
   onViewDetails: (payment: VendorPayment) => void;
   onReleasePayment: (paymentId: string, notes?: string) => void;
+  onCancelPayment: (paymentId: string, reason?: string) => void;
   onReleaseScheduledPayments: () => void;
   onPageChange: (page: number) => void;
   onFilterChange: (filters: { status: string; vendor_id: string }) => void;
@@ -164,7 +165,7 @@ const StatusCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
 
 // Action cell renderer
 const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
-  const { onViewDetails, onReleasePayment, isReleasing } = props.context;
+  const { onViewDetails, onReleasePayment, onCancelPayment, isReleasing } = props.context;
   const data = props.data;
 
   if (!data) return null;
@@ -179,44 +180,96 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
   // For vendor row - show view details only
   if (isVendor) {
     return (
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
+      <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center gap-2 h-full w-full">
         <button
           onClick={() => console.log('Vendor details not implemented')}
-          className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
+          className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
           title="View Vendor Details"
         >
-          <Eye size={16} />
+          <Eye size={14} />
         </button>
       </div>
     );
   }
 
-  // For payment row - show individual release option
+  // For payment row - show individual release/cancel options
   if (isPayment && data.originalData) {
-    const canRelease = data.paymentStatus === 'pending' && data.releaseDate && canReleasePayment(data.releaseDate);
+    const canRelease = data.paymentStatus === 'pending';
+    const canCancel = data.paymentStatus === 'pending';
+
+    const handleReleaseClick = () => {
+      const confirmed = window.confirm(
+        `Are you sure you want to release payment for Order ${data.orderNumber}?\n\n` +
+        `Customer: ${data.customerName}\n` +
+        `Vendor Amount: ${data.formattedVendorAmount}\n\n` +
+        `This action cannot be undone.`
+      );
+      
+      if (confirmed) {
+        const notes = window.prompt('Enter release notes (optional):');
+        onReleasePayment(data.id, notes || undefined);
+      }
+    };
+
+    const handleCancelClick = () => {
+      const reason = window.prompt(
+        `Please enter the reason for cancelling payment for Order ${data.orderNumber}:\n\n` +
+        `Customer: ${data.customerName}\n` +
+        `Vendor Amount: ${data.formattedVendorAmount}`
+      );
+      
+      if (reason && reason.trim()) {
+        const confirmed = window.confirm(
+          `Are you sure you want to cancel this payment?\n\n` +
+          `Reason: ${reason}\n\n` +
+          `This action cannot be undone.`
+        );
+        
+        if (confirmed) {
+          onCancelPayment(data.id, reason.trim());
+        }
+      } else if (reason !== null) {
+        alert('Cancellation reason is required.');
+      }
+    };
 
     return (
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2">
+      <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center gap-2 h-full w-full">
         <button
           onClick={() => onViewDetails(data.originalData)}
-          className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
+          className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
           title="View Payment Details"
         >
-          <Eye size={16} />
+          <Eye size={14} />
         </button>
         {canRelease && (
           <button
-            onClick={() => onReleasePayment(data.id)}
+            onClick={handleReleaseClick}
             disabled={isReleasing === data.id}
-            className="px-2 py-1.5 text-xs rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
+            className="px-3 py-2 text-xs font-medium rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
             title="Release Payment"
           >
             {isReleasing === data.id ? (
               <Loader2 size={12} className="animate-spin" />
             ) : (
-              <DollarSign size={12} />
+              <CheckCircle size={12} />
             )}
             Release
+          </button>
+        )}
+        {canCancel && (
+          <button
+            onClick={handleCancelClick}
+            disabled={isReleasing === data.id}
+            className="px-3 py-2 text-xs font-medium rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
+            title="Cancel Payment"
+          >
+            {isReleasing === data.id ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <XCircle size={12} />
+            )}
+            Cancel
           </button>
         )}
       </div>
@@ -268,6 +321,7 @@ export default function VendorPaymentTreeTable({
   pagination,
   onViewDetails,
   onReleasePayment,
+  onCancelPayment,
   onReleaseScheduledPayments,
   onPageChange,
   onFilterChange,
@@ -383,8 +437,9 @@ export default function VendorPaymentTreeTable({
       pinned: "right",
       suppressHeaderMenuButton: true,
       suppressSizeToFit: true,
-      minWidth: 150,
-      maxWidth: 150,
+      minWidth: 200,
+      maxWidth: 200,
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     }
   ], []);
 
@@ -425,8 +480,9 @@ export default function VendorPaymentTreeTable({
   const context = useMemo(() => ({
     onViewDetails,
     onReleasePayment,
+    onCancelPayment,
     isReleasing,
-  }), [onViewDetails, onReleasePayment, isReleasing]);
+  }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing]);
 
   // Handle filter changes
   const handleStatusFilterChange = (status: string) => {

@@ -106,6 +106,14 @@ class ApiService {
     });
   }
 
+  async cancelPayment(paymentId: string, reason?: string): Promise<ReleasePaymentResponse> {
+    const endpoint = endPointApi.cancelPayment.replace(':paymentId', paymentId);
+    return this.request<ReleasePaymentResponse>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
   async releaseScheduledPayments(): Promise<ReleasePaymentResponse> {
     return this.request<ReleasePaymentResponse>(endPointApi.releaseScheduledPayments, {
       method: 'POST',

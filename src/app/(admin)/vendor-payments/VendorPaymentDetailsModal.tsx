@@ -73,7 +73,14 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     };
 
     const handleReleasePayment = () => {
-        if (onReleasePayment) {
+        const confirmed = window.confirm(
+            `Are you sure you want to release payment for Order ${orderInfo.order_id}?\n\n` +
+            `Customer: ${orderInfo.user_name}\n` +
+            `Vendor Amount: ${formatAmount(data.vendor_amount)}\n\n` +
+            `This action cannot be undone.`
+        );
+        
+        if (confirmed && onReleasePayment) {
             onReleasePayment(data._id, notes.trim() || undefined);
         }
     };

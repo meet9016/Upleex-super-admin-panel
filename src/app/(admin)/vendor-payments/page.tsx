@@ -113,6 +113,35 @@ export default function VendorPaymentsPage() {
         }
     };
 
+    const handleCancelPayment = async (paymentId: string, reason?: string) => {
+        setIsReleasing(paymentId);
+        
+        try {
+            const response: ReleasePaymentResponse = await apiService.cancelPayment(paymentId, reason);
+            
+            if (response && response.success) {
+                toast.success("Payment cancelled successfully");
+                // Update the payment in the list
+                setPayments(prev => 
+                    prev.map(payment => 
+                        payment._id === paymentId
+                            ? { ...payment, payment_status: 'cancelled', notes: reason || 'Cancelled by admin' }
+                            : payment
+                    )
+                );
+                // Refresh stats
+                fetchPaymentStats();
+            } else {
+                toast.error(response?.message || "Failed to cancel payment");
+            }
+        } catch (error: any) {
+            console.error("Error cancelling payment:", error);
+            toast.error(error.message || "Failed to cancel payment");
+        } finally {
+            setIsReleasing(null);
+        }
+    };
+
     const handleReleaseScheduledPayments = async () => {
         try {
             const response: ReleasePaymentResponse = await apiService.releaseScheduledPayments();
@@ -238,6 +267,7 @@ export default function VendorPaymentsPage() {
                     pagination={pagination}
                     onViewDetails={handleViewDetails}
                     onReleasePayment={handleReleasePayment}
+                    onCancelPayment={handleCancelPayment}
                     onReleaseScheduledPayments={handleReleaseScheduledPayments}
                     onPageChange={handlePageChange}
                     onFilterChange={handleFilterChange}
