@@ -229,11 +229,6 @@ export default function VendorServiceApprovalPage() {
     <div className="p-1">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Service Approval</h1>
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-bold border border-blue-100">
-            Management
-          </span>
-        </div>
       </div>
 
       <div className="bg-white rounded-lg min-h-[400px]">
