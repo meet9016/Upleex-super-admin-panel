@@ -168,38 +168,41 @@ export default function DropdownsManagementPage() {
     }
   };
 
-  const columnDefs = useMemo<ColDef[]>(() => [
-    {
-      headerName: activeConfig.displayLabel,
-      field: activeConfig.fieldName,
-      flex: 1,
-      minWidth: 200,
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
-      cellRenderer: (params: any) => (
-        <span className="font-semibold text-slate-900">{params.value}</span>
-      )
-    },
-    {
+  const columnDefs = useMemo<ColDef[]>(() => {
+    const cols: ColDef[] = [
+      {
+        headerName: activeConfig.displayLabel,
+        field: activeConfig.fieldName,
+        flex: 1,
+        minWidth: 200,
+        checkboxSelection: true,
+        headerCheckboxSelection: true,
+        cellRenderer: (params: any) => (
+          <span className="font-semibold text-slate-900">{params.value}</span>
+        )
+      },
+      {
         headerName: "Created",
         field: "created_at",
         minWidth: 150,
         valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
         cellStyle: { textAlign: "center" }
-    },
-    {
-      headerName: "Action",
-      width: 100,
-      pinned: 'right',
-      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
-      cellRenderer: (params: any) => (
-        <ActionButtons 
-            onEdit={() => handleEdit(params.data)} 
-            onDelete={() => setItemToDelete(params.data)} 
-        />
-      )
-    }
-  ], [activeTab, activeConfig, editingItem]);
+      },
+      {
+        headerName: "Action",
+        width: 100,
+        pinned: 'right',
+        cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
+        cellRenderer: (params: any) => (
+          <ActionButtons 
+              onEdit={() => handleEdit(params.data)} 
+              onDelete={() => setItemToDelete(params.data)} 
+          />
+        )
+      }
+    ];
+    return cols;
+  }, [activeTab, activeConfig, editingItem]);
 
   const filteredData = useMemo(() => {
     const list = data[activeTab] || [];
