@@ -46,6 +46,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       { name: "Vendor-services", href: "/vendor-services", icon: FolderPlus, permission: "products" },
+      { name: "Dropdowns", href: "/dropdowns", icon: Layers },
       { name: "Quotes", href: "/quotes", icon: FileText },
       {
         name: "Categories",

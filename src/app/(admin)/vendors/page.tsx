@@ -23,7 +23,7 @@ interface VendorRow {
     mobile: string;
     business_name: string;
     status: "pending" | "approved" | "rejected";
-    vendor_type?: "service" | "product" | "both";
+    vendor_type?: "service" | "vendor" | "both";
     created_at?: string;
 }
 
@@ -135,7 +135,7 @@ export default function VendorsPage() {
                 vendor_id: vendorId,
                 status: newStatus.toLowerCase(),
             };
-            
+
             // Add rejection reason if status is rejected
             if (newStatus.toLowerCase() === 'rejected' && rejectionReason) {
                 payload.rejection_reason = rejectionReason;
@@ -266,11 +266,11 @@ export default function VendorsPage() {
                                         toast.error(`Complete all ${requiredSteps} pages before approving`);
                                         return;
                                     }
-                                    
+
                                     // If rejecting, ask for reason
                                     if (next === 'rejected') {
                                         // const reason = prompt('Please provide a reason for rejection (optional):');
-                                        handleStatusChange(kycId, vendorId, next );
+                                        handleStatusChange(kycId, vendorId, next);
                                     } else {
                                         handleStatusChange(kycId, vendorId, next);
                                     }

@@ -248,6 +248,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
             animateRows
             alwaysShowHorizontalScroll={true}
             onSelectionChanged={onSelectionChanged}
+            quickFilterText={searchText}
             getRowId={useCallback((params: any) => {
               return params.data.id || params.data.categories_id || params.data._id;
             }, [])}

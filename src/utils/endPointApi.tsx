@@ -18,6 +18,9 @@ export interface EndPointApi {
     downloadVendorKycPdf: string;
     // Dropdowns
     getDropdowns: string;
+    postDropdowns: string;
+    updateDropdowns: string;
+    deleteDropdowns: string;
 
     // Categories CRUD
     getCategoryList: string;
@@ -126,6 +129,9 @@ const endPointApi: EndPointApi = {
 
     // Dropdowns
     getDropdowns: 'dropdowns',
+    postDropdowns: 'dropdowns',
+    updateDropdowns: 'dropdowns',
+    deleteDropdowns: 'dropdowns',
 
     // Categories CRUD
     getCategoryList: 'categories/getall',
