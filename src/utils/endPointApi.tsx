@@ -106,6 +106,11 @@ export interface EndPointApi {
     approveService: string;
     bulkApproveServices: string;
     bulkRejectServices: string;
+    
+    // Vendor Wallets
+    getAllVendorWallets: string;
+    getVendorWalletDetails: string;
+    getVendorWalletTransactions: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -197,7 +202,6 @@ const endPointApi: EndPointApi = {
     bulkApproveProducts: 'products/bulk-approve',
     bulkRejectProducts: 'products/bulk-reject',
 
-
     // Quotes
     postAllQuotes: 'quote/getallforadmin',
     getQuoteById: 'quote/getById',
@@ -218,6 +222,11 @@ const endPointApi: EndPointApi = {
     approveService: 'services/approve',
     bulkApproveServices: 'services/bulk-approve',
     bulkRejectServices: 'services/bulk-reject',
+    
+    // Vendor Wallets
+    getAllVendorWallets: 'admin/vendor-wallets',
+    getVendorWalletDetails: 'admin/vendor-wallets/:vendorId',
+    getVendorWalletTransactions: 'admin/vendor-wallets/:vendorId/transactions',
 };
 
 export default endPointApi;
