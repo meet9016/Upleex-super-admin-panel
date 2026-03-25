@@ -195,7 +195,7 @@ export default function VendorsPage() {
             cellRenderer: (params: any) => {
                 const completed = params.data.completed_pages?.length || 0;
                 const vendorType = params.data.vendor_type;
-                const totalSteps = vendorType === 'service' ? 2 : 5;
+                const totalSteps = vendorType === 'service' ? 4 : 5;
                 const percentage = Math.min((completed / totalSteps) * 100, 100);
 
                 return (

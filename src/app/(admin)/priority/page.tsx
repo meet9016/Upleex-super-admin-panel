@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ColDef } from "ag-grid-community";
 import AgGridTable from "@/components/ui/AgGridTable";
 import { api } from "@/utils/axiosInstance";
@@ -31,6 +31,7 @@ export default function PriorityPlansPage() {
   const [rows, setRows] = useState<PPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<PPlan[]>([]);
+  const gridRef = useRef<any>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPlanType, setSelectedPlanType] = useState<string>("");
   const [errors, setErrors] = useState<{ [k: string]: string }>({});
@@ -157,6 +158,7 @@ export default function PriorityPlansPage() {
       }
       toast.success("Selected plans deleted");
       setSelected([]);
+      gridRef.current?.api?.deselectAll();
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Bulk delete failed");
@@ -492,6 +494,7 @@ export default function PriorityPlansPage() {
             <CardContent className="p-0">
               {/* <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2"> */}
               <AgGridTable
+                ref={gridRef}
                 columns={columns}
                 rowData={rows}
                 onSelectionChange={(sel: any[]) => setSelected(sel as PPlan[])}

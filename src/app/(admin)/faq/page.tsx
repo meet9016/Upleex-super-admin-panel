@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -55,6 +55,7 @@ export default function FAQPage() {
   const [faqToDelete, setFaqToDelete] = useState<FAQRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
  const [selectedRows, setSelectedRows] = useState<FAQRow[]>([]);
+  const gridRef = useRef<any>(null);
   const debouncedSearch = useDebounce(searchText, 600);
 
   const {
@@ -432,6 +433,7 @@ const handleConfirmDelete = async () => {
                         if (res?.data?.message || res?.data?.success) {
                           toast.success(`${selectedRows.length} FAQ${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
                           setSelectedRows([]);
+                          gridRef.current?.api?.deselectAll();
                           await fetchFAQs();
                         } else {
                           toast.error(res?.data?.message || 'Bulk delete failed');
@@ -497,6 +499,7 @@ const handleConfirmDelete = async () => {
                 </div>
               ) : (
                 <AgGridTable
+                  ref={gridRef}
                   rowData={filteredFaqs}
                   columns={columnDefs}
                    onSelectionChange={(selected) => {

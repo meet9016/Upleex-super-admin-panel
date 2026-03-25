@@ -281,7 +281,7 @@ export default function VendorProductTreeTable({
     setRowData(buildRowData(vendors));
   }, [vendors]);
 
-  const handleBulkApprove = useCallback(() => {
+  const handleBulkApprove = useCallback(async () => {
     if (!gridRef.current?.api) return;
     const selectedNodes = gridRef.current.api.getSelectedNodes().filter(n => n.data.type === "product");
     const validNodes = selectedNodes.filter(n => n.data.approval_status !== "approved");
@@ -293,11 +293,13 @@ export default function VendorProductTreeTable({
 
     const ids = validNodes.map((n) => n.data.id);
     if (ids.length > 0) {
-      onBulkApprove(ids);
+      await onBulkApprove(ids);
+      gridRef.current.api.deselectAll();
+      setSelectedCount(0);
     }
   }, [onBulkApprove]);
 
-  const handleBulkReject = useCallback(() => {
+  const handleBulkReject = useCallback(async () => {
     if (!gridRef.current?.api || !onBulkReject) return;
     const selectedNodes = gridRef.current.api.getSelectedNodes().filter(n => n.data.type === "product");
     const validNodes = selectedNodes.filter(n => n.data.approval_status !== "rejected");
@@ -309,7 +311,9 @@ export default function VendorProductTreeTable({
 
     const ids = validNodes.map((n) => n.data.id);
     if (ids.length > 0) {
-      onBulkReject(ids);
+      await onBulkReject(ids);
+      gridRef.current.api.deselectAll();
+      setSelectedCount(0);
     }
   }, [onBulkReject]);
 

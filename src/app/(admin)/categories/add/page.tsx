@@ -66,6 +66,7 @@ export default function AddCategoryPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
+  const gridRef = useRef<any>(null);
   const debouncedSearch = useDebounce(searchText, 600);
 
   // Fetch categories with search
@@ -369,6 +370,7 @@ const handleConfirmDelete = async () => {
       if (res?.data?.message || res?.data?.success) {
         toast.success(`${selectedRows.length} categor${selectedRows.length > 1 ? 'ies' : 'y'} deleted successfully`);
         setSelectedRows([]);
+        gridRef.current?.api?.deselectAll();
         await fetchCategories();
       } else {
         toast.error(res?.data?.message || 'Bulk delete failed');
@@ -639,6 +641,7 @@ const handleConfirmDelete = async () => {
                 </div>
               ) : (
                 <AgGridTable
+                  ref={gridRef}
                   rowData={categories}
                   columns={columnDefs as ColDef[]}
                   onSelectionChange={(selected) => {

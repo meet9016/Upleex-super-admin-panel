@@ -58,6 +58,7 @@ export default function ListingPlanPurchasesPage() {
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const gridRef = useRef<any>(null);
 
   // Search and filter states
   const [searchText, setSearchText] = useState("");
@@ -242,6 +243,7 @@ export default function ListingPlanPurchasesPage() {
       }
       toast.success("Selected purchases deleted");
       setSelected([]);
+      gridRef.current?.api?.deselectAll();
       fetchData(appliedFilters, debouncedSearch);
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Bulk delete failed");
@@ -545,6 +547,7 @@ export default function ListingPlanPurchasesPage() {
 
           <CardContent className="p-0">
             <AgGridTable
+              ref={gridRef}
               columns={columns}
               rowData={rows}
               onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
