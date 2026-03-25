@@ -40,7 +40,7 @@ interface AgGridTableProps {
   gridHeight?: number | string;
 }
 
-const AgGridTable: React.FC<AgGridTableProps> = ({
+const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
   buttonName = "",
   addButtonLink = "",
   rowData,
@@ -55,9 +55,10 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
   onSelectionChange,
   loading = false,
   gridHeight,
-}) => {
+}, ref) => {
   const router = useRouter();
-  const gridRef = useRef<any>(null);
+  const internalRef = useRef<any>(null);
+  const gridRef = (ref as any) || internalRef;
   const [isDark, setIsDark] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -180,7 +181,7 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
       const selectedRows = gridRef.current.api.getSelectedRows();
       onSelectionChange(selectedRows);
     }
-  }, [onSelectionChange]);
+  }, [onSelectionChange, gridRef]);
 
   return (
     <div className="h-full flex flex-col">
@@ -257,6 +258,8 @@ const AgGridTable: React.FC<AgGridTableProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default memo(AgGridTable);
+AgGridTable.displayName = "AgGridTable";
+
+export default memo(AgGridTable);

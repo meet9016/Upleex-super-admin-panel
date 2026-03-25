@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -65,6 +65,7 @@ export default function BlogPage() {
   const [blogToDelete, setBlogToDelete] = useState<BlogRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<BlogRow[]>([]);
+  const gridRef = useRef<any>(null);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
 
@@ -787,6 +788,7 @@ export default function BlogPage() {
                         if (res?.data?.message || res?.data?.success) {
                           toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
                           setSelectedRows([]);
+                          gridRef.current?.api?.deselectAll();
                           await fetchBlogs();
                         } else {
                           toast.error(res?.data?.message || 'Bulk delete failed');
@@ -852,6 +854,7 @@ export default function BlogPage() {
                 </div>
               ) : (
                 <AgGridTable
+                  ref={gridRef}
                   rowData={filteredBlogs}
                   columns={columnDefs as any}
                   onSelectionChange={(selected) => {

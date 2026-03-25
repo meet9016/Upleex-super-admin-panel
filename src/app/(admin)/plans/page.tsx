@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ColDef } from "ag-grid-community";
 import AgGridTable from "@/components/ui/AgGridTable";
 import { api } from "@/utils/axiosInstance";
@@ -29,6 +29,7 @@ export default function PlansPage() {
   const [rows, setRows] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Plan[]>([]);
+  const gridRef = useRef<any>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
@@ -182,6 +183,7 @@ export default function PlansPage() {
       }
       toast.success("Selected plans deleted");
       setSelected([]);
+      gridRef.current?.api?.deselectAll();
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Bulk delete failed");
@@ -470,6 +472,7 @@ export default function PlansPage() {
             <CardContent className="p-0">
 
               <AgGridTable
+                ref={gridRef}
                 columns={columns}
                 rowData={rows}
                 onSelectionChange={(sel: any[]) =>

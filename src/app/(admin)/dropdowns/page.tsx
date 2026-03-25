@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { toast } from "react-toastify";
 import { Plus, Loader2, Layers, Database, Calendar, UserCheck, CheckCircle, X, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -49,6 +49,7 @@ export default function DropdownsManagementPage() {
   const [itemToDelete, setItemToDelete] = useState<DropdownItem | null>(null);
   const [searchText, setSearchText] = useState("");
   const [selectedRows, setSelectedRows] = useState<DropdownItem[]>([]);
+  const gridRef = useRef<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
@@ -131,7 +132,7 @@ export default function DropdownsManagementPage() {
       if (res?.data?.success) {
         toast.success("Deleted successfully");
         if (editingItem?.id === itemToDelete.id) {
-            handleCancelEdit();
+          handleCancelEdit();
         }
         setItemToDelete(null);
         setData(res.data);
@@ -157,6 +158,7 @@ export default function DropdownsManagementPage() {
       if (res?.data?.success) {
         toast.success(`${selectedRows.length} items deleted successfully`);
         setSelectedRows([]);
+        gridRef.current?.api?.deselectAll();
         setShowBulkDeleteModal(false);
         setData(res.data);
       }
@@ -181,22 +183,23 @@ export default function DropdownsManagementPage() {
           <span className="font-semibold text-slate-900">{params.value}</span>
         )
       },
-      {
-        headerName: "Created",
-        field: "created_at",
-        minWidth: 150,
-        valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
-        cellStyle: { textAlign: "center" }
-      },
+      // {
+      //   headerName: "Created",
+      //   field: "created_at",
+      //   minWidth: 150,
+      //   valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+      //   cellStyle: { textAlign: "center" }
+      // },
       {
         headerName: "Action",
-        width: 100,
+        width: 400,
+        suppressHeaderMenuButton: true,
         pinned: 'right',
         cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
         cellRenderer: (params: any) => (
-          <ActionButtons 
-              onEdit={() => handleEdit(params.data)} 
-              onDelete={() => setItemToDelete(params.data)} 
+          <ActionButtons
+            onEdit={() => handleEdit(params.data)}
+            onDelete={() => setItemToDelete(params.data)}
           />
         )
       }
@@ -207,7 +210,7 @@ export default function DropdownsManagementPage() {
   const filteredData = useMemo(() => {
     const list = data[activeTab] || [];
     if (!searchText) return list;
-    return list.filter(item => 
+    return list.filter(item =>
       String(item[activeConfig.fieldName]).toLowerCase().includes(searchText.toLowerCase())
     );
   }, [data, activeTab, activeConfig, searchText]);
@@ -257,9 +260,9 @@ export default function DropdownsManagementPage() {
               <CardTitle className="text-lg">
                 {editingItem ? `Edit ${activeConfig.displayLabel}` : `Add New ${activeConfig.displayLabel}`}
               </CardTitle>
-              <CardDescription>
+              {/* <CardDescription>
                 Enter the name for the new entry.
-              </CardDescription>
+              </CardDescription> */}
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSave} className="space-y-5">
@@ -271,7 +274,7 @@ export default function DropdownsManagementPage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder={activeConfig.placeholder}
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl mt-3"
                     autoFocus
                   />
                 </div>
@@ -283,13 +286,13 @@ export default function DropdownsManagementPage() {
                     disabled={submitting || !inputValue.trim()}
                   >
                     {submitting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                        <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4" />
                     )}
                     {editingItem ? 'Update' : 'Add Entry'}
                   </Button>
-                  
+
                   {editingItem && (
                     <Button
                       type="button"
@@ -317,7 +320,7 @@ export default function DropdownsManagementPage() {
                     Total: {filteredData.length} records
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Button
                     variant="destructive"
@@ -336,7 +339,7 @@ export default function DropdownsManagementPage() {
                     />
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     {searchText && (
-                      <button 
+                      <button
                         onClick={() => setSearchText("")}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
@@ -350,10 +353,11 @@ export default function DropdownsManagementPage() {
             <CardContent className="p-0 flex-1 relative">
               {isFetching && (
                 <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center">
-                    <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                  <Loader2 className="animate-spin h-8 w-8 text-primary" />
                 </div>
               )}
               <AgGridTable
+                ref={gridRef}
                 rowData={filteredData}
                 columns={columnDefs}
                 onSelectionChange={(selected) => setSelectedRows(selected)}
