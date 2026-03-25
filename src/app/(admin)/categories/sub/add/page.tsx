@@ -377,10 +377,12 @@ export default function AddSubCategoryPage() {
   };
 
   // Filter subcategories based on search
-  const filteredSubCategories = subCategories.filter(sub =>
-    sub.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    sub.parent.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredSubCategories = (searchText.length >= 3 || searchText.length === 0)
+    ? subCategories.filter(sub =>
+        sub.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        sub.parent.toLowerCase().includes(searchText.toLowerCase())
+      )
+    : subCategories;
 
   const columnDefs: ColDef<SubCategoryRow>[] = [
     {
@@ -715,16 +717,7 @@ export default function AddSubCategoryPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {isFetching ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                  <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-sm text-slate-500">
-                      {searchText ? 'Searching...' : 'Loading sub-categories...'}
-                    </p>
-                  </div>
-                </div>
-              ) : filteredSubCategories.length === 0 ? (
+              {filteredSubCategories.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
                     <p className="text-slate-500 mb-2">
@@ -746,6 +739,7 @@ export default function AddSubCategoryPage() {
                 </div>
               ) : (
                 <AgGridTable
+                  loading={isFetching}
                   rowData={filteredSubCategories}
                   columns={columnDefs as any}
                   onSelectionChange={(selected) => {

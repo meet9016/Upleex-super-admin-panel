@@ -230,9 +230,9 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
       </div>
 
       <div className="relative">
-        {loading && <Loader type="section" />}
         <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: typeof gridHeight === 'number' ? `${gridHeight}px` : (gridHeight || "660px") }}>
           <AgGridReact
+            loading={loading}
             rowHeight={40}
             ref={gridRef}
             rowData={rowData}

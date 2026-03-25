@@ -173,7 +173,9 @@ export default function ListingPlanPurchasesPage() {
 
   // Apply search when debouncedSearch changes (search applies immediately)
   useEffect(() => {
-    fetchData(appliedFilters, debouncedSearch);
+    if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
+      fetchData(appliedFilters, debouncedSearch);
+    }
   }, [debouncedSearch, appliedFilters]);
 
   // Handle click outside to close modal
@@ -547,6 +549,7 @@ export default function ListingPlanPurchasesPage() {
 
           <CardContent className="p-0">
             <AgGridTable
+              loading={loading}
               ref={gridRef}
               columns={columns}
               rowData={rows}

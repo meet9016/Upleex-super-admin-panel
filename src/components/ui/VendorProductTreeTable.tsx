@@ -190,8 +190,8 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
 
   if (data.type === "vendor") {
     return (
-      <div className="flex items-center gap-3 py-1">
-        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+      <div className="flex items-center gap-3  ">
+        <div className="w-8 h-8  mb-2  rounded-full bg-indigo-100 flex items-center justify-center">
           <span className="text-indigo-600 font-semibold text-sm">
             {data.name?.charAt(0).toUpperCase()}
           </span>
@@ -199,15 +199,15 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
         <div>
           <div className="text-sm font-medium text-gray-900">{data.name}</div>
           <div className="text-xs text-gray-500 flex items-center gap-2">
-            <span>{data.full_name} · {data.product_count} products</span>
+            <span className="mb-3">{data.full_name} · {data.product_count} products</span>
             {counts.pending_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 font-medium">{counts.pending_count} pending</span>
+              <span className="px-1.5   mb-3 rounded-md bg-amber-50 text-amber-600 font-medium">{counts.pending_count} pending</span>
             )}
             {counts.approved_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 font-medium">{counts.approved_count} approved</span>
+              <span className="px-1.5   mb-3  rounded-md bg-green-50 text-green-600 font-medium">{counts.approved_count} approved</span>
             )}
             {counts.rejected_count > 0 && (
-              <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-600 font-medium">{counts.rejected_count} rejected</span>
+              <span className="px-1.5   mb-3  rounded-md bg-red-50 text-red-600 font-medium">{counts.rejected_count} rejected</span>
             )}
           </div>
         </div>

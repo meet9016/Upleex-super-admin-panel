@@ -59,7 +59,8 @@ export default function VendorsPage() {
     const [pendingKycProgress, setPendingKycProgress] = useState("");
 
     const debouncedSearch = useDebounce(searchText, 500);
-
+    // Only fetch if 3+ chars or empty string
+    const validSearchText = debouncedSearch.length >= 3 || debouncedSearch.length === 0 ? debouncedSearch : "";
     const activeFilterCount = [statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter].filter(v => v !== "").length;
 
     console.log(rowData)
@@ -107,8 +108,9 @@ export default function VendorsPage() {
     }, []);
 
     useEffect(() => {
-        fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
-    }, [fetchVendors, debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter]);
+        // use validSearchText instead of debouncedSearch  
+        fetchVendors(validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
+    }, [fetchVendors, validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter]);
 
     useEffect(() => {
         fetchDropdowns();
@@ -447,9 +449,7 @@ export default function VendorsPage() {
                 <Card className="border-none rounded-none shadow-xl shadow-slate-200/50 overflow-hidden">
                     <CardContent className="p-0">
                         <div className="h-full w-full relative">
-                            {isLoading ? (
-                                <Loader type="section" text="Fetching vendor data..." />
-                            ) : rowData.length === 0 ? (
+                            {rowData.length === 0 && !isLoading ? (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="text-center group">
                                         <div className="bg-slate-50 p-6 rounded-full inline-block mb-4 transition-transform group-hover:scale-110 duration-300">
@@ -464,6 +464,7 @@ export default function VendorsPage() {
                                         rowData={rowData}
                                         columns={columnDefs as ColDef<any>[]}
                                         gridHeight={790}
+                                        loading={isLoading}
                                     />
                                     {showDetails && detailsRow && (
                                         <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />

@@ -83,6 +83,7 @@ export interface EndPointApi {
     getAllVendors: string;
     getVendorProducts: string;
     approveProduct: string;
+    rejectProduct: string;
     bulkApproveProducts: string;
     bulkRejectProducts: string;
 
@@ -199,6 +200,7 @@ const endPointApi: EndPointApi = {
     getAllVendors: 'products/vendors/getall',
     getVendorProducts: 'products/vendor',
     approveProduct: 'products/approve',
+    rejectProduct: 'products/approve', // Same endpoint, different approval_status
     bulkApproveProducts: 'products/bulk-approve',
     bulkRejectProducts: 'products/bulk-reject',
 

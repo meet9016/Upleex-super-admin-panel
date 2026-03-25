@@ -99,7 +99,9 @@ export default function AddServiceCategoryPage() {
   }, []);
 
   useEffect(() => {
-    fetchCategories(debouncedSearch);
+    if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
+      fetchCategories(debouncedSearch);
+    }
   }, [debouncedSearch]);
 
   const getImageUrl = (imagePath: string) => {
@@ -509,16 +511,13 @@ export default function AddServiceCategoryPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {isFetching ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : categories.length === 0 ? (
+              {categories.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <p className="text-slate-500"> No categories found </p>
                 </div>
               ) : (
                 <AgGridTable
+                  loading={isFetching}
                   rowData={categories}
                   columns={columnDefs as ColDef[]}
                   onSelectionChange={(selected) => setSelectedRows(selected)}

@@ -46,8 +46,8 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       { name: "Vendor-services", href: "/vendor-services", icon: FolderPlus, permission: "products" },
-      { name: "Dropdowns", href: "/dropdowns", icon: Layers },
-      { name: "Quotes", href: "/quotes", icon: FileText },
+      { name: "Dropdowns", href: "/dropdowns", icon: Layers, permission: "dropdowns" },
+      { name: "Quotes", href: "/quotes", icon: FileText, permission: "quotes" },
       {
         name: "Categories",
         icon: Layers,
@@ -69,8 +69,8 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         ],
       },
       { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
-      { name: "Vendor Wallet", href: "/vendor-wallets", icon: Loader2 },
-      { name: "Vendor Payments", href: "/vendor-payments", icon: FileText, },
+      { name: "Vendor Wallet", href: "/vendor-wallets", icon: Loader2, permission: "vendor-wallets" },
+      { name: "Vendor Payments", href: "/vendor-payments", icon: FileText, permission: "vendor-payments" },
     ],
   },
   {

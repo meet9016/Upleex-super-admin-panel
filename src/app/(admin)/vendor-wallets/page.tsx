@@ -4,10 +4,19 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '@/utils/axiosInstance';   // ← Your axios instance
 import endPointApi from '@/utils/endPointApi';
 import { toast } from 'react-toastify';
-import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward } from 'react-icons/md';
+import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch } from 'react-icons/md';
 import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
+
+function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 interface VendorWallet {
   _id: string;
@@ -41,11 +50,16 @@ const VendorWalletsPage = () => {
   const [showTransactions, setShowTransactions] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch all vendor wallets (same pattern as fetchVendorsWithServices)
-  const fetchVendorWallets = async () => {
+  const debouncedSearch = useDebounce(searchTerm, 600);
+
+  // Fetch all vendor wallets with optional search param
+  const fetchVendorWallets = async (search?: string) => {
     try {
       setLoading(true);
-      const res = await api.get(endPointApi.getAllVendorWallets);
+      const params: any = {};
+      if (search) params.search = search;
+      
+      const res = await api.get(endPointApi.getAllVendorWallets, { params });
 
       const wallets = res?.data?.data?.wallets || [];
       const walletsWithId = wallets.map((wallet: VendorWallet) => ({
@@ -80,23 +94,17 @@ const VendorWalletsPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchVendorWallets();
-  }, []);
-
   const handleViewHistory = (vendor: VendorWallet) => {
     setSelectedVendor(vendor);
     setShowTransactions(true);
     fetchVendorTransactions(vendor.vendor_id);
   };
 
-  const filteredVendors = useMemo(() => 
-    vendors.filter(vendor =>
-      vendor.vendor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vendor.vendor_email?.toLowerCase().includes(searchTerm.toLowerCase())
-    ),
-    [vendors, searchTerm]
-  );
+  useEffect(() => {
+    if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
+      fetchVendorWallets(debouncedSearch);
+    }
+  }, [debouncedSearch]);
 
   const columns: ColDef[] = useMemo(() => [
     { field: 'vendor_name', headerName: 'Vendor Name', flex: 1, minWidth: 150 },
@@ -165,14 +173,28 @@ const VendorWalletsPage = () => {
           Manage and monitor vendor wallet balances
         </p>
       </div>
-
+      <div className="mb-4 flex justify-between items-center">
+        <div className="relative w-64">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MdSearch className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          />
+        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Total Vendors: {vendors.length}
+        </div>
+      </div>
       {/* AgGrid Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <div className="bg-white rounded-lg shadow-sm p-4">
         <AgGridTable
-          rowData={filteredVendors}
+          rowData={vendors}
           columns={columns}
-          enableSearch
-          onSearchChange={setSearchTerm}
           loading={loading}
           gridHeight={600}
         />
@@ -239,11 +261,10 @@ const VendorWalletsPage = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-2 rounded-lg ${
-                                transaction.type === 'credit'
-                                  ? 'bg-green-100 dark:bg-green-900/20'
-                                  : 'bg-red-100 dark:bg-red-900/20'
-                              }`}
+                              className={`p-2 rounded-lg ${transaction.type === 'credit'
+                                ? 'bg-green-100 dark:bg-green-900/20'
+                                : 'bg-red-100 dark:bg-red-900/20'
+                                }`}
                             >
                               {transaction.type === 'credit' ? (
                                 <MdArrowDownward className="w-4 h-4 text-green-600" />
@@ -263,11 +284,10 @@ const VendorWalletsPage = () => {
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-lg font-semibold ${
-                              transaction.type === 'credit'
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-red-600 dark:text-red-400'
-                            }`}
+                            className={`text-lg font-semibold ${transaction.type === 'credit'
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-red-600 dark:text-red-400'
+                              }`}
                           >
                             {transaction.type === 'credit' ? '+' : '-'}₹
                             {Number(transaction.amount).toLocaleString('en-IN')}
@@ -291,7 +311,7 @@ const VendorWalletsPage = () => {
       )}
 
       {/* Empty State */}
-      {filteredVendors.length === 0 && !loading && (
+      {vendors.length === 0 && !loading && (
         <div className="text-center py-12">
           <MdWallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">

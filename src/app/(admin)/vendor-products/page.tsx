@@ -114,7 +114,12 @@ export default function VendorProductApprovalPage() {
   const handleStatusChange = async (productId: string, status: string) => {
     try {
       setApproving(true);
-      const res = await api.put(`${endPointApi.approveProduct}/${productId}`, { approval_status: status });
+      
+      // Use existing productApproval API with PUT method
+      const res = await api.put(`${endPointApi.approveProduct}/${productId}`, { 
+        approval_status: status 
+      });
+      
       const vid = res?.data?.vendor_id;
       const counts = res?.data?.counts;
       setVendors(prev => prev.map(v => {
@@ -132,10 +137,14 @@ export default function VendorProductApprovalPage() {
         });
         return updated;
       }));
-      toast.success(`Product ${status}`);
-    } catch (error) {
+      
+      // Show appropriate message based on response
+      const message = res?.data?.message || `Product ${status} successfully`;
+      toast.success(message);
+    } catch (error: any) {
       console.error('Failed to update status:', error);
-      toast.error("Failed to update status");
+      const errorMessage = error?.response?.data?.message || 'Failed to update status';
+      toast.error(errorMessage);
     } finally {
       setApproving(false);
     }

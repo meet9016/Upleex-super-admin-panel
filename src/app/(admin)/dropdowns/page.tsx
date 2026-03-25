@@ -177,8 +177,6 @@ export default function DropdownsManagementPage() {
         field: activeConfig.fieldName,
         flex: 1,
         minWidth: 200,
-        checkboxSelection: true,
-        headerCheckboxSelection: true,
         cellRenderer: (params: any) => (
           <span className="font-semibold text-slate-900">{params.value}</span>
         )
@@ -209,7 +207,7 @@ export default function DropdownsManagementPage() {
 
   const filteredData = useMemo(() => {
     const list = data[activeTab] || [];
-    if (!searchText) return list;
+    if (!searchText || searchText.length < 3) return list;
     return list.filter(item =>
       String(item[activeConfig.fieldName]).toLowerCase().includes(searchText.toLowerCase())
     );

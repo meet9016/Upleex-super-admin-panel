@@ -107,7 +107,9 @@ if (res?.data?.success && res?.data?.data) {
 
   // Search effect
   useEffect(() => {
-    fetchCategories(debouncedSearch);
+    if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
+      fetchCategories(debouncedSearch);
+    }
   }, [debouncedSearch]);
 
   const getImageUrl = (imagePath: string) => {
@@ -610,16 +612,7 @@ const handleConfirmDelete = async () => {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {isFetching ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                  <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-sm text-slate-500">
-                      {searchText ? 'Searching...' : 'Loading categories...'}
-                    </p>
-                  </div>
-                </div>
-              ) : categories.length === 0 ? (
+              {categories.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
                     <p className="text-slate-500 mb-2">
@@ -641,6 +634,7 @@ const handleConfirmDelete = async () => {
                 </div>
               ) : (
                 <AgGridTable
+                  loading={isFetching}
                   ref={gridRef}
                   rowData={categories}
                   columns={columnDefs as ColDef[]}
