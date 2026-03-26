@@ -20,6 +20,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name is required"),
@@ -409,6 +410,10 @@ const handleConfirmDelete = async () => {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
+{isFetching && categories.length === 0 ? (
+          <PageLoader />
+      ) : (
+        <>
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Categories</h2>
       </div>
@@ -692,6 +697,8 @@ const handleConfirmDelete = async () => {
                 </div>
               </div>
             )}
+            </>
+      )}
     </div>
   );
 }

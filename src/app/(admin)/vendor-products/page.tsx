@@ -6,6 +6,7 @@ import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import VendorProductTreeTable from "@/components/ui/VendorProductTreeTable";
+import PageLoader from "@/components/common/PageLoader";
 
 interface Vendor {
   _id: string;
@@ -246,14 +247,7 @@ export default function VendorProductApprovalPage() {
 
       <div className="bg-white rounded-lg">
         {loading && vendors.length === 0 ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
-          </div>
-        ) : vendors.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-            <Loader2 className="animate-spin h-8 w-8 text-blue-600 mb-4" />
-            <p className="text-lg">No vendors found</p>
-          </div>
+          <PageLoader />
         ) : (
           <>
             <VendorProductTreeTable
@@ -275,12 +269,6 @@ export default function VendorProductApprovalPage() {
               </div>
             )}
 
-            {/* End of list message */}
-            {!hasMore && vendors.length > 0 && (
-              <div className="flex justify-center py-6 border-t border-gray-200">
-                <p className="text-sm text-gray-400">No more vendors to load</p>
-              </div>
-            )}
           </>
         )}
       </div>

@@ -6,6 +6,7 @@ import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import VendorServiceTreeTable from "@/components/ui/VendorServiceTreeTable";
+import PageLoader from "@/components/common/PageLoader";
 
 interface Service {
   _id: string;
@@ -233,10 +234,7 @@ export default function VendorServiceApprovalPage() {
 
       <div className="bg-white rounded-lg min-h-[400px]">
         {loading && vendors.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="animate-spin h-10 w-10 text-blue-600 mb-4" />
-            <p className="text-gray-500 font-medium">Loading vendors and services...</p>
-          </div>
+          <PageLoader />
         ) : vendors.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-40 text-gray-500">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">

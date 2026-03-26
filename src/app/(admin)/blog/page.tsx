@@ -21,6 +21,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 
 const blogSchema = z.object({
   title: z.string().min(5, "Title is required"),
@@ -536,7 +537,9 @@ export default function BlogPage() {
       )
     },
   ];
-
+ if (isFetching && blogs.length === 0) {
+    return <PageLoader />;
+  }
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">

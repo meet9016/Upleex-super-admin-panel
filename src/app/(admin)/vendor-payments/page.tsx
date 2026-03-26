@@ -8,6 +8,7 @@ import VendorPaymentDetailsModal from "./VendorPaymentDetailsModal";
 import VendorPaymentTreeTable from "./VendorPaymentTreeTable";
 import { apiService } from "@/services/api";
 import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData, VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse, SafeOrderInfo } from "@/types/vendorPayment";
+import PageLoader from "@/components/common/PageLoader";
 
 export default function VendorPaymentsPage() {
     const [payments, setPayments] = useState<VendorPayment[]>([]);
@@ -251,8 +252,8 @@ export default function VendorPaymentsPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {isLoading ? (
-                <Loader type="section" text="Loading vendor payment data..." />
+            {isLoading && payments.length === 0 ? (
+                <PageLoader />
             ) : payments.length === 0 ? (
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">

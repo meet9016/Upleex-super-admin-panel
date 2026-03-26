@@ -13,6 +13,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 
 type Plan = {
   _id?: string;
@@ -223,6 +224,10 @@ export default function PlansPage() {
       ),
     },
   ];
+
+  if (loading && rows.length === 0) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">

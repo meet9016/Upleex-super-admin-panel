@@ -13,6 +13,7 @@ import { ColDef } from "ag-grid-community";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import ActionButtons from "@/components/common/ActionButtons";
 import { cn } from "@/lib/utils";
+import PageLoader from "@/components/common/PageLoader";
 
 type DropdownType = 'products_type' | 'products_listing_type' | 'products_months' | 'account_type' | 'getquote_status';
 
@@ -213,7 +214,7 @@ export default function DropdownsManagementPage() {
     );
   }, [data, activeTab, activeConfig, searchText]);
 
-  if (loading) return <div className="h-[400px] flex items-center justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+  if (loading) return <PageLoader />;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

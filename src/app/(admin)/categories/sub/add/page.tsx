@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
@@ -477,7 +478,10 @@ export default function AddSubCategoryPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-
+      {isFetching && subCategories.length === 0 ? (
+        <PageLoader />
+      ) : (
+        <>
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
       </div>
@@ -795,6 +799,8 @@ export default function AddSubCategoryPage() {
             />
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

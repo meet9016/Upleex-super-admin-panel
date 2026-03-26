@@ -12,6 +12,7 @@ import ActionButtons from "@/components/common/ActionButtons";
 import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import PageLoader from "@/components/common/PageLoader";
 
 type PPlan = {
   _id?: string;
@@ -74,6 +75,10 @@ export default function PriorityPlansPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  if (loading && rows.length === 0) {
+    return <PageLoader />;
+  }
 
   const resetForm = () => {
     setEditingId(null);

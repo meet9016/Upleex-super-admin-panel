@@ -14,6 +14,7 @@ import AgGridTable from "@/components/ui/AgGridTable";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import VendorDetailsModal from "./view";
 import Loader from "@/components/common/Loader";
+import PageLoader from "@/components/common/PageLoader";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -127,6 +128,10 @@ export default function VendorsPage() {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    if (isLoading && rowData.length === 0) {
+        return <PageLoader />;
+    }
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
         setIsUpdating(kycId);

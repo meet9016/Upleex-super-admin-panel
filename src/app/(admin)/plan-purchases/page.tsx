@@ -22,6 +22,7 @@ import DatePicker from "@/components/ui/DatePicker";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import { CiFilter } from "react-icons/ci";
 import { MdClose, MdSearch } from "react-icons/md";
+import PageLoader from "@/components/common/PageLoader";
 
 // Add debounce hook
 function useDebounce<T>(value: T, delay: number = 500): T {
@@ -395,9 +396,12 @@ export default function ListingPlanPurchasesPage() {
       ),
     },
   ];
-
+      if (loading && rows.length === 0) {
+        return <PageLoader />;
+      }
   return (
     <div className="space-y-6">
+  
       <div className="lg:col-span-2">
         <Card className="border-slate-200">
           <CardHeader className="flex flex-row items-center justify-end">

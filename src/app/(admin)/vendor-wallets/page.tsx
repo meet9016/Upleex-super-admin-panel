@@ -8,6 +8,7 @@ import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch } from 'r
 import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
+import PageLoader from '@/components/common/PageLoader';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -161,9 +162,13 @@ const VendorWalletsPage = () => {
       },
     },
   ], []);
-
+ if(loading && vendors.length === 0 ){
+  return <PageLoader />
+ }
+      
   return (
     <div className="space-y-6">
+     
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
@@ -203,19 +208,19 @@ const VendorWalletsPage = () => {
       {/* Transactions Modal */}
       {showTransactions && selectedVendor && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                <h2 className="text-xl font-semibold text-gray-800 ">
                   {selectedVendor.vendor_name}
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-600  mt-1">
                   {selectedVendor.vendor_email}
                 </p>
               </div>
               <button
                 onClick={() => setShowTransactions(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl font-bold"
+                className="text-gray-500 hover:text-gray-700  text-2xl font-bold"
               >
                 ×
               </button>
@@ -224,21 +229,21 @@ const VendorWalletsPage = () => {
             <div className="p-6 space-y-6">
               {/* Wallet Summary */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Current Balance</p>
-                  <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-600  mb-1">Current Balance</p>
+                  <p className="text-xl font-bold text-blue-600">
                     ₹{Number(selectedVendor.balance || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Credited</p>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                <div className="bg-green-50  rounded-lg p-4">
+                  <p className="text-xs text-gray-600  mb-1">Total Credited</p>
+                  <p className="text-xl font-bold text-green-600 ">
                     ₹{Number(selectedVendor.total_credited || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Debited</p>
-                  <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                <div className="bg-red-50  rounded-lg p-4">
+                  <p className="text-xs text-gray-600  mb-1">Total Debited</p>
+                  <p className="text-xl font-bold text-red-600 ">
                     ₹{Number(selectedVendor.total_debited || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
@@ -246,7 +251,7 @@ const VendorWalletsPage = () => {
 
               {/* Transactions List */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-800  mb-4 flex items-center gap-2">
                   <MdHistory className="w-5 h-5" />
                   Transaction History
                 </h3>
@@ -256,14 +261,14 @@ const VendorWalletsPage = () => {
                     {transactions.map((transaction) => (
                       <div
                         key={transaction._id}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                        className="flex items-center justify-between p-4 bg-gray-50  rounded-lg border border-gray-200 "
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
                             <div
                               className={`p-2 rounded-lg ${transaction.type === 'credit'
-                                ? 'bg-green-100 dark:bg-green-900/20'
-                                : 'bg-red-100 dark:bg-red-900/20'
+                                ? 'bg-green-100 '
+                                : 'bg-red-100 '
                                 }`}
                             >
                               {transaction.type === 'credit' ? (
@@ -273,10 +278,10 @@ const VendorWalletsPage = () => {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-800 dark:text-white">
+                              <p className="font-medium text-gray-800 ">
                                 {transaction.description}
                               </p>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                              <p className="text-xs text-gray-600 ">
                                 {new Date(transaction.createdAt).toLocaleString('en-IN')}
                               </p>
                             </div>
@@ -285,14 +290,14 @@ const VendorWalletsPage = () => {
                         <div className="text-right">
                           <p
                             className={`text-lg font-semibold ${transaction.type === 'credit'
-                              ? 'text-green-600 dark:text-green-400'
-                              : 'text-red-600 dark:text-red-400'
+                              ? 'text-green-600 '
+                              : 'text-red-600 '
                               }`}
                           >
                             {transaction.type === 'credit' ? '+' : '-'}₹
                             {Number(transaction.amount).toLocaleString('en-IN')}
                           </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                          <p className="text-xs text-gray-600 ">
                             {transaction.status}
                           </p>
                         </div>
@@ -301,7 +306,7 @@ const VendorWalletsPage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 dark:text-gray-400">No transactions found</p>
+                    <p className="text-gray-600 ">No transactions found</p>
                   </div>
                 )}
               </div>
@@ -314,7 +319,7 @@ const VendorWalletsPage = () => {
       {vendors.length === 0 && !loading && (
         <div className="text-center py-12">
           <MdWallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 ">
             {searchTerm ? 'No vendors found matching your search' : 'No vendor wallets found'}
           </p>
         </div>

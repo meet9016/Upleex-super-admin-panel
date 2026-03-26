@@ -9,6 +9,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import QuotesTreeTable from "./quotesTreeTable";
 import QuoteDetailsModal from "./view";
+import PageLoader from "@/components/common/PageLoader";
 
 export default function QuotesPage() {
     const [quotes, setQuotes] = useState<any[]>([]);
@@ -93,12 +94,7 @@ export default function QuotesPage() {
                     <CardContent className="p-0">
                         <div className="h-[calc(100vh-280px)] w-full relative flex flex-col">
                             {isLoading ? (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10 backdrop-blur-[1px]">
-                                    <div className="text-center">
-                                        <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mx-auto mb-3" />
-                                        <p className="text-sm font-semibold text-slate-600 italic">Fetching quotes data...</p>
-                                    </div>
-                                </div>
+                                <PageLoader />
                             ) : quotes.length === 0 ? (
                                 <div className="absolute inset-0 flex items-center justify-center py-20">
                                     <div className="text-center group">

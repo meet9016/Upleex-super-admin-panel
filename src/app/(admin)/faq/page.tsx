@@ -19,6 +19,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import AgGridTable from "@/components/ui/AgGridTable";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
+import PageLoader from "@/components/common/PageLoader";
 
 const faqSchema = z.object({
   question: z.string().min(10, "Question is required"),
@@ -281,6 +282,10 @@ const handleConfirmDelete = async () => {
     answer: ""
   }); 
   };
+
+  if (isFetching && faqs.length === 0) {
+    return <PageLoader />;
+  }
 
   const columnDefs: ColDef<FAQRow>[] = [
     {

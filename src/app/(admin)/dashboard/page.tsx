@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
+import PageLoader from "@/components/common/PageLoader";
 
 const stats = [
   {
@@ -82,7 +83,7 @@ export default function DashboardPage() {
   }, [router]);
 
   if (!isAuthenticated) {
-    return null;
+    return <PageLoader />;
   }
 
   return (
