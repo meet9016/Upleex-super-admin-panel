@@ -40,7 +40,7 @@ interface WalletTransaction {
   amount: number;
   description: string;
   status: string;
-  createdAt: string;
+  date: string;
 }
 
 const VendorWalletsPage = () => {
@@ -62,10 +62,13 @@ const VendorWalletsPage = () => {
       
       const res = await api.get(endPointApi.getAllVendorWallets, { params });
 
-      const wallets = res?.data?.data?.wallets || [];
+      // Handle different response structures
+      const payload = res?.data?.data;
+      const wallets = Array.isArray(payload) ? payload : payload?.wallets || [];
+      
       const walletsWithId = wallets.map((wallet: VendorWallet) => ({
         ...wallet,
-        id: wallet._id,
+        id: wallet._id || (wallet as any).id,
       }));
 
       setVendors(walletsWithId);
@@ -84,8 +87,11 @@ const VendorWalletsPage = () => {
       const endpoint = endPointApi.getVendorWalletTransactions.replace(':vendorId', vendorId);
 
       const res = await api.get(endpoint);
+      
+      const payload = res?.data?.data;
+      const transactionsList = Array.isArray(payload) ? payload : payload?.transactions || [];
 
-      setTransactions(res?.data?.data?.transactions || []);
+      setTransactions(transactionsList);
     } catch (error: any) {
       console.error('Error fetching transactions:', error);
       toast.error(error?.response?.data?.message || 'Failed to fetch transactions');
@@ -98,13 +104,11 @@ const VendorWalletsPage = () => {
   const handleViewHistory = (vendor: VendorWallet) => {
     setSelectedVendor(vendor);
     setShowTransactions(true);
-    fetchVendorTransactions(vendor.vendor_id);
+    fetchVendorTransactions(vendor.vendor_id || vendor._id);
   };
 
   useEffect(() => {
-    if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
-      fetchVendorWallets(debouncedSearch);
-    }
+    fetchVendorWallets(debouncedSearch);
   }, [debouncedSearch]);
 
   const columns: ColDef[] = useMemo(() => [
@@ -258,8 +262,9 @@ const VendorWalletsPage = () => {
 
                 {transactions.length > 0 ? (
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {transactions.map((transaction) => (
-                      <div
+                    {transactions.map((transaction) => {
+                      console.log("🚀 ~ VendorWalletsPage ~ transaction:", transaction)
+                      return <div
                         key={transaction._id}
                         className="flex items-center justify-between p-4 bg-gray-50  rounded-lg border border-gray-200 "
                       >
@@ -282,7 +287,7 @@ const VendorWalletsPage = () => {
                                 {transaction.description}
                               </p>
                               <p className="text-xs text-gray-600 ">
-                                {new Date(transaction.createdAt).toLocaleString('en-IN')}
+                                {new Date(transaction.date).toLocaleString('en-IN')}
                               </p>
                             </div>
                           </div>
@@ -301,8 +306,8 @@ const VendorWalletsPage = () => {
                             {transaction.status}
                           </p>
                         </div>
-                      </div>
-                    ))}
+                      </div>;
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -316,14 +321,14 @@ const VendorWalletsPage = () => {
       )}
 
       {/* Empty State */}
-      {vendors.length === 0 && !loading && (
+      {/* {vendors.length === 0 && !loading && (
         <div className="text-center py-12">
           <MdWallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 ">
             {searchTerm ? 'No vendors found matching your search' : 'No vendor wallets found'}
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
