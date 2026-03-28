@@ -112,6 +112,13 @@ export interface EndPointApi {
     getAllVendorWallets: string;
     getVendorWalletDetails: string;
     getVendorWalletTransactions: string;
+    // BANNERS
+    createBanner: string;
+    getAllBanners: string;
+    getBannerById: string;
+    updateBanner: string;
+    deleteBanner: string;
+    bulkDeleteBanner: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -229,6 +236,13 @@ const endPointApi: EndPointApi = {
     getAllVendorWallets: 'admin/vendor-wallets',
     getVendorWalletDetails: 'admin/vendor-wallets/:vendorId',
     getVendorWalletTransactions: 'admin/vendor-wallets/:vendorId/transactions',
+    // BANNERS
+    createBanner: 'banners/create-banner',
+    getAllBanners: 'banners/getall',
+    getBannerById: 'banners/getById',
+    updateBanner: 'banners/update',
+    deleteBanner: 'banners/delete',
+    bulkDeleteBanner: 'banners/bulk-delete',
 };
 
 export default endPointApi;

@@ -78,6 +78,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
     group: "Content",
     items: [
       { name: "Blog", href: "/blog", icon: BookOpen, permission: "blogs" },
+      { name: "Banners", href: "/banners", icon: Layers, permission: "blogs" },
       { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },
     ],
   },
