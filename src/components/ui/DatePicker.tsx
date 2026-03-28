@@ -120,6 +120,15 @@ export default function DatePicker({
         );
     };
 
+    const isToday = (day: number) => {
+        const today = new Date();
+        return (
+            today.getDate() === day &&
+            today.getMonth() === currentDate.getMonth() &&
+            today.getFullYear() === currentDate.getFullYear()
+        );
+    };
+
     const renderCalendarDays = () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -136,6 +145,7 @@ export default function DatePicker({
         for (let day = 1; day <= daysInMonth; day++) {
             const disabled = isDateDisabled(day);
             const selected = isDateSelected(day);
+            const today = isToday(day);
 
             days.push(
                 <button
@@ -149,10 +159,12 @@ export default function DatePicker({
                     className={clsx(
                         "h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all",
                         selected
-                            ? "bg-blue-600 text-white shadow-md cursor-pointer"
-                            : disabled
-                                ? "text-gray-300 cursor-not-allowed"
-                                : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                            ? "bg-blue-100 text-blue-700 shadow-sm cursor-pointer" // Light for selected
+                            : today
+                                ? "bg-slate-800 text-white shadow-md cursor-pointer" // Dark for today
+                                : disabled
+                                    ? "text-gray-300 cursor-not-allowed"
+                                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
                     )}
                 >
                     {day}

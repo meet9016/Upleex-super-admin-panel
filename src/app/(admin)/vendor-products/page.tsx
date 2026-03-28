@@ -114,6 +114,21 @@ export default function VendorProductApprovalPage() {
 
   const handleStatusChange = async (productId: string, status: string) => {
     try {
+      // Find the product to check its current status
+      let currentStatus = "";
+      for (const vendor of vendors) {
+        const product = vendor.products?.find(p => String((p as any).id || p._id) === String(productId));
+        if (product) {
+          currentStatus = product.approval_status;
+          break;
+        }
+      }
+
+      if (currentStatus === status) {
+        toast.info(`Product is already ${status}`);
+        return;
+      }
+
       setApproving(true);
       
       // Use existing productApproval API with PUT method

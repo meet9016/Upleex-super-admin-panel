@@ -13,6 +13,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import PageLoader from "@/components/common/PageLoader";
+import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 
 type PPlan = {
   _id?: string;
@@ -36,6 +37,10 @@ export default function PriorityPlansPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPlanType, setSelectedPlanType] = useState<string>("");
   const [errors, setErrors] = useState<{ [k: string]: string }>({});
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState<PPlan>({
     name: "",
     monthly_price: 0,
@@ -141,32 +146,42 @@ export default function PriorityPlansPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const deleteOne = async (plan: PPlan) => {
+  const deleteOne = (plan: PPlan) => {
     const id = plan._id || (plan as any).id;
     if (!id) { toast.error("Invalid plan id"); return; }
-    try {
-      await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
-      toast.success("Deleted successfully");
-      fetchData();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Delete failed");
-    }
+    setDeleteId(id);
+    setIsBulkDelete(false);
+    setOpenDeleteModal(true);
   };
 
-  const deleteSelected = async () => {
+  const deleteSelected = () => {
     if (!selected.length) { toast.info("Select rows to delete"); return; }
-    if (!confirm(`Delete ${selected.length} selected priority plans?`)) return;
+    setIsBulkDelete(true);
+    setOpenDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
-      for (const r of selected) {
-        const id = (r as any)._id || (r as any).id;
-        if (id) await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
+      if (isBulkDelete) {
+        for (const r of selected) {
+          const id = (r as any)._id || (r as any).id;
+          if (id) await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
+        }
+        toast.success("Selected plans deleted");
+        setSelected([]);
+        gridRef.current?.api?.deselectAll();
+      } else if (deleteId) {
+        await api.delete(`${endPointApi.deletePriorityPlan}/${deleteId}`);
+        toast.success("Deleted successfully");
       }
-      toast.success("Selected plans deleted");
-      setSelected([]);
-      gridRef.current?.api?.deselectAll();
       fetchData();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Bulk delete failed");
+      toast.error(e?.response?.data?.message || (isBulkDelete ? "Bulk delete failed" : "Delete failed"));
+    } finally {
+      setIsDeleting(false);
+      setOpenDeleteModal(false);
+      setDeleteId(null);
     }
   };
 
@@ -513,6 +528,21 @@ export default function PriorityPlansPage() {
           </Card>
         </div>
       </div>
+
+      <CommonDeleteModal
+        open={openDeleteModal}
+        isLoading={isDeleting}
+        onCancel={() => {
+          setOpenDeleteModal(false);
+          setDeleteId(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title={isBulkDelete ? "Delete Selected Plans?" : "Delete Priority Plan?"}
+        description={isBulkDelete 
+          ? `Are you sure you want to delete ${selected.length} selected priority plans? This action cannot be undone.`
+          : "Are you sure you want to delete this priority plan? This action cannot be undone."
+        }
+      />
     </div>
   );
 }

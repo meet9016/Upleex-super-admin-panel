@@ -45,7 +45,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             <Input
               type="search"
               placeholder="Search dashboards, users, reports..."
-              className="pl-10 h-10 bg-slate-50 border-transparent focus:bg-white focus:border-primary/20 transition-all rounded-xl"
+              className="pl-10 h-10 bg-slate-50 border-2 border-slate-200  transition-all rounded-xl"
             />
           </div>
         </div>
