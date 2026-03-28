@@ -15,8 +15,10 @@ import { apiService } from "@/services/api";
 import Loader from "@/components/common/Loader";
 
 const loginSchema = z.object({
-  email: z.string().email("Valid email address is required"),
-  password: z.string().min(6, "Password is required"),
+  email: z.string()
+    .min(1, { message: "Email address is required" })
+    .email({ message: "Valid email address is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -39,8 +41,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const response = await apiService.login(data.email, data.password)as any;
-      console.log('Login response:', response);
-
       if (response.success && response.data?.token) {
         // Save token and user info
         localStorage.setItem("auth_token", response.data.token);
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <Input
                   id="email"
-                  type="email"
+                  type="text"
                   placeholder="admin@upleex.com"
                   className="pl-10 h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all"
                   {...formRegister("email")}
