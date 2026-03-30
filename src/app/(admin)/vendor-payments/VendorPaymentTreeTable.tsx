@@ -206,7 +206,7 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
 
     const handleReleaseClick = () => {
       const confirmed = window.confirm(
-        `Are you sure you want to release payment for Order ${data.orderNumber}?\n\n` +
+        `Are you sure dsyou want to release payment for Order ${data.orderNumber}?\n\n` +
         `Customer: ${data.customerName}\n` +
         `Vendor Amount: ${data.formattedVendorAmount}\n\n` +
         `This action cannot be undone.`
