@@ -492,10 +492,11 @@ export default function VendorPaymentTreeTable({
   }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing]);
 
   // Handle filter changes
-  const handleStatusFilterChange = (status: string) => {
-    setStatusFilter(status);
-    onFilterChange({ status, vendor_id: vendorFilter });
-  };
+const handleStatusFilterChange = (status: string | string[]) => {
+  const newStatus = Array.isArray(status) ? (status[0] || '') : status;
+  setStatusFilter(newStatus);
+  onFilterChange({ status: newStatus, vendor_id: vendorFilter });
+};
 
   const handleVendorFilterChange = (vendorId: string) => {
     setVendorFilter(vendorId);
