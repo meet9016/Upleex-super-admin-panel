@@ -329,142 +329,165 @@ export default function BannerPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Banner Management</h2>
-      </div>
+  <div className="flex items-center justify-between">
+    <h2 className="text-2xl font-bold tracking-tight text-slate-900">Banner Management</h2>
+  </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <Card className="sticky top-16 border-slate-100 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">{editingId ? 'Edit Banner' : 'New Banner'}</CardTitle>
-              <CardDescription>
-                {editingId ? 'Update banner details' : 'Add a new banner to the homepage carousel.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Banner Title</label>
-                  <Input {...register("title")} placeholder="Main title" error={errors.title?.message} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Subtitle</label>
-                  <Input {...register("subtitle")} placeholder="Secondary text" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Description</label>
-                  <textarea 
-                    {...register("description")} 
-                    className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[80px]" 
-                    placeholder="Short description"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">Background Color</label>
-                    <Input {...register("color")} placeholder="bg-blue-900" />
-                  </div>
-                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-slate-700">Status</label>
-                    <select 
-                      {...register("status")}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Link URL</label>
-                  <Input {...register("link")} placeholder="https://..." />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-slate-700">Banner Image (1200x500)</label>
-                  <div
-                    {...getRootProps()}
-                    className={cn(
-                      "border-2 border-dotted rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[140px]",
-                      isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
-                      errors.image ? "border-red-500 bg-red-50" : ""
-                    )}
-                  >
-                    <input {...getInputProps()} />
-                    {(previewImage || (editingId && banners.find(b => (b._id || b.id) === editingId)?.image)) ? (
-                      <div className="absolute inset-0 w-full h-full group">
-                        <img
-                          src={previewImage || getImageUrl(banners.find(b => (b._id || b.id) === editingId)?.image || '') || ''}
-                          alt="Banner Preview"
-                          className="w-full h-full object-cover"
-                        />
-                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900">
-                              <Edit size={14} /> Change
-                            </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-4">
-                        <Plus className="h-6 w-6 text-slate-400 mx-auto mb-2" />
-                        <p className="text-xs text-slate-500">Drag & drop or click</p>
-                      </div>
-                    )}
-                  </div>
-                  {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>}
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button type="submit" className="flex-1 rounded-xl btn-primary" disabled={isLoading}>
-                    {isLoading ? <Loader2 className="animate-spin h-4 w-4" /> : (editingId ? 'Update' : 'Publish')}
-                  </Button>
-                  <Button type="button" variant="outline" className="flex-1 rounded-xl" onClick={handleCancelEdit}>Cancel</Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden h-[730px] flex flex-col">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-50 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Banners</CardTitle>
-                <CardDescription>Homepage carousel banners</CardDescription>
-              </div>
-              <div className="relative w-64">
-                <Input 
-                  placeholder="Search banners..." 
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  className="pl-10" 
-                />
-                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0 flex-1 relative">
-              <AgGridTable
-                loading={isFetching}
-                ref={gridRef}
-                rowData={banners}
-                columns={columnDefs as ColDef[]}
-                onSelectionChange={setSelectedRows}
-                gridHeight={650}
+  <div className="grid gap-4 lg:grid-cols-3">
+    <div className="lg:col-span-1">
+      <Card className="sticky top-16 border-slate-100 shadow-sm">
+        <CardHeader className="pb-2 pt-4">
+          <CardTitle className="text-base">{editingId ? 'Edit Banner' : 'New Banner'}</CardTitle>
+          <CardDescription className="text-xs">
+            {editingId ? 'Update banner details' : 'Add a new banner to the homepage carousel.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700">Banner Title</label>
+              <Input {...register("title")} placeholder="Main title" error={errors.title?.message} className="h-9 text-sm" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700">Subtitle</label>
+              <Input {...register("subtitle")} placeholder="Secondary text" className="h-9 text-sm" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700">Description</label>
+              <textarea 
+                {...register("description")} 
+                className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[70px]" 
+                placeholder="Short description"
               />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-700">Background Color</label>
+                <Input {...register("color")} placeholder="bg-blue-900" className="h-9 text-sm" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-700">Status</label>
+                <select 
+                  {...register("status")}
+                  className="w-full h-9 px-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700">Link URL</label>
+              <Input {...register("link")} placeholder="https://..." className="h-9 text-sm" />
+            </div>
 
-      <CommonDeleteModal
-        open={showDeletePopup}
-        title="Delete Banner?"
-        description={`Are you sure you want to delete "${bannerToDelete?.title}"?`}
-        isLoading={isDeleting}
-        onCancel={() => setShowDeletePopup(false)}
-        onConfirm={handleConfirmDelete}
-      />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700">Banner Image (1200x500)</label>
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "border-2 border-dotted rounded-lg relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[120px]",
+                  isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
+                  errors.image ? "border-red-500 bg-red-50" : ""
+                )}
+              >
+                <input {...getInputProps()} />
+                {(previewImage || (editingId && banners.find(b => (b._id || b.id) === editingId)?.image)) ? (
+                  <div className="absolute inset-0 w-full h-full group">
+                    <img
+                      src={previewImage || getImageUrl(banners.find(b => (b._id || b.id) === editingId)?.image || '') || ''}
+                      alt="Banner Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900">
+                        <Edit size={12} /> Change
+                      </div>
+                    </div>
+                    {previewImage && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewImage(null);
+                          setValue('image', undefined);
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20"
+                      >
+                        <X size={10} />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3">
+                    <Plus className="h-5 w-5 text-slate-400 mx-auto mb-1" />
+                    <p className="text-[11px] text-slate-500">Drag & drop or click</p>
+                  </div>
+                )}
+              </div>
+              {errors.image && <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>}
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
+                {isLoading ? <Loader2 className="animate-spin h-3 w-3" /> : (editingId ? 'Update' : 'Publish')}
+              </Button>
+              <Button type="button" variant="outline" className="flex-1 h-9 rounded-lg text-sm" onClick={handleCancelEdit}>Cancel</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
+
+    <div className="lg:col-span-2">
+      <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-base">Banners</CardTitle>
+              <CardDescription className="text-xs">Homepage carousel banners</CardDescription>
+            </div>
+            <div className="relative w-full sm:w-56">
+              <Input 
+                placeholder="Search..." 
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-8 h-9 text-sm" 
+              />
+              <MdSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+              {searchText && (
+                <button
+                  onClick={() => setSearchText("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 flex-1 relative">
+          <AgGridTable
+            loading={isFetching}
+            ref={gridRef}
+            rowData={banners}
+            columns={columnDefs as ColDef[]}
+            onSelectionChange={setSelectedRows}
+            gridHeight={550}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+
+  <CommonDeleteModal
+    open={showDeletePopup}
+    title="Delete Banner?"
+    description={`Are you sure you want to delete "${bannerToDelete?.title}"?`}
+    isLoading={isDeleting}
+    onCancel={() => setShowDeletePopup(false)}
+    onConfirm={handleConfirmDelete}
+  />
+</div>
   );
 }

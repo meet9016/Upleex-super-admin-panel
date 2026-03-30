@@ -395,8 +395,8 @@ export default function AddSubCategoryPage() {
         const imageUrl = getImageUrl(params.data.image);
 
         return (
-          <div className="flex items-center gap-3 h-full py-2">
-            <div className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110 bg-slate-100">
+          <div className="flex items-center gap-2 h-full py-1">
+            <div className="h-7 w-7 shrink-0 flex items-center justify-center rounded-md overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110 bg-slate-100">
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -414,7 +414,7 @@ export default function AddSubCategoryPage() {
                 <span className="text-xs text-slate-400">No img</span>
               )}
             </div>
-            <span className="font-semibold text-slate-900">{params.data.name}</span>
+            <span className="font-semibold text-slate-900 text-sm">{params.data.name}</span>
           </div>
         );
       }
@@ -440,14 +440,14 @@ export default function AddSubCategoryPage() {
     },
     {
       headerName: "Action",
-      width: 100,
-      minWidth: 100,
-      maxWidth: 100,
+      width: 90,
+      minWidth: 90,
+      maxWidth: 90,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
-      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" },
       cellRenderer: (params: { data: SubCategoryRow }) => (
         <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )
@@ -483,29 +483,24 @@ export default function AddSubCategoryPage() {
       ) : (
         <>
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Sub Categories</h2>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 items-stretch">
+      <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         {/* Left: Form */}
         <div className="lg:col-span-1">
-          <Card
-            className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col"
-            style={{ height: '770px' }}
-          >
-            <CardHeader>
+          <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col">
+            <CardHeader className="pb-2 pt-4">
               <div className="flex items-center gap-2">
-                {/* <Layers className="h-5 w-5 text-primary" /> */}
-                <CardTitle className="text-lg">
+                <CardTitle className="text-base">
                   {editingSubCategory ? "Edit Sub Category" : "Add Sub Category"}
                 </CardTitle>
               </div>
-
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="categoryId" className="text-sm font-semibold text-slate-700">
+            <CardContent className="pt-0">
+              <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-3">
+                <div className="space-y-1">
+                  <label htmlFor="categoryId" className="text-xs font-semibold text-slate-700">
                     Parent Category
                   </label>
                   <Controller
@@ -516,9 +511,8 @@ export default function AddSubCategoryPage() {
                         options={categories.map((cat) => ({
                           value: String(cat.categories_id || ''),
                           label: cat.categories_name,
-                          image: cat.image, // This will now show in the dropdown
+                          image: cat.image,
                         }))}
-
                         value={watch('categoryId') || ''}
                         onChange={(val) => {
                           const v = Array.isArray(val) ? val[0] : val;
@@ -527,37 +521,38 @@ export default function AddSubCategoryPage() {
                         disabled={isFetching}
                         error={!!errors.categoryId}
                         searchable
-                        multiple={false} // Set to true if you want multi-select
+                        multiple={false}
                       />
                     )}
                   />
                   {errors.categoryId && (
-                    <p className="text-xs text-red-500 mt-1">{errors.categoryId.message}</p>
+                    <p className="text-xs text-red-500 mt-0.5">{errors.categoryId.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-semibold text-slate-700">
+                <div className="space-y-1">
+                  <label htmlFor="name" className="text-xs font-semibold text-slate-700">
                     Sub Category Name
                   </label>
                   <Input
                     id="name"
                     placeholder="e.g. Laptops"
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-9 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg text-sm"
                     {...register("name")}
                     error={errors.name?.message}
                   />
                 </div>
+                
                 {/* Image Upload Field */}
-                <div className="space-y-2">
-                  <label htmlFor="image" className="text-sm font-semibold text-slate-700">
+                <div className="space-y-1">
+                  <label htmlFor="image" className="text-xs font-semibold text-slate-700">
                     Sub Category Image
                   </label>
 
                   <div
                     {...getRootProps()}
                     className={cn(
-                      "border-2 border-dotted rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[160px]",
+                      "border-2 border-dotted rounded-lg relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[120px]",
                       isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
                       errors.image ? "border-red-500 bg-red-50" : ""
                     )}
@@ -585,13 +580,13 @@ export default function AddSubCategoryPage() {
                                 setModalImageUrl(url);
                                 setImageModalOpen(true);
                               }}
-                              className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
+                              className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm hover:bg-white"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                               View
                             </button>
-                            <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
-                              <Edit size={14} />
+                            <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm">
+                              <Edit size={12} />
                               Change
                             </div>
                           </div>
@@ -605,25 +600,25 @@ export default function AddSubCategoryPage() {
                               setPreviewImage(null);
                               setValue('image', undefined);
                             }}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors z-20"
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20"
                           >
-                            <X size={14} />
+                            <X size={10} />
                           </button>
                         )}
                       </div>
                     ) : (
                       <>
-                        <div className="bg-slate-100 p-2 rounded-full mb-2">
-                          <Plus className="h-5 w-5 text-slate-500" />
+                        <div className="bg-slate-100 p-1.5 rounded-full mb-1">
+                          <Plus className="h-4 w-4 text-slate-500" />
                         </div>
                         {isDragActive ? (
-                          <p className="text-sm font-medium text-primary">Drop the image here...</p>
+                          <p className="text-xs font-medium text-primary">Drop the image here...</p>
                         ) : (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-slate-700">
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-medium text-slate-700">
                               Click or drag image to upload
                             </p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-[11px] text-slate-500">
                               SVG, PNG, JPG or GIF (max. 5MB)
                             </p>
                           </div>
@@ -633,30 +628,30 @@ export default function AddSubCategoryPage() {
                   </div>
 
                   {errors.image && (
-                    <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>
+                    <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>
                   )}
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-[11px] text-slate-500">
                     {editingSubCategory
                       ? 'Upload a new image to replace the existing one'
-                      : 'Upload an image for the sub-category (JPEG, PNG, etc.)'}
+                      : 'Upload an image for the sub-category'}
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2 pt-1">
                   <Button
                     type="submit"
-                    className="flex-1 h-11 rounded-xl shadow-lg shadow-primary/20 btn-primary"
+                    className="flex-1 h-9 rounded-lg shadow-lg shadow-primary/20 btn-primary text-sm"
                     disabled={isLoading || isFetching}
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                         {editingSubCategory ? "Updating..." : "Saving..."}
                       </>
                     ) : (
                       <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        {editingSubCategory ? "Update Sub Category" : "Add Sub Category"}
+                        <Plus className="mr-1 h-3 w-3" />
+                        {editingSubCategory ? "Update" : "Add"}
                       </>
                     )}
                   </Button>
@@ -664,7 +659,7 @@ export default function AddSubCategoryPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 h-11 rounded-xl"
+                    className="flex-1 h-9 rounded-lg text-sm"
                     onClick={handleCancelEdit}
                   >
                     Cancel
@@ -677,69 +672,66 @@ export default function AddSubCategoryPage() {
 
         {/* Right: List */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col" style={{ height: '770px' }}>
-            <CardHeader className="bg-slate-50/50 border-b border-slate-50">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-  
-  {/* LEFT */}
-  <div>
-    <CardTitle className="text-lg">Sub-category Directory</CardTitle>
-    <p className="text-xs text-slate-500 mt-1">
-      Total: {filteredSubCategories.length} sub-categories
-      {searchText && ` • Searching: "${searchText}"`}
-    </p>
-  </div>
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                {/* LEFT */}
+                <div>
+                  <CardTitle className="text-base">Sub-category Directory</CardTitle>
+                  <p className="text-xs text-slate-500">
+                    Total: {filteredSubCategories.length} sub-categories
+                    {searchText && ` • Searching: "${searchText}"`}
+                  </p>
+                </div>
 
-  {/* RIGHT */}
-  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-    
-    {/* DELETE BUTTON */}
-    <Button
-      variant="destructive"
-      size="md"
-      disabled={selectedRows.length === 0}
-      onClick={() => {
-        if (selectedRows.length === 0) return;
-        setShowBulkDeletePopup(true);
-      }}
-      className="w-full sm:w-auto"
-    >
-      Delete Selected ({selectedRows.length})
-    </Button>
+                {/* RIGHT */}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  {/* DELETE BUTTON */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => {
+                      if (selectedRows.length === 0) return;
+                      setShowBulkDeletePopup(true);
+                    }}
+                    className="w-full sm:w-auto h-9 text-sm"
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
 
-    {/* SEARCH */}
-    <div className="relative w-full sm:w-64">
-      <input
-        type="text"
-        placeholder="Search sub-categories..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-900 w-full text-sm"
-      />
+                  {/* SEARCH */}
+                  <div className="relative w-full sm:w-56">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className="pl-8 pr-7 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 w-full text-sm"
+                    />
 
-      <MdSearch
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        size={18}
-      />
+                    <MdSearch
+                      className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={14}
+                    />
 
-      {searchText && (
-        <button
-          onClick={handleClearSearch}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          ×
-        </button>
-      )}
-    </div>
-
-  </div>
-</div>
+                    {searchText && (
+                      <button
+                        onClick={handleClearSearch}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {filteredSubCategories.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
-                    <p className="text-slate-500 mb-2">
+                    <p className="text-slate-500 text-sm mb-2">
                       {searchText
                         ? `No sub-categories found matching "${searchText}"`
                         : 'No sub-categories found'}
@@ -749,7 +741,7 @@ export default function AddSubCategoryPage() {
                         variant="outline"
                         size="sm"
                         onClick={handleClearSearch}
-                        className="text-xs"
+                        className="text-xs h-8"
                       >
                         Clear Search
                       </Button>
@@ -764,9 +756,9 @@ export default function AddSubCategoryPage() {
                   onSelectionChange={(selected) => {
                     setSelectedRows(selected);
                   }}
-                  enableSearch={false} // Since you have your own search
+                  enableSearch={false}
                   enableFilter={false}
-                  gridHeight={675}
+                  gridHeight={600}
                 />
               )}
             </CardContent>
@@ -802,9 +794,9 @@ export default function AddSubCategoryPage() {
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
               onClick={() => setImageModalOpen(false)}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute -top-8 right-0 text-white hover:text-gray-300 transition-colors text-sm"
             >
-              <X size={32} />
+              <X size={24} />
             </button>
             <img
               src={modalImageUrl}

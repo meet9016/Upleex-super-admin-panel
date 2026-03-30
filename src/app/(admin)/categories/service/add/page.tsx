@@ -25,7 +25,6 @@ import PageLoader from "@/components/common/PageLoader";
 const categorySchema = z.object({
   name: z.string().min(2, "Category name is required"),
   image: z.any().refine((files) => files && files.length > 0, "Image is required"),
-
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -123,8 +122,8 @@ export default function AddServiceCategoryPage() {
       cellRenderer: (params: any) => {
         const imageUrl = getImageUrl(params.data.image);
         return (
-          <div className="flex items-center gap-3 h-full py-2">
-            <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
+          <div className="flex items-center gap-2 h-full py-1">
+            <div className="h-7 w-7 shrink-0 rounded-md overflow-hidden border border-slate-100 shadow-sm transition-transform hover:scale-110">
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -147,7 +146,7 @@ export default function AddServiceCategoryPage() {
                 </div>
               )}
             </div>
-            <span className="font-semibold text-slate-900">{params.value}</span>
+            <span className="font-semibold text-slate-900 text-sm">{params.value}</span>
           </div>
         );
       }
@@ -161,14 +160,14 @@ export default function AddServiceCategoryPage() {
     },
     {
       headerName: "Action",
-      width: 200,
-      minWidth: 200,
-      maxWidth: 200,
+      width: 90,
+      minWidth: 90,
+      maxWidth: 90,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
-      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" },
       cellRenderer: (params: any) => (
         <ActionButtons onEdit={() => handleEdit(params.data)} onDelete={() => handleDeleteClick(params.data)} />
       )
@@ -372,221 +371,220 @@ export default function AddServiceCategoryPage() {
         <PageLoader />
       ) : (
         <>
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Service Categories</h2>
-      </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Service Categories</h2>
+          </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 items-stretch" style={{ height: '770px' }}>
-        <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {editingId ? 'Edit Service Category' : 'Add New Service Category'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-semibold text-slate-700"> Name </label>
-                  <Input
-                    id="name"
-                    placeholder="e.g. Cleaning"
-                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
-                    {...register("name")}
-                    error={errors.name?.message}
-                  />
-                </div>
+          <div className="grid gap-4 lg:grid-cols-3 items-stretch">
+            <div className="lg:col-span-1">
+              <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col">
+                <CardHeader className="pb-2 pt-4">
+                  <CardTitle className="text-base">
+                    {editingId ? 'Edit Service Category' : 'Add New Service Category'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                    <div className="space-y-1">
+                      <label htmlFor="name" className="text-xs font-semibold text-slate-700">Name</label>
+                      <Input
+                        id="name"
+                        placeholder="e.g. Cleaning"
+                        className="h-9 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg text-sm"
+                        {...register("name")}
+                        error={errors.name?.message}
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="image" className="text-sm font-semibold text-slate-700"> Category Image </label>
-                  <div
-                    {...getRootProps()}
-                    className={cn(
-                      "border-2 border-dashed rounded-xl relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[160px]",
-                      isDragActive ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
-                      errors.image ? "border-red-500 bg-red-50" : ""
-                    )}
-                  >
-                    <input {...getInputProps()} />
-                    {(previewImage || (editingId && currentEditingCategory?.image)) ? (
-                      <div className="absolute inset-0 w-full h-full group">
-                        <img
-                          src={previewImage || getImageUrl(currentEditingCategory?.image || "")}
-                          alt="Category"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23f1f5f9'/%3E%3Ctext x='48' y='48' font-family='Arial' font-size='12' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const url = previewImage || getImageUrl(currentEditingCategory?.image || "");
-                                setModalImageUrl(url);
-                                setImageModalOpen(true);
+                    <div className="space-y-1">
+                      <label htmlFor="image" className="text-xs font-semibold text-slate-700">Category Image</label>
+                      <div
+                        {...getRootProps()}
+                        className={cn(
+                          "border-2 border-dotted rounded-lg relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all w-full min-h-[120px]",
+                          isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
+                          errors.image ? "border-red-500 bg-red-50" : ""
+                        )}
+                      >
+                        <input {...getInputProps()} />
+                        {(previewImage || (editingId && currentEditingCategory?.image)) ? (
+                          <div className="absolute inset-0 w-full h-full group">
+                            <img
+                              src={previewImage || getImageUrl(currentEditingCategory?.image || "")}
+                              alt="Category"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23f1f5f9'/%3E%3Ctext x='48' y='48' font-family='Arial' font-size='12' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3ENo image%3C/text%3E%3C/svg%3E";
                               }}
-                              className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-white"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
-                              View
-                            </button>
-                            <div className="bg-white/90 p-2 rounded-lg flex items-center gap-2 text-sm font-medium text-slate-900 shadow-sm">
-                              <Edit size={14} /> Change
+                            />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const url = previewImage || getImageUrl(currentEditingCategory?.image || "");
+                                    setModalImageUrl(url);
+                                    setImageModalOpen(true);
+                                  }}
+                                  className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm hover:bg-white"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                                  View
+                                </button>
+                                <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm">
+                                  <Edit size={12} /> Change
+                                </div>
+                              </div>
                             </div>
+                            {previewImage && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPreviewImage(null);
+                                  setValue('image', undefined);
+                                }}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20"
+                              >
+                                <X size={10} />
+                              </button>
+                            )}
                           </div>
-                        </div>
-                        {previewImage && (
+                        ) : (
+                          <>
+                            <div className="bg-slate-100 p-1.5 rounded-full mb-1">
+                              <Plus className="h-4 w-4 text-slate-500" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className="text-xs font-medium text-slate-700">Click or drag image to upload</p>
+                              <p className="text-[11px] text-slate-500">SVG, PNG, JPG or GIF (max. 5MB)</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {errors.image && <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>}
+                    </div>
+                    
+                    <div className="flex gap-2 pt-1">
+                      <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
+                        {isLoading ? (
+                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
+                        ) : (
+                          <><Plus className="mr-1 h-3 w-3" /> {editingId ? 'Update' : 'Add'}</>
+                        )}
+                      </Button>
+                      <Button type="button" variant="outline" className="flex-1 h-9 rounded-lg text-sm" onClick={handleCancelEdit}>Cancel</Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-2">
+              <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    {/* LEFT */}
+                    <div>
+                      <CardTitle className="text-base">Service Category List</CardTitle>
+                      <p className="text-xs text-slate-500">
+                        Total: {categories.length} categories
+                        {searchText && ` • Searching: "${searchText}"`}
+                      </p>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                      {/* DELETE BUTTON */}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={selectedRows.length === 0}
+                        onClick={() => {
+                          if (selectedRows.length === 0) return;
+                          setShowBulkDeletePopup(true);
+                        }}
+                        className="w-full sm:w-auto h-9 text-sm"
+                      >
+                        Delete Selected ({selectedRows.length})
+                      </Button>
+
+                      {/* SEARCH */}
+                      <div className="relative w-full sm:w-56">
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={searchText}
+                          onChange={(e) => setSearchText(e.target.value)}
+                          className="pl-8 pr-7 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+                        />
+
+                        <MdSearch
+                          className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
+                          size={14}
+                        />
+
+                        {searchText && (
                           <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPreviewImage(null);
-                              setValue('image', undefined);
-                            }}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors z-20"
+                            onClick={handleClearSearch}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                           >
-                            <X size={14} />
+                            ×
                           </button>
                         )}
                       </div>
-                    ) : (
-                      <>
-                        <div className="bg-slate-100 p-2 rounded-full mb-2">
-                          <Plus className="h-5 w-5 text-slate-500" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-slate-700"> Click or drag image to upload </p>
-                          <p className="text-xs text-slate-500"> SVG, PNG, JPG or GIF (max. 5MB) </p>
-                        </div>
-                      </>
-                    )}
+                    </div>
                   </div>
-                  {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image.message as string}</p>}
-                </div>
-                <div className="flex gap-3">
-                  <Button type="submit" className="flex-1 h-11 rounded-xl btn-primary" disabled={isLoading}>
-                    {isLoading ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
-                    ) : (
-                      <><Plus className="mr-2 h-4 w-4" /> {editingId ? 'Update' : 'Add'} Category</>
-                    )}
-                  </Button>
-                  <Button type="button" variant="outline" className="flex-1 h-11" onClick={handleCancelEdit}> Cancel </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-50">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-  
-  {/* LEFT */}
-  <div>
-    <CardTitle className="text-lg">Service Category List</CardTitle>
-    <p className="text-xs text-slate-500 mt-1">
-      Total: {categories.length} categories
-    </p>
-  </div>
-
-  {/* RIGHT */}
-  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-    
-    {/* DELETE BUTTON */}
-    <Button
-      variant="destructive"
-      size="md"
-      disabled={selectedRows.length === 0}
-      onClick={() => {
-        if (selectedRows.length === 0) return;
-        setShowBulkDeletePopup(true);
-      }}
-      className="w-full sm:w-auto"
-    >
-      Delete Selected ({selectedRows.length})
-    </Button>
-
-    {/* SEARCH */}
-    <div className="relative w-full sm:w-64">
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
-      />
-
-      <MdSearch
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        size={18}
-      />
-
-      {searchText && (
-        <button
-          onClick={handleClearSearch}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          ×
-        </button>
-      )}
-    </div>
-
-  </div>
-</div>
-            </CardHeader>
-            <CardContent className="p-0 flex-1 relative">
-              {categories.length === 0 && !isFetching ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                  <p className="text-slate-500"> No categories found </p>
-                </div>
-              ) : (
-                <AgGridTable
-                  loading={isFetching}
-                  rowData={categories}
-                  columns={columnDefs as ColDef[]}
-                  onSelectionChange={(selected) => setSelectedRows(selected)}
-                  enableSearch={false}
-                  enableFilter={false}
-                  gridHeight={700}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <CommonDeleteModal
-        open={showDeletePopup}
-        title="Delete Service Category?"
-        description={categoryToDelete ? `Are you sure you want to delete "${categoryToDelete.categories_name}"?` : "This action cannot be undone."}
-        isLoading={isDeleting}
-        onCancel={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-      />
-
-      <CommonDeleteModal
-        open={showBulkDeletePopup}
-        title="Delete Selected Categories?"
-        description={`Are you sure you want to delete ${selectedRows.length} selected categories? This action cannot be undone.`}
-        isLoading={isBulkDeleting}
-        onCancel={handleCancelBulkDelete}
-        onConfirm={handleConfirmBulkDelete}
-      />
-
-      {imageModalOpen && modalImageUrl && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setImageModalOpen(false)}>
-          <div className="relative max-w-4xl max-h-[90vh]">
-            <button onClick={() => setImageModalOpen(false)} className="absolute -top-10 right-0 text-white"><X size={32} /></button>
-            <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+                </CardHeader>
+                <CardContent className="p-0 flex-1 relative">
+                  {categories.length === 0 && !isFetching ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                      <p className="text-slate-500 text-sm">No categories found</p>
+                    </div>
+                  ) : (
+                    <AgGridTable
+                      loading={isFetching}
+                      rowData={categories}
+                      columns={columnDefs as ColDef[]}
+                      onSelectionChange={(selected) => setSelectedRows(selected)}
+                      enableSearch={false}
+                      enableFilter={false}
+                      gridHeight={600}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      )}
-      </>
+
+          <CommonDeleteModal
+            open={showDeletePopup}
+            title="Delete Service Category?"
+            description={categoryToDelete ? `Are you sure you want to delete "${categoryToDelete.categories_name}"?` : "This action cannot be undone."}
+            isLoading={isDeleting}
+            onCancel={handleCancelDelete}
+            onConfirm={handleConfirmDelete}
+          />
+
+          <CommonDeleteModal
+            open={showBulkDeletePopup}
+            title="Delete Selected Categories?"
+            description={`Are you sure you want to delete ${selectedRows.length} selected categories? This action cannot be undone.`}
+            isLoading={isBulkDeleting}
+            onCancel={handleCancelBulkDelete}
+            onConfirm={handleConfirmBulkDelete}
+          />
+
+          {imageModalOpen && modalImageUrl && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setImageModalOpen(false)}>
+              <div className="relative max-w-4xl max-h-[90vh]">
+                <button onClick={() => setImageModalOpen(false)} className="absolute -top-8 right-0 text-white"><X size={24} /></button>
+                <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

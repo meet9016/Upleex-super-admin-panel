@@ -217,14 +217,14 @@ export default function DropdownsManagementPage() {
   if (loading) return <PageLoader />;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dropdowns</h2>
-        <p className="text-slate-500">Manage dynamic values for various system dropdowns.</p>
+    <div className="space-y-4 animate-in fade-in duration-500">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Dropdowns</h2>
+        <p className="text-sm text-slate-500">Manage dynamic values for various system dropdowns.</p>
       </div>
 
       {/* Type Selector (Pill Style Tabs) */}
-      <div className="flex flex-wrap gap-2 pb-2">
+      <div className="flex flex-wrap gap-2 pb-1">
         {CONFIGS.map((config) => {
           const Icon = config.icon;
           const isActive = activeTab === config.key;
@@ -238,56 +238,53 @@ export default function DropdownsManagementPage() {
                 setSelectedRows([]);
               }}
               className={cn(
-                "flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200",
+                "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200",
                 isActive
                   ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
               )}
             >
-              <Icon size={16} />
+              <Icon size={14} />
               {config.label}
             </button>
           );
         })}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 items-stretch">
+      <div className="grid gap-4 lg:grid-cols-3 items-stretch">
         {/* Left: Form Card */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col" style={{ height: '650px' }}>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">
+          <Card className="sticky top-24 border-slate-100 shadow-sm h-full flex flex-col">
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-base">
                 {editingItem ? `Edit ${activeConfig.displayLabel}` : `Add New ${activeConfig.displayLabel}`}
               </CardTitle>
-              {/* <CardDescription>
-                Enter the name for the new entry.
-              </CardDescription> */}
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSave} className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">
+            <CardContent className="pt-0">
+              <form onSubmit={handleSave} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">
                     {activeConfig.displayLabel} Name
                   </label>
                   <Input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder={activeConfig.placeholder}
-                    className="h-11 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl mt-3"
+                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg"
                     autoFocus
                   />
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-2 pt-1">
                   <Button
                     type="submit"
-                    className="flex-1 h-11 rounded-xl shadow-lg shadow-blue-200 btn-primary"
+                    className="flex-1 h-10 rounded-lg shadow-lg shadow-blue-200 btn-primary"
                     disabled={submitting || !inputValue.trim()}
                   >
                     {submitting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                     ) : (
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 h-3 w-3" />
                     )}
                     {editingItem ? 'Update' : 'Add Entry'}
                   </Button>
@@ -296,7 +293,7 @@ export default function DropdownsManagementPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="flex-1 h-11 rounded-xl"
+                      className="flex-1 h-10 rounded-lg"
                       onClick={handleCancelEdit}
                     >
                       Cancel
@@ -310,59 +307,56 @@ export default function DropdownsManagementPage() {
 
         {/* Right: Grid Card */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full" style={{ height: '650px' }}>
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-  
-  {/* LEFT SIDE */}
-  <div>
-    <CardTitle className="text-lg">{activeConfig.label} List</CardTitle>
-    <p className="text-xs text-slate-500 mt-1">
-      Total: {filteredData.length} records
-    </p>
-  </div>
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                {/* LEFT SIDE */}
+                <div>
+                  <CardTitle className="text-base">{activeConfig.label} List</CardTitle>
+                  <p className="text-xs text-slate-500">
+                    Total: {filteredData.length} records
+                  </p>
+                </div>
 
-  {/* RIGHT SIDE */}
-  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-    
-    {/* DELETE BUTTON */}
-    <Button
-      variant="destructive"
-      size="md"
-      disabled={selectedRows.length === 0}
-      onClick={() => setShowBulkDeleteModal(true)}
-      className="w-full sm:w-auto"
-    >
-      Delete Selected ({selectedRows.length})
-    </Button>
+                {/* RIGHT SIDE */}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  {/* DELETE BUTTON */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => setShowBulkDeleteModal(true)}
+                    className="w-full sm:w-auto h-9"
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
 
-    {/* SEARCH */}
-    <div className="relative w-full sm:w-64">
-      <Input
-        placeholder="Search..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="pl-10 h-10 w-full bg-white border-slate-200 rounded-xl text-sm"
-      />
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  {/* SEARCH */}
+                  <div className="relative w-full sm:w-56">
+                    <Input
+                      placeholder="Search..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className="pl-8 h-9 w-full bg-white border-slate-200 rounded-lg text-sm"
+                    />
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
 
-      {searchText && (
-        <button
-          onClick={() => setSearchText("")}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-        >
-          <X size={14} />
-        </button>
-      )}
-    </div>
-
-  </div>
-</div>
+                    {searchText && (
+                      <button
+                        onClick={() => setSearchText("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {isFetching && (
                 <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center">
-                  <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                  <Loader2 className="animate-spin h-6 w-6 text-primary" />
                 </div>
               )}
               <AgGridTable
