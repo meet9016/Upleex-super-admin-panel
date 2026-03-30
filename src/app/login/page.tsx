@@ -59,121 +59,95 @@ export default function LoginPage() {
     }
   };
 
- return (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
-    <Card className="w-full max-w-md shadow-xl border-none">
-      
-      <CardHeader className="space-y-4 text-center pb-8">
-        <div className="flex justify-center">
-          <img src="/logo.png" alt="Upleex" className="h-12 object-contain" />
-        </div>
-
-        <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
-          Super Admin Login
-        </CardTitle>
-
-        <CardDescription>
-          Enter your credentials to access the management panel
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          
-          {/* Email */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-semibold text-gray-700">
-              Email Address
-            </label>
-
-            <div className="flex flex-col w-full">
-              <Input
-  id="email"
-  type="text"
-  placeholder="admin@upleex.com"
-  className={`h-11 rounded-xl border w-full outline-none transition-all
-    focus:outline-none focus:ring-0
-    ${errors.email
-      ? "border-red-500 focus:border-red-500"
-      : "border-gray-200 focus:border-indigo-500"
-    }`}
-  {...formRegister("email")}
-/>
-
-              {errors.email?.message && (
-                <span className="text-[12px] text-red-600 mt-1">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md shadow-xl border-none">
+        <CardHeader className="space-y-4 text-center pb-8">
+          <div className="flex justify-center">
+            <img src="/logo.png" alt="Upleex" className="h-12 object-contain" />
           </div>
-
-          {/* Password */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-semibold text-gray-700">
-              Password
-            </label>
-
-            <div className="flex flex-col w-full">
-    <Input
-  id="email"
-  type="text"
-  placeholder="admin@upleex.com"
-  className={`h-11 rounded-xl border w-full outline-none transition-all
-    focus:outline-none focus:ring-0
-    ${errors.email
-      ? "border-red-500 focus:border-red-500"
-      : "border-gray-200 focus:border-gray-300"
-    }`}
-  {...formRegister("email")}
-/>
-
-              {errors.password?.message && (
-                <span className="text-[12px] text-red-600 mt-1">
-                  {errors.password.message}
-                </span>
-              )}
+          <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+            Super Admin Login
+          </CardTitle>
+          <CardDescription>
+            Enter your credentials to access the management panel
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="admin@upleex.com"
+                  className="pl-10 h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all"
+                  {...formRegister("email")}
+                  error={errors.email?.message}
+                />
+              </div>
             </div>
-
-            {/* Toggle Button */}
-            <div className="flex justify-end -mt-9 pr-3">
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Button */}
-          <Button 
-            type="submit" 
-            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader type="button" text="Authenticating..." iconClassName="text-white" />
-            ) : (
-              "Sign In"
-            )}
-          </Button>
-
-        </form>
-      </CardContent>
-
-      <CardFooter className="flex flex-col space-y-4 pt-4">
-        <p className="text-center text-xs text-gray-400">
-          © 2026 Upleex. All rights reserved.
-        </p>
-      </CardFooter>
-
-    </Card>
+       <div className="space-y-2">
+  <div className="flex items-center justify-between">
+    <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+      Password
+    </label>
   </div>
-);
+
+  <div className="relative">
+    <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+
+    <Input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      placeholder="••••••••"
+      className="pl-10 pr-10 h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all"
+      {...formRegister("password")}
+      error={errors.password?.message}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+    >
+      {showPassword ? (
+        <EyeOff className="h-5 w-5" />
+      ) : (
+        <Eye className="h-5 w-5" />
+      )}
+    </button>
+  </div>
+</div>
+<Button 
+  type="submit" 
+  className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg shadow-lg shadow-indigo-200 transition-all active:scale-95" 
+  disabled={isLoading}
+>
+              {isLoading ? (
+                <Loader type="button" text="Authenticating..." iconClassName="text-white" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4 pt-4">
+          {/* <div className="text-sm text-center">
+            <span className="text-gray-500">Don't have an account? </span>
+            <Link href="/register" className="text-indigo-600 font-semibold hover:underline">
+              Register here
+            </Link>
+          </div> */}
+          <p className="text-center text-xs text-gray-400">
+            © 2026 Upleex. All rights reserved.
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 }
