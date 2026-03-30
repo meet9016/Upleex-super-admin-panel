@@ -312,42 +312,52 @@ export default function DropdownsManagementPage() {
         <div className="lg:col-span-2">
           <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full" style={{ height: '650px' }}>
             <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="text-lg">{activeConfig.label} List</CardTitle>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Total: {filteredData.length} records
-                  </p>
-                </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  
+  {/* LEFT SIDE */}
+  <div>
+    <CardTitle className="text-lg">{activeConfig.label} List</CardTitle>
+    <p className="text-xs text-slate-500 mt-1">
+      Total: {filteredData.length} records
+    </p>
+  </div>
 
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="destructive"
-                    size="md"
-                    disabled={selectedRows.length === 0}
-                    onClick={() => setShowBulkDeleteModal(true)}
-                  >
-                    Delete Selected ({selectedRows.length})
-                  </Button>
-                  <div className="relative">
-                    <Input
-                      placeholder="Search..."
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 h-10 w-64 bg-white border-slate-200 rounded-xl text-sm"
-                    />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    {searchText && (
-                      <button
-                        onClick={() => setSearchText("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+  {/* RIGHT SIDE */}
+  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    
+    {/* DELETE BUTTON */}
+    <Button
+      variant="destructive"
+      size="md"
+      disabled={selectedRows.length === 0}
+      onClick={() => setShowBulkDeleteModal(true)}
+      className="w-full sm:w-auto"
+    >
+      Delete Selected ({selectedRows.length})
+    </Button>
+
+    {/* SEARCH */}
+    <div className="relative w-full sm:w-64">
+      <Input
+        placeholder="Search..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="pl-10 h-10 w-full bg-white border-slate-200 rounded-xl text-sm"
+      />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+
+      {searchText && (
+        <button
+          onClick={() => setSearchText("")}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+
+  </div>
+</div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {isFetching && (

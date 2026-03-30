@@ -362,9 +362,9 @@ export default function VendorProductTreeTable({
     },
     {
       headerName: "Action",
-      width: 140,
-      minWidth: 140,
-      maxWidth: 140,
+      width: 200,
+      minWidth: 200,
+      maxWidth: 200,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,

@@ -350,7 +350,7 @@ export default function VendorServiceTreeTable({
     },
     {
       headerName: "Action",
-      width: 140,
+      width: 200,
       pinned: "right",
       suppressHeaderMenuButton: true,
       sortable: false,

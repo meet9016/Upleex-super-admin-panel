@@ -311,7 +311,7 @@ export default function BannerPage() {
           "px-2 py-1 rounded-full text-xs font-semibold",
           params.value === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
         )}>
-          {params.value.toUpperCase()}
+          {params.value.charAt(0).toUpperCase() + params.value.slice(1) }
         </span>
       ),
     },

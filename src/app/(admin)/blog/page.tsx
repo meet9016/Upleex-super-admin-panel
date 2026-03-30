@@ -765,65 +765,80 @@ export default function BlogPage() {
         <div className="lg:col-span-2">
           <Card className="border-slate-100 shadow-sm overflow-hiddenflex flex-col" style={{ height: '774px' }}>
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="text-lg">Blog Posts</CardTitle>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Total: {filteredBlogs.length} posts
-                    {searchText && ` • Searching: "${searchText}"`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="destructive"
-                    size="md"
-                    disabled={selectedRows.length === 0}
-                    onClick={async () => {
-                      if (selectedRows.length === 0) return;
-                      if (!confirm(`Delete ${selectedRows.length} selected blogs?`)) return;
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  
+  {/* LEFT */}
+  <div>
+    <CardTitle className="text-lg">Blog Posts</CardTitle>
+    <p className="text-xs text-slate-500 mt-1">
+      Total: {filteredBlogs.length} posts
+      {searchText && ` • Searching: "${searchText}"`}
+    </p>
+  </div>
 
-                      try {
-                        const ids = selectedRows.map(r => r.id).filter(Boolean);
-                        const res = await api.delete(endPointApi.bulkDeleteBlog, {
-                          data: { ids }
-                        });
+  {/* RIGHT */}
+  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    
+    {/* DELETE BUTTON */}
+    <Button
+      variant="destructive"
+      size="md"
+      disabled={selectedRows.length === 0}
+      onClick={async () => {
+        if (selectedRows.length === 0) return;
+        if (!confirm(`Delete ${selectedRows.length} selected blogs?`)) return;
 
-                        if (res?.data?.message || res?.data?.success) {
-                          toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
-                          setSelectedRows([]);
-                          gridRef.current?.api?.deselectAll();
-                          await fetchBlogs();
-                        } else {
-                          toast.error(res?.data?.message || 'Bulk delete failed');
-                        }
-                      } catch (error: any) {
-                        console.error("Bulk delete error:", error);
-                        toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
-                      }
-                    }}
-                  >
-                    Delete Selected ({selectedRows.length})
-                  </Button>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search blogs..."
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 text-sm"
-                    />
-                    <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    {searchText && (
-                      <button
-                        onClick={handleClearSearch}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <X size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+        try {
+          const ids = selectedRows.map(r => r.id).filter(Boolean);
+          const res = await api.delete(endPointApi.bulkDeleteBlog, {
+            data: { ids }
+          });
+
+          if (res?.data?.message || res?.data?.success) {
+            toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
+            setSelectedRows([]);
+            gridRef.current?.api?.deselectAll();
+            await fetchBlogs();
+          } else {
+            toast.error(res?.data?.message || 'Bulk delete failed');
+          }
+        } catch (error: any) {
+          console.error("Bulk delete error:", error);
+          toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
+        }
+      }}
+      className="w-full sm:w-auto"
+    >
+      Delete Selected ({selectedRows.length})
+    </Button>
+
+    {/* SEARCH */}
+    <div className="relative w-full sm:w-64">
+      <input
+        type="text"
+        placeholder="Search blogs..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full text-sm"
+      />
+
+      <MdSearch
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        size={18}
+      />
+
+      {searchText && (
+        <button
+          onClick={handleClearSearch}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          <X size={16} />
+        </button>
+      )}
+    </div>
+
+  </div>
+</div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {filteredBlogs.length === 0 && !isFetching ? (

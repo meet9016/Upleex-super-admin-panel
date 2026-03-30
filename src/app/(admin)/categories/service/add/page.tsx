@@ -484,36 +484,60 @@ export default function AddServiceCategoryPage() {
         <div className="lg:col-span-2">
           <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="text-lg"> Service Category List </CardTitle>
-                  <p className="text-xs text-slate-500 mt-1"> Total: {categories.length} categories </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="destructive"
-                    size="md"
-                    disabled={selectedRows.length === 0}
-                    onClick={() => {
-                      if (selectedRows.length === 0) return;
-                      setShowBulkDeletePopup(true);
-                    }}
-                  >
-                    Delete Selected ({selectedRows.length})
-                  </Button>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 text-sm"
-                    />
-                    <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    {searchText && <button onClick={handleClearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"> × </button>}
-                  </div>
-                </div>
-              </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  
+  {/* LEFT */}
+  <div>
+    <CardTitle className="text-lg">Service Category List</CardTitle>
+    <p className="text-xs text-slate-500 mt-1">
+      Total: {categories.length} categories
+    </p>
+  </div>
+
+  {/* RIGHT */}
+  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+    
+    {/* DELETE BUTTON */}
+    <Button
+      variant="destructive"
+      size="md"
+      disabled={selectedRows.length === 0}
+      onClick={() => {
+        if (selectedRows.length === 0) return;
+        setShowBulkDeletePopup(true);
+      }}
+      className="w-full sm:w-auto"
+    >
+      Delete Selected ({selectedRows.length})
+    </Button>
+
+    {/* SEARCH */}
+    <div className="relative w-full sm:w-64">
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+      />
+
+      <MdSearch
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        size={18}
+      />
+
+      {searchText && (
+        <button
+          onClick={handleClearSearch}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          ×
+        </button>
+      )}
+    </div>
+
+  </div>
+</div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {categories.length === 0 && !isFetching ? (

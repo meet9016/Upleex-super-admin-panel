@@ -38,6 +38,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData } from "@/types/vendorPayment";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -107,7 +108,13 @@ interface TreeDataItem {
   vendorTotalAmount?: number;
   vendorProductCount?: number;
 }
-
+const statusOptions = [
+  { label: "All Status", value: "" },
+  { label: "Pending", value: "pending" },
+  { label: "Released", value: "released" },
+  { label: "Failed", value: "failed" },
+  { label: "Cancelled", value: "cancelled" },
+];
 interface VendorPaymentTreeTableProps {
   data: VendorPaymentTreeData[];
   stats: VendorPaymentStats | null;
@@ -574,26 +581,29 @@ export default function VendorPaymentTreeTable({
       <Card className="border-none shadow-lg">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="flex-1 flex items-center gap-4">
-              <input
-                type="text"
-                placeholder="Search vendors, orders, customers..."
-                value={quickFilterText}
-                onChange={onQuickFilterChanged}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <select
-                value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="released">Released</option>
-                <option value="failed">Failed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
+           <div className="flex-1 flex flex-col sm:flex-row gap-3">
+  
+  {/* SEARCH INPUT */}
+  <input
+    type="text"
+    placeholder="Search vendors, orders, customers..."
+    value={quickFilterText}
+    onChange={onQuickFilterChanged}
+    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+
+  {/* DROPDOWN */}
+  <div className="w-full sm:w-56">
+    <SearchableDropdown
+      options={statusOptions}
+      value={statusFilter}
+      onChange={(val) => handleStatusFilterChange(val)}
+      placeholder="All Status"
+      searchable={false} // true karna ho to kar sakte ho
+    />
+  </div>
+
+</div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
