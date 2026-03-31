@@ -13,6 +13,8 @@ import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import PageLoader from "@/components/common/PageLoader";
+import { Checkbox } from "@/components/ui/Checkbox";
+
 
 type PPlan = {
   _id?: string;
@@ -185,12 +187,9 @@ export default function PriorityPlanTab() {
     const isPopular = params.value;
     return (
       <div className="flex items-center justify-center h-full">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={isPopular}
           disabled={true}
-          className="w-4 h-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500 cursor-default"
-          readOnly
         />
       </div>
     );
@@ -454,12 +453,10 @@ export default function PriorityPlanTab() {
                       Annual Add-on
                     </label>
                     <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      <Checkbox
                         checked={!!form.addon_available_for_yearly}
-                        onChange={(e) =>
-                          setForm({ ...form, addon_available_for_yearly: e.target.checked })
+                        onCheckedChange={(checked) =>
+                          setForm({ ...form, addon_available_for_yearly: checked })
                         }
                       />
                       <span className="text-sm text-slate-600">Available</span>
@@ -507,11 +504,10 @@ export default function PriorityPlanTab() {
                   Mark as Popular
                 </label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-yellow-300 text-yellow-500 focus:ring-yellow-500"
+                  <Checkbox
                     checked={!!form.is_popular}
-                    onChange={(e) => setForm({ ...form, is_popular: e.target.checked })}
+                    onCheckedChange={(checked) => setForm({ ...form, is_popular: checked })}
+                    className="border-yellow-300 text-yellow-500"
                   />
                   <span className="text-sm text-slate-700">
                     ⭐ Show as popular plan (only one can be popular)

@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import PageLoader from "@/components/common/PageLoader";
+import { Checkbox } from "@/components/ui/Checkbox";
+
 
 type Plan = {
   _id?: string;
@@ -300,12 +302,12 @@ export default function ProductListingTab() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-700">Popular</label>
+                <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={!!form.popular}
-                    onChange={(e) => setForm({ ...form, popular: e.target.checked })}
+                    onCheckedChange={(checked) => setForm({ ...form, popular: checked })}
+                    className="border-yellow-300 text-yellow-500"
                   />
                   <span className="text-sm text-slate-700">⭐ Mark as popular</span>
                 </div>
