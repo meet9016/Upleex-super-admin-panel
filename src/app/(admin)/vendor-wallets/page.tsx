@@ -9,6 +9,7 @@ import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
 import PageLoader from '@/components/common/PageLoader';
+import { Margarine } from 'next/font/google';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -152,7 +153,7 @@ const VendorWalletsPage = () => {
       width: 100,
       pinned: 'right',
       suppressHeaderMenuButton: true,
-      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' , Margin: '10px' },
       cellRenderer: (params: any) => {
         const vendor = params.data as VendorWallet;
         return (

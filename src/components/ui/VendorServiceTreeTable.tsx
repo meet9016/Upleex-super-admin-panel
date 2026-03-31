@@ -139,7 +139,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
   }, [uniqueId]);
 
   return (
-    <div onClick={(e) => e.stopPropagation()} className="w-40 mt-1">
+    <div onClick={(e) => e.stopPropagation()} className="w-40 mt-[8px]">
       <div className={uniqueId}>
         <SearchableDropdown
           // key={`${props.data.id}-${String(props.data.approval_status || '').toLowerCase()}`}

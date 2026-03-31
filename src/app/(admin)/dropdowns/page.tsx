@@ -270,7 +270,7 @@ export default function DropdownsManagementPage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder={activeConfig.placeholder}
-                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg"
+                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg mt-2"
                     autoFocus
                   />
                 </div>

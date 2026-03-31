@@ -29,6 +29,7 @@ import SearchableDropdown from "./SearchableDropdown";
 import StatusBadge from "@/components/common/StatusBadge";
 import { toast } from "react-toastify";
 import Loader from "@/components/common/Loader";
+import { mark } from "framer-motion/client";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -141,7 +142,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
   }, [uniqueId]);
 
   return (
-    <div onClick={(e) => e.stopPropagation()} className="w-40 mt-1">
+    <div onClick={(e) => e.stopPropagation()} className="w-40 mt-[5px]">
       <div className={uniqueId}>
         <SearchableDropdown
           options={[
@@ -369,7 +370,7 @@ export default function VendorProductTreeTable({
       suppressHeaderMenuButton: true,
       sortable: false,
       filter: false,
-      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px "  },
       cellRenderer: ActionCellRenderer,
     },
   ], []);
