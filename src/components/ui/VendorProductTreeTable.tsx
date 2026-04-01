@@ -57,6 +57,8 @@ interface Product {
   product_main_image?: string;
   description?: string;
   vendor_name?: string;
+  product_type_name?: string;
+  product_type_id?: string;
 }
 
 interface Vendor {
@@ -289,7 +291,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onFocus={(e) => e.target.blur()}
           tabIndex={-1}
-          className="p-2 rounded-lg bg-blue-50 text-blue-600 mt-1.5 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0"
+          className="p-2 rounded-lg bg-blue-50 text-blue-600 mt-0.5 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0"
           title="View Product Details"
         >
           <Eye size={14} />
@@ -390,8 +392,48 @@ export default function VendorProductTreeTable({
   const [selectedProduct, setSelectedProduct] = useState<TreeDataItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const buildRowData = (vendorList: Vendor[]): TreeDataItem[] =>
-    vendorList.map((vendor) => {
+  const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
+
+  const processedVendors = useMemo(() => {
+    const map: Record<string, any> = {};
+    const filteredVendors: any[] = [];
+    
+    vendors.forEach((vendor) => {
+      const v = vendor as any;
+      const products = vendor.products || [];
+      
+      const filteredProducts = products.filter(p => {
+         const typeName = (p.product_type_name || '').toLowerCase();
+         return typeName === activeTab;
+      });
+
+      if (filteredProducts.length > 0) {
+        let pending = 0, approved = 0, rejected = 0;
+        filteredProducts.forEach(p => {
+          if (p.approval_status === 'pending') pending++;
+          if (p.approval_status === 'approved') approved++;
+          if (p.approval_status === 'rejected') rejected++;
+        });
+
+        const newVendor = {
+          ...v,
+          pending_count: pending,
+          approved_count: approved,
+          rejected_count: rejected,
+          products: filteredProducts
+        };
+
+        map[v._id] = newVendor;
+        filteredVendors.push(newVendor);
+      }
+    });
+    return { map, filteredVendors };
+  }, [vendors, activeTab]);
+
+  const { map: vendorMap, filteredVendors } = processedVendors;
+
+  const buildRowData = useCallback((vendorList: Vendor[]): TreeDataItem[] => {
+    return vendorList.map((vendor) => {
       const v = vendor as any;
       const vendorPath = [vendor._id];
       const products = vendor.products || [];
@@ -421,8 +463,9 @@ export default function VendorProductTreeTable({
         })),
       };
     });
+  }, []);
 
-  const [rowData, setRowData] = useState<TreeDataItem[]>(() => buildRowData(vendors));
+  const [rowData, setRowData] = useState<TreeDataItem[]>([]);
 
   const [isDark, setIsDark] = useState(false);
   useEffect(() => {
@@ -436,8 +479,8 @@ export default function VendorProductTreeTable({
   }, []);
 
   useEffect(() => {
-    setRowData(buildRowData(vendors));
-  }, [vendors]);
+    setRowData(buildRowData(filteredVendors));
+  }, [filteredVendors, buildRowData]);
 
   const handleViewProduct = useCallback((product: TreeDataItem) => {
     setSelectedProduct(product);
@@ -566,11 +609,7 @@ export default function VendorProductTreeTable({
   const getRowId = useCallback((params: any) =>
     params.data.type === "vendor" ? `vendor-${params.data.id}` : `product-${params.data.id}`, []);
 
-  const vendorMap = useMemo(() => {
-    const map: Record<string, any> = {};
-    vendors.forEach((v) => { map[(v as any)._id] = v; });
-    return map;
-  }, [vendors]);
+  // vendorMap is now managed by processedVendors up above
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("vendor-counts-updated", { detail: vendorMap }));
@@ -584,31 +623,73 @@ export default function VendorProductTreeTable({
 
   return (
     <div className="space-y-4">
-      {selectedCount > 0 && (
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            className="border-gray-300"
-            onClick={() => { gridRef.current?.api.deselectAll(); setSelectedCount(0); }}
-          >
-            Clear ({selectedCount})
-          </Button>
-          {onBulkReject && rejectableCount > 0 && (
-            <Button onClick={handleBulkReject} disabled={rejecting} className="bg-red-600 hover:bg-red-700">
-              <>Reject Selected ({rejectableCount})</>
-            </Button>
-          )}
-          {approvableCount > 0 && (
-            <Button onClick={handleBulkApprove} disabled={approving} className="bg-green-600 hover:bg-green-700">
-              {approving ? (
-                <Loader type="button" text="Approving..." iconClassName="text-white" />
-              ) : (
-                <>Approve Selected ({approvableCount})</>
-              )}
-            </Button>
-          )}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex justify-start overflow-x-auto">
+          <div className="inline-flex rounded-xl bg-gray-100  p-1 border border-gray-200 shadow-sm min-w-max">
+            <button
+              onClick={() => {
+                setActiveTab('rent');
+                gridRef.current?.api.deselectAll();
+                setSelectedCount(0);
+              }}
+              className={`group flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap ${activeTab === 'rent'
+                ? 'bg-white  text-indigo-600  shadow-md ring-1 ring-black/[0.04]'
+                : 'text-gray-500 hover:text-gray-800 '
+                }`}
+            >
+              <svg className={`w-3.5 h-3.5 ${activeTab === 'rent' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="hidden sm:inline">RENT</span>
+              <span className="sm:hidden">R</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab('sell');
+                gridRef.current?.api.deselectAll();
+                setSelectedCount(0);
+              }}
+              className={`group flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap ${activeTab === 'sell'
+                ? 'bg-white  text-orange-600  shadow-md ring-1 ring-black/[0.04]'
+                : 'text-gray-500 hover:text-gray-800 '
+                }`}
+            >
+              <svg className={`w-3.5 h-3.5 ${activeTab === 'sell' ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span className="hidden sm:inline">SELL</span>
+              <span className="sm:hidden">S</span>
+            </button>
+          </div>
         </div>
-      )}
+
+        {selectedCount > 0 && (
+          <div className="flex justify-end gap-2 shrink-0">
+            <Button
+              variant="outline"
+              className="border-gray-300"
+              onClick={() => { gridRef.current?.api.deselectAll(); setSelectedCount(0); }}
+            >
+              Clear ({selectedCount})
+            </Button>
+            {onBulkReject && rejectableCount > 0 && (
+              <Button onClick={handleBulkReject} disabled={rejecting} className="bg-red-600 hover:bg-red-700">
+                <>Reject Selected ({rejectableCount})</>
+              </Button>
+            )}
+            {approvableCount > 0 && (
+              <Button onClick={handleBulkApprove} disabled={approving} className="bg-green-600 hover:bg-green-700">
+                {approving ? (
+                  <Loader type="button" text="Approving..." iconClassName="text-white" />
+                ) : (
+                  <>Approve Selected ({approvableCount})</>
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'} w-full border border-gray-200 overflow-hidden`} style={{ height: "700px" }}>
         <style dangerouslySetInnerHTML={{

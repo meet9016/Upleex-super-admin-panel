@@ -184,19 +184,8 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
   const isVendor = data.type === 'vendor';
   const isPayment = data.type === 'payment';
   
-  // For vendor row - show view details only
   if (isVendor) {
-    return (
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center gap-2 h-full w-full">
-        <button
-          onClick={() => console.log('Vendor details not implemented')}
-          className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
-          title="View Vendor Details"
-        >
-          <Eye size={14} />
-        </button>
-      </div>
-    );
+    return null;
   }
 
   // For payment row - show individual release/cancel options
@@ -241,7 +230,7 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
     };
 
     return (
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center gap-2 h-full w-full">
+      <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-left gap-2 h-full w-full">
         <button
           onClick={() => onViewDetails(data.originalData)}
           className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
@@ -295,8 +284,8 @@ const VendorGroupCellRenderer = (props: ICellRendererParams<VendorPaymentTreeDat
   if (data.type === 'vendor') {
     return (
       <div className="flex items-center gap-3 py-1">
-        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-          <User size={20} className="text-indigo-600" />
+        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+          <User size={16} className="text-indigo-600" />
         </div>
         <div>
           <div className="text-sm font-semibold text-gray-900">{data.name}</div>

@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import SearchableDropdown from '@/components/ui/SearchableDropdown';
 import { toast } from 'react-toastify';
 import { Users, Shield, Save, RefreshCw, UserCheck, Settings, CheckCircle, XCircle } from 'lucide-react';
+import Loader from '@/components/common/Loader';
+import PageLoader from '@/components/common/PageLoader';
 
 interface Admin {
   name: string;
@@ -136,10 +138,7 @@ export default function AdminPermissionsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
-        <div className="text-center">
-          <RefreshCw className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading admin data...</p>
-        </div>
+        <PageLoader />
       </div>
     );
   }

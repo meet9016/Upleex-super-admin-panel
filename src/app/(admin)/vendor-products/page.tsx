@@ -24,6 +24,8 @@ interface Product {
   price: number;
   approval_status: string;
   createdAt: string;
+  product_type_name?: string;
+  product_type_id?: string;
 }
 
 export default function VendorProductApprovalPage() {

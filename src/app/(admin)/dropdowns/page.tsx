@@ -194,7 +194,7 @@ export default function DropdownsManagementPage() {
         width: 400,
         suppressHeaderMenuButton: true,
         pinned: 'right',
-        cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
+        cellStyle: { display: "flex", alignItems: "center", justifyContent: "left" },
         cellRenderer: (params: any) => (
           <ActionButtons
             onEdit={() => handleEdit(params.data)}

@@ -153,7 +153,7 @@ const VendorWalletsPage = () => {
       width: 100,
       pinned: 'right',
       suppressHeaderMenuButton: true,
-      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' , Margin: '10px' },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'left' , Margin: '10px' },
       cellRenderer: (params: any) => {
         const vendor = params.data as VendorWallet;
         return (
