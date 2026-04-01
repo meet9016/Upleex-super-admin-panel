@@ -119,6 +119,13 @@ export interface EndPointApi {
     updateBanner: string;
     deleteBanner: string;
     bulkDeleteBanner: string;
+
+    // CONTACT US
+    getAllContacts: string;
+    getContactById: string;
+    updateContactStatus: string;
+    deleteContact: string;
+    bulkDeleteContacts: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -243,6 +250,13 @@ const endPointApi: EndPointApi = {
     updateBanner: 'banners/update',
     deleteBanner: 'banners/delete',
     bulkDeleteBanner: 'banners/bulk-delete',
+
+    // CONTACT US
+    getAllContacts: 'contacts/getall',
+    getContactById: 'contacts/getById',
+    updateContactStatus: 'contacts/add-notes',
+    deleteContact: 'contacts/delete',
+    bulkDeleteContacts: 'contacts/bulk-delete',
 };
 
 export default endPointApi;

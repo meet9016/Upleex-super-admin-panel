@@ -845,7 +845,7 @@ export default function BlogPage() {
 </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {filteredBlogs.length === 0 && !isFetching ? (
+              {/* {filteredBlogs.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
                     <p className="text-slate-500 mb-2">
@@ -865,7 +865,7 @@ export default function BlogPage() {
                     )}
                   </div>
                 </div>
-              ) : (
+              ) : ( */}
                 <AgGridTable
                   loading={isFetching}
                   ref={gridRef}
@@ -878,7 +878,7 @@ export default function BlogPage() {
                   enableFilter={false}
                   gridHeight={700}
                 />
-              )}
+              {/* )} */}
             </CardContent>
           </Card>
         </div>
