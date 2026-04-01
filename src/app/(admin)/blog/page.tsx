@@ -619,7 +619,7 @@ export default function BlogPage() {
                       >
                         <Editor
                           value={field.value || ""}
-                          onTextChange={(e) => field.onChange(e.htmlValue)}
+                          onTextChange={(e: any) => field.onChange(e.htmlValue)}
                           style={{ height: "250px" }}
                         />
                       </div>
