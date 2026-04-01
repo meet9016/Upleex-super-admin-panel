@@ -10,7 +10,7 @@ import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
 // import { format, parse } from "date-fns"; // Install date-fns: npm install date-fns
-
+import { Editor } from "primereact/editor";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -537,7 +537,7 @@ export default function BlogPage() {
       )
     },
   ];
- if (isFetching && blogs.length === 0) {
+  if (isFetching && blogs.length === 0) {
     return <PageLoader />;
   }
   return (
@@ -597,24 +597,37 @@ export default function BlogPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="long_description" className="text-sm font-semibold text-slate-700">
+                  <label className="text-sm font-semibold text-slate-700">
                     Long Description
                   </label>
-                  <textarea
-                    id="long_description"
-                    rows={5}
-                    className={cn(
-                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans",
-                      errors.long_description ? "border-red-500 focus-visible:ring-red-500/20" : ""
+
+                  <Controller
+                    name="long_description"
+                    control={control}
+                    render={({ field }) => (
+                      <div
+                        className={cn(
+                          "rounded-xl overflow-hidden border transition-all",
+                          errors.long_description
+                            ? "border-red-500 ring-2 ring-red-500/20"
+                            : "border-slate-200 focus-within:ring-2 focus-within:ring-primary/20"
+                        )}
+                      >
+                        <Editor
+                          value={field.value || ""}
+                          onTextChange={(e) => field.onChange(e.htmlValue)}
+                          style={{ height: "250px" }}
+                        />
+                      </div>
                     )}
-                    placeholder="Detailed content of the post..."
-                    {...register("long_description")}
                   />
+
                   {errors.long_description && (
-                    <p className="text-xs text-red-500 mt-1">{errors.long_description.message}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.long_description.message}
+                    </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <label htmlFor="date" className="text-sm font-semibold text-slate-700">
                     Publish Date
@@ -765,80 +778,80 @@ export default function BlogPage() {
         <div className="lg:col-span-2">
           <Card className="border-slate-100 shadow-sm overflow-hiddenflex flex-col" style={{ height: '774px' }}>
             <CardHeader className="bg-slate-50/50 border-b border-slate-50">
-             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-  
-  {/* LEFT */}
-  <div>
-    <CardTitle className="text-lg">Blog Posts</CardTitle>
-    <p className="text-xs text-slate-500 mt-1">
-      Total: {filteredBlogs.length} posts
-      {searchText && ` • Searching: "${searchText}"`}
-    </p>
-  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
-  {/* RIGHT */}
-  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-    
-    {/* DELETE BUTTON */}
-    <Button
-      variant="destructive"
-      size="md"
-      disabled={selectedRows.length === 0}
-      onClick={async () => {
-        if (selectedRows.length === 0) return;
-        if (!confirm(`Delete ${selectedRows.length} selected blogs?`)) return;
+                {/* LEFT */}
+                <div>
+                  <CardTitle className="text-lg">Blog Posts</CardTitle>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Total: {filteredBlogs.length} posts
+                    {searchText && ` • Searching: "${searchText}"`}
+                  </p>
+                </div>
 
-        try {
-          const ids = selectedRows.map(r => r.id).filter(Boolean);
-          const res = await api.delete(endPointApi.bulkDeleteBlog, {
-            data: { ids }
-          });
+                {/* RIGHT */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
 
-          if (res?.data?.message || res?.data?.success) {
-            toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
-            setSelectedRows([]);
-            gridRef.current?.api?.deselectAll();
-            await fetchBlogs();
-          } else {
-            toast.error(res?.data?.message || 'Bulk delete failed');
-          }
-        } catch (error: any) {
-          console.error("Bulk delete error:", error);
-          toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
-        }
-      }}
-      className="w-full sm:w-auto"
-    >
-      Delete Selected ({selectedRows.length})
-    </Button>
+                  {/* DELETE BUTTON */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={selectedRows.length === 0}
+                    onClick={async () => {
+                      if (selectedRows.length === 0) return;
+                      if (!confirm(`Delete ${selectedRows.length} selected blogs?`)) return;
 
-    {/* SEARCH */}
-    <div className="relative w-full sm:w-64">
-      <input
-        type="text"
-        placeholder="Search blogs..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full text-sm"
-      />
+                      try {
+                        const ids = selectedRows.map(r => r.id).filter(Boolean);
+                        const res = await api.delete(endPointApi.bulkDeleteBlog, {
+                          data: { ids }
+                        });
 
-      <MdSearch
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        size={18}
-      />
+                        if (res?.data?.message || res?.data?.success) {
+                          toast.success(`${selectedRows.length} blog${selectedRows.length > 1 ? 's' : ''} deleted successfully`);
+                          setSelectedRows([]);
+                          gridRef.current?.api?.deselectAll();
+                          await fetchBlogs();
+                        } else {
+                          toast.error(res?.data?.message || 'Bulk delete failed');
+                        }
+                      } catch (error: any) {
+                        console.error("Bulk delete error:", error);
+                        toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
+                      }
+                    }}
+                    className="w-full sm:w-auto"
+                  >
+                    Delete Selected ({selectedRows.length})
+                  </Button>
 
-      {searchText && (
-        <button
-          onClick={handleClearSearch}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          <X size={16} />
-        </button>
-      )}
-    </div>
+                  {/* SEARCH */}
+                  <div className="relative w-full sm:w-64">
+                    <input
+                      type="text"
+                      placeholder="Search blogs..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-full text-sm"
+                    />
 
-  </div>
-</div>
+                    <MdSearch
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={18}
+                    />
+
+                    {searchText && (
+                      <button
+                        onClick={handleClearSearch}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
               {filteredBlogs.length === 0 && !isFetching ? (

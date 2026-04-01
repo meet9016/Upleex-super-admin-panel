@@ -424,7 +424,7 @@ const handleConfirmDelete = async () => {
     {/* DELETE BUTTON */}
     <Button
       variant="destructive"
-      size="md"
+      size="sm"
       disabled={selectedRows.length === 0}
       onClick={async () => {
         if (selectedRows.length === 0) return;

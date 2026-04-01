@@ -401,31 +401,58 @@ export default function VendorServiceTreeTable({
 
   return (
     <div className="space-y-4">
-      {selectedCount > 0 && (
-        <div className="flex justify-end gap-2">
+      <div className="mb-6 flex items-center justify-between">
+    
+    {/* Left side - Heading */}
+    <h1 className="text-3xl font-bold text-gray-900">
+      Service Approval
+    </h1>
+
+    {/* Right side - Buttons */}
+    {selectedCount > 0 && (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          className="border-gray-300"
+          onClick={() => {
+            gridRef.current?.api.deselectAll();
+            setSelectedCount(0);
+          }}
+        >
+          Clear ({selectedCount})
+        </Button>
+
+        {onBulkReject && rejectableCount > 0 && (
           <Button
-            variant="outline"
-            className="border-gray-300"
-            onClick={() => { gridRef.current?.api.deselectAll(); setSelectedCount(0); }}
+            onClick={handleBulkReject}
+            disabled={rejecting}
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
-            Clear ({selectedCount})
+            Reject ({rejectableCount})
           </Button>
-          {onBulkReject && rejectableCount > 0 && (
-            <Button onClick={handleBulkReject} disabled={rejecting} className="bg-red-600 hover:bg-red-700 text-white">
-              Reject Selected ({rejectableCount})
-            </Button>
-          )}
-          {approvableCount > 0 && (
-            <Button onClick={handleBulkApprove} disabled={approving} className="bg-green-600 hover:bg-green-700 text-white">
-              {approving ? (
-                <Loader type="button" text="Approving..." iconClassName="text-white" />
-              ) : (
-                <>Approve Selected ({approvableCount})</>
-              )}
-            </Button>
-          )}
-        </div>
-      )}
+        )}
+
+        {approvableCount > 0 && (
+          <Button
+            onClick={handleBulkApprove}
+            disabled={approving}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {approving ? (
+              <Loader
+                type="button"
+                text="Approving..."
+                iconClassName="text-white"
+              />
+            ) : (
+              <>Approve ({approvableCount})</>
+            )}
+          </Button>
+        )}
+      </div>
+    )}
+    
+  </div>
 
       <div className={`${isDark ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full border border-gray-200 overflow-hidden rounded-lg`} style={{ height: "700px" }}>
         <AgGridReact

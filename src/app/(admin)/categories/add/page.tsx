@@ -82,17 +82,17 @@ export default function AddCategoryPage() {
       const res = await api.get(endPointApi.getCategoryList, { params });
       console.log("🚀 ~ API Response:", res);
 
-    // When setting categories from API response
-    if (res?.data?.success && res?.data?.data) {
-      // Transform data to include id field
-      const transformedData = res.data.data.map((category: any) => ({
-        ...category,
-        id: category.categories_id || category._id // Add id field for AG Grid
-      }));
-      setCategories(transformedData);
-    } else if (res?.data?.data) {
-      setCategories(res.data.data);
-    }
+      // When setting categories from API response
+      if (res?.data?.success && res?.data?.data) {
+        // Transform data to include id field
+        const transformedData = res.data.data.map((category: any) => ({
+          ...category,
+          id: category.categories_id || category._id // Add id field for AG Grid
+        }));
+        setCategories(transformedData);
+      } else if (res?.data?.data) {
+        setCategories(res.data.data);
+      }
     } catch (error) {
       console.error("Error fetching categories:", error);
       toast.error("Failed to fetch categories");
@@ -169,7 +169,7 @@ export default function AddCategoryPage() {
     //   valueGetter: (params) => params.data?.subcategories?.length || 0,
     //   cellStyle: { textAlign: "center" }
     // },
-  
+
     {
       field: "created_at",
       headerName: "Created",
@@ -328,7 +328,7 @@ export default function AddCategoryPage() {
 
       await api.delete(`${endPointApi.deleteCategory}/${id}`);
       toast.success("Category deleted successfully");
-      
+
       // Check if the deleted category is the one being edited
       if (editingId === id) {
         setEditingId(null);
@@ -338,7 +338,7 @@ export default function AddCategoryPage() {
           image: undefined
         }); // Clear the form
       }
-      
+
       await fetchCategories(debouncedSearch);
 
       // Close popup
@@ -360,7 +360,7 @@ export default function AddCategoryPage() {
 
   const handleConfirmBulkDelete = async () => {
     if (selectedRows.length === 0) return;
-    
+
     try {
       setIsBulkDeleting(true);
       const ids = selectedRows.map(r => r._id || r.id).filter(Boolean);
@@ -480,7 +480,7 @@ export default function AddCategoryPage() {
                                   }}
                                   className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm hover:bg-white"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                                   View
                                 </button>
                                 <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900 shadow-sm">
@@ -607,16 +607,16 @@ export default function AddCategoryPage() {
                           onChange={(e) => setSearchText(e.target.value)}
                           className="pl-8 pr-7 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
                         />
-                        
+
                         <MdSearch
                           className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
-                          size={14}
+                          size={16}
                         />
 
                         {searchText && (
                           <button
                             onClick={handleClearSearch}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                            className="absolute right-3 top-[45%] -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl"
                           >
                             ×
                           </button>
@@ -686,7 +686,7 @@ export default function AddCategoryPage() {
 
           {/* Image Modal */}
           {imageModalOpen && modalImageUrl && (
-            <div 
+            <div
               className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
               onClick={() => setImageModalOpen(false)}
             >

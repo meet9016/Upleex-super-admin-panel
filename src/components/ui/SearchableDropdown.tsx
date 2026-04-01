@@ -390,7 +390,7 @@ export default function SearchableDropdown({
                 disabled={disabled}
                 onClick={() => !disabled && setOpen(!open)}
                 onKeyDown={handleKeyDown}
-                className={`min-w-[130px] flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm transition-all 
+                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg border text-sm transition-all 
                       ${buttonClassName || 'h-11'}
                     ${error ? "!border-red-500 !ring-red-500/20" : "border-gray-200 hover:border-gray-300"}
                     ${disabled

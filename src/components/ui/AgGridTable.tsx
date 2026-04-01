@@ -38,6 +38,9 @@ interface AgGridTableProps {
   onSelectionChange?: (selected: any[]) => void;
   loading?: boolean;
   gridHeight?: number | string;
+  rowHeight?: number;
+  height?: string | number;
+  showCheckboxes?: boolean;
 }
 
 const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
@@ -55,6 +58,9 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
   onSelectionChange,
   loading = false,
   gridHeight,
+  rowHeight = 40,
+  height,
+  showCheckboxes = true,
 }, ref) => {
   const router = useRouter();
   const internalRef = useRef<any>(null);
@@ -101,9 +107,9 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
       {
         field: "planName",
         headerName: "Plan Name",
-        checkboxSelection: true,
-        headerCheckboxSelection: true,
-        headerCheckboxSelectionFilteredOnly: true, // Only select filtered rows
+        checkboxSelection: showCheckboxes,
+        headerCheckboxSelection: showCheckboxes,
+        headerCheckboxSelectionFilteredOnly: showCheckboxes, // Only select filtered rows
         width: 200,
       },
       { field: "price", headerName: "Price", width: 100 },
@@ -147,17 +153,17 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
         },
       },
     ],
-    [onEdit, onDelete, router]
+    [onEdit, onDelete, router, showCheckboxes]
   );
 
-  const rowSelection = useMemo<RowSelectionOptions>(
-    () => ({
+  const rowSelection = useMemo<RowSelectionOptions | undefined>(
+    () => showCheckboxes ? ({
       mode: "multiRow",
       checkboxes: true, // Enable checkboxes for selection
       enableSelectionWithoutKeys: true, // Allow selection without holding Ctrl key
       enableSelectAll: true, // Enable select all
-    }),
-    []
+    }) : undefined,
+    [showCheckboxes]
   );
 
   const handleAddClick = useCallback(() => {
@@ -177,11 +183,11 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
 
   // Handle selection changes
   const onSelectionChanged = useCallback(() => {
-    if (gridRef.current && onSelectionChange) {
+    if (gridRef.current && onSelectionChange && showCheckboxes) {
       const selectedRows = gridRef.current.api.getSelectedRows();
       onSelectionChange(selectedRows);
     }
-  }, [onSelectionChange, gridRef]);
+  }, [onSelectionChange, gridRef, showCheckboxes]);
 
   return (
     <div className="h-full flex flex-col">
@@ -230,10 +236,10 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
       </div>
 
       <div className="relative">
-        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: typeof gridHeight === 'number' ? `${gridHeight}px` : (gridHeight || "660px") }}>
+        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: height ? (typeof height === 'number' ? `${height}px` : height) : (typeof gridHeight === 'number' ? `${gridHeight}px` : (gridHeight || "660px")) }}>
           <AgGridReact
             loading={loading}
-            rowHeight={40}
+            rowHeight={rowHeight}
             ref={gridRef}
             rowData={rowData}
             columnDefs={columns || defaultColumns}
@@ -243,12 +249,12 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
             rowSelection={rowSelection}
             paginationPageSizeSelector={[10, 20, 50, 100]}
             columnMenu="new"
-            suppressRowClickSelection={true}
+            suppressRowClickSelection={showCheckboxes}
             suppressRowDeselection={false}
             rowMultiSelectWithClick={false}
             animateRows
             alwaysShowHorizontalScroll={true}
-            onSelectionChanged={onSelectionChanged}
+            onSelectionChanged={showCheckboxes ? onSelectionChanged : undefined}
             quickFilterText={searchText}
             getRowId={useCallback((params: any) => {
               return params.data.id || params.data.categories_id || params.data._id;
@@ -262,4 +268,4 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
 
 AgGridTable.displayName = "AgGridTable";
 
-export default memo(AgGridTable);
+export default memo(AgGridTable);

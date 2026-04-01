@@ -176,7 +176,7 @@ const VendorWalletsPage = () => {
      
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
+        <h1 className="text-2xl font-semibold text-gray-800 ">
           Vendor Wallets
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -196,9 +196,9 @@ const VendorWalletsPage = () => {
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        {/* <div className="text-sm text-gray-500 dark:text-gray-400">
           Total Vendors: {vendors.length}
-        </div>
+        </div> */}
       </div>
       {/* AgGrid Table */}
       <div className="bg-white rounded-lg shadow-sm p-4">
@@ -207,6 +207,7 @@ const VendorWalletsPage = () => {
           columns={columns}
           loading={loading}
           gridHeight={600}
+          showCheckboxes={false}
         />
       </div>
 
