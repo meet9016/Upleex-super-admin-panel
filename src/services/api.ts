@@ -1,5 +1,6 @@
 import endPointApi from '@/utils/endPointApi';
 import type { VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse } from '@/types/vendorPayment';
+import type { ContactResponse, ContactUpdateResponse } from '@/types/contact';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3688/api/v1';
 
@@ -117,6 +118,39 @@ class ApiService {
   async releaseScheduledPayments(): Promise<ReleasePaymentResponse> {
     return this.request<ReleasePaymentResponse>(endPointApi.releaseScheduledPayments, {
       method: 'POST',
+    });
+  }
+
+  // Contact Management
+  async getAllContacts(params?: { page?: number; limit?: number }): Promise<ContactResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.getAllContacts}?${queryParams.toString()}`
+      : endPointApi.getAllContacts;
+    
+    return this.request<ContactResponse>(endpoint);
+  }
+
+  async addContactNotes(id: string, notes: string): Promise<ContactUpdateResponse> {
+    return this.request<ContactUpdateResponse>(`${endPointApi.updateContactStatus}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ notes }),
+    });
+  }
+
+  async deleteContact(id: string): Promise<ContactUpdateResponse> {
+    return this.request<ContactUpdateResponse>(`${endPointApi.deleteContact}/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async bulkDeleteContacts(ids: string[]): Promise<ContactUpdateResponse> {
+    return this.request<ContactUpdateResponse>(endPointApi.bulkDeleteContacts, {
+      method: 'DELETE',
+      body: JSON.stringify({ ids }),
     });
   }
 }

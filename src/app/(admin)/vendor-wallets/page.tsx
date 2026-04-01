@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { api } from '@/utils/axiosInstance';   // ← Your axios instance
+import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
 import { toast } from 'react-toastify';
 import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch } from 'react-icons/md';
@@ -9,7 +9,7 @@ import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
 import PageLoader from '@/components/common/PageLoader';
-import { Margarine } from 'next/font/google';
+import { X } from 'lucide-react';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -53,6 +53,11 @@ const VendorWalletsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const debouncedSearch = useDebounce(searchTerm, 600);
+
+  // Handle clear search
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
 
   // Fetch all vendor wallets with optional search param
   const fetchVendorWallets = async (search?: string) => {
@@ -153,7 +158,7 @@ const VendorWalletsPage = () => {
       width: 100,
       pinned: 'right',
       suppressHeaderMenuButton: true,
-      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'left' , Margin: '10px' },
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'left', margin: '10px' },
       cellRenderer: (params: any) => {
         const vendor = params.data as VendorWallet;
         return (
@@ -167,17 +172,17 @@ const VendorWalletsPage = () => {
       },
     },
   ], []);
- if(loading && vendors.length === 0 ){
-  return (
-    <div className="flex items-center justify-center min-h-[500px]">
-      <PageLoader fullScreen={false} />
-    </div>
-  );
- }
+
+  if (loading && vendors.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <PageLoader fullScreen={false} />
+      </div>
+    );
+  }
       
   return (
     <div className="space-y-6">
-     
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-gray-800 ">
@@ -197,13 +202,22 @@ const VendorWalletsPage = () => {
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
+          {searchTerm && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
         {/* <div className="text-sm text-gray-500 dark:text-gray-400">
           Total Vendors: {vendors.length}
         </div> */}
       </div>
+      
       {/* AgGrid Table */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <AgGridTable
@@ -221,16 +235,16 @@ const VendorWalletsPage = () => {
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 ">
+                <h2 className="text-xl font-semibold text-gray-800">
                   {selectedVendor.vendor_name}
                 </h2>
-                <p className="text-sm text-gray-600  mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                   {selectedVendor.vendor_email}
                 </p>
               </div>
               <button
                 onClick={() => setShowTransactions(false)}
-                className="text-gray-500 hover:text-gray-700  text-2xl font-bold"
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
               >
                 ×
               </button>
@@ -240,20 +254,20 @@ const VendorWalletsPage = () => {
               {/* Wallet Summary */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-xs text-gray-600  mb-1">Current Balance</p>
+                  <p className="text-xs text-gray-600 mb-1">Current Balance</p>
                   <p className="text-xl font-bold text-blue-600">
                     ₹{Number(selectedVendor.balance || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <div className="bg-green-50  rounded-lg p-4">
-                  <p className="text-xs text-gray-600  mb-1">Total Credited</p>
-                  <p className="text-xl font-bold text-green-600 ">
+                <div className="bg-green-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-600 mb-1">Total Credited</p>
+                  <p className="text-xl font-bold text-green-600">
                     ₹{Number(selectedVendor.total_credited || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <div className="bg-red-50  rounded-lg p-4">
-                  <p className="text-xs text-gray-600  mb-1">Total Debited</p>
-                  <p className="text-xl font-bold text-red-600 ">
+                <div className="bg-red-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-600 mb-1">Total Debited</p>
+                  <p className="text-xl font-bold text-red-600">
                     ₹{Number(selectedVendor.total_debited || 0).toLocaleString('en-IN')}
                   </p>
                 </div>
@@ -261,26 +275,26 @@ const VendorWalletsPage = () => {
 
               {/* Transactions List */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800  mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <MdHistory className="w-5 h-5" />
                   Transaction History
                 </h3>
 
                 {transactions.length > 0 ? (
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {transactions.map((transaction) => {
-                      console.log("🚀 ~ VendorWalletsPage ~ transaction:", transaction)
-                      return <div
+                    {transactions.map((transaction) => (
+                      <div
                         key={transaction._id}
-                        className="flex items-center justify-between p-4 bg-gray-50  rounded-lg border border-gray-200 "
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-2 rounded-lg ${transaction.type === 'credit'
-                                ? 'bg-green-100 '
-                                : 'bg-red-100 '
-                                }`}
+                              className={`p-2 rounded-lg ${
+                                transaction.type === 'credit'
+                                  ? 'bg-green-100'
+                                  : 'bg-red-100'
+                              }`}
                             >
                               {transaction.type === 'credit' ? (
                                 <MdArrowDownward className="w-4 h-4 text-green-600" />
@@ -289,10 +303,10 @@ const VendorWalletsPage = () => {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-800 ">
+                              <p className="font-medium text-gray-800">
                                 {transaction.description}
                               </p>
-                              <p className="text-xs text-gray-600 ">
+                              <p className="text-xs text-gray-600">
                                 {new Date(transaction.date).toLocaleString('en-IN')}
                               </p>
                             </div>
@@ -300,24 +314,25 @@ const VendorWalletsPage = () => {
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-lg font-semibold ${transaction.type === 'credit'
-                              ? 'text-green-600 '
-                              : 'text-red-600 '
-                              }`}
+                            className={`text-lg font-semibold ${
+                              transaction.type === 'credit'
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                            }`}
                           >
                             {transaction.type === 'credit' ? '+' : '-'}₹
                             {Number(transaction.amount).toLocaleString('en-IN')}
                           </p>
-                          <p className="text-xs text-gray-600 ">
+                          <p className="text-xs text-gray-600">
                             {transaction.status}
                           </p>
                         </div>
-                      </div>;
-                    })}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 ">No transactions found</p>
+                    <p className="text-gray-600">No transactions found</p>
                   </div>
                 )}
               </div>
@@ -325,16 +340,6 @@ const VendorWalletsPage = () => {
           </div>
         </div>
       )}
-
-      {/* Empty State */}
-      {/* {vendors.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <MdWallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 ">
-            {searchTerm ? 'No vendors found matching your search' : 'No vendor wallets found'}
-          </p>
-        </div>
-      )} */}
     </div>
   );
 };

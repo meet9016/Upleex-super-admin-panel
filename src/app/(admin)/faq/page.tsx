@@ -488,7 +488,7 @@ const handleConfirmDelete = async () => {
 </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative h-full">
-              {filteredFaqs.length === 0 && !isFetching ? (
+              {/* {filteredFaqs.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
                     <p className="text-slate-500 mb-2">
@@ -508,7 +508,7 @@ const handleConfirmDelete = async () => {
                     )}
                   </div>
                 </div>
-              ) : (
+              ) : ( */}
                 <AgGridTable
                   loading={isFetching}
                   ref={gridRef}
@@ -521,7 +521,7 @@ const handleConfirmDelete = async () => {
                   enableFilter={false}
                   gridHeight={680}
                 />
-              )}
+              {/* )}   */}
             </CardContent>
           </Card>
         </div>

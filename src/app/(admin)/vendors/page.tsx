@@ -458,7 +458,7 @@ export default function VendorsPage() {
                 <Card className="border-none rounded-none shadow-xl shadow-slate-200/50 overflow-hidden">
                     <CardContent className="p-0">
                         <div className="h-full w-full relative">
-                            {rowData.length === 0 && !isLoading ? (
+                            {/* {rowData.length === 0 && !isLoading ? (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="text-center group">
                                         <div className="bg-slate-50 p-6 rounded-full inline-block mb-4 transition-transform group-hover:scale-110 duration-300">
@@ -467,7 +467,7 @@ export default function VendorsPage() {
                                         <p className="text-slate-500 font-medium font-inter">No vendor records found at the moment.</p>
                                     </div>
                                 </div>
-                            ) : (
+                            ) : ( */}
                                 <>
                                     <AgGridTable
                                         rowData={rowData}
@@ -480,7 +480,7 @@ export default function VendorsPage() {
                                         <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />
                                     )}
                                 </>
-                            )}
+                            {/* )} */}
                         </div>
                     </CardContent>
                 </Card>
