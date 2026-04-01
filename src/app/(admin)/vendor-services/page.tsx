@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
@@ -35,6 +35,10 @@ export default function VendorServiceApprovalPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [selectedCount, setSelectedCount] = useState(0);
+const [approvableCount, setApprovableCount] = useState(0);
+const [rejectableCount, setRejectableCount] = useState(0);
+const gridRef = useRef(null);
   const LIMIT = 10;
 
   useEffect(() => {
@@ -228,10 +232,6 @@ export default function VendorServiceApprovalPage() {
 
   return (
     <div className="p-1">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Service Approval</h1>
-      </div>
-
       <div className="bg-white rounded-lg min-h-[400px]">
         {loading && vendors.length === 0 ? (
           <div className="flex items-center justify-center py-16">

@@ -9,6 +9,7 @@ import ActionButtons from "@/components/common/ActionButtons";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
+import SearchableDropdown from "@/components/ui/SearchableDropdown";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -373,13 +374,22 @@ export default function BannerPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700">Status</label>
-                <select 
-                  {...register("status")}
-                  className="w-full h-9 px-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableDropdown
+                      options={[
+                        { label: "Active", value: "active" },
+                        { label: "Inactive", value: "inactive" }
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select status"
+                      buttonClassName="h-9"
+                    />
+                  )}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -460,13 +470,13 @@ export default function BannerPage() {
                 onChange={(e) => setSearchText(e.target.value)}
                 className="pl-8 h-9 text-sm" 
               />
-              <MdSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+              <MdSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               {searchText && (
                 <button
                   onClick={() => setSearchText("")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X size={12} />
+                  <X size={16} />
                 </button>
               )}
             </div>
@@ -480,6 +490,7 @@ export default function BannerPage() {
             columns={columnDefs as ColDef[]}
             onSelectionChange={setSelectedRows}
             gridHeight={550}
+            showCheckboxes={false}
           />
         </CardContent>
       </Card>

@@ -474,6 +474,7 @@ export default function VendorsPage() {
                                         columns={columnDefs as ColDef<any>[]}
                                         gridHeight={790}
                                         loading={isLoading}
+                                        showCheckboxes={false}
                                     />
                                     {showDetails && detailsRow && (
                                         <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />

@@ -716,13 +716,13 @@ export default function AddSubCategoryPage() {
 
                     <MdSearch
                       className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={14}
+                      size={16}
                     />
 
                     {searchText && (
                       <button
                         onClick={handleClearSearch}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                        className="absolute right-3 top-[45%] -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl"
                       >
                         ×
                       </button>
