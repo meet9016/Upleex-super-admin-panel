@@ -8,6 +8,7 @@ import { Trash2, Eye, Search, X } from "lucide-react";
 import { apiService } from "@/services/api";
 import type { Contact } from "@/types/contact";
 import AgGridTable from "@/components/ui/AgGridTable";
+import Tooltip from "@/components/ui/Tooltip";
 import { ColDef } from "ag-grid-community";
 import { toast } from "react-toastify";
 import { MdSearch } from "react-icons/md";
@@ -142,8 +143,24 @@ const ContactUsPage = () => {
       minWidth: 400,
       cellStyle: { color: "#1e293b", display: 'flex', alignItems: 'center' },
       cellRenderer: (params: { data: Contact }) => {
-        const message = params.data.message;
-        return message.length > 100 ? `${message.substring(0, 100)}...` : message;
+        const message = params.data?.message || "";
+        const isLong = message.length > 100;
+        const displayMessage = isLong ? `${message.substring(0, 100)}...` : message;
+        
+        return (
+          <Tooltip 
+            className="w-full"
+            content={
+              <div className="max-w-sm p-1 leading-relaxed text-slate-50">
+                {message}
+              </div>
+            }
+          >
+            <span className="cursor-pointer border-b border-dotted border-slate-300 whitespace-nowrap overflow-hidden text-ellipsis block w-full">
+              {displayMessage}
+            </span>
+          </Tooltip>
+        );
       }
     },
     {
