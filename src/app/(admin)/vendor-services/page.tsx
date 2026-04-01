@@ -234,7 +234,9 @@ export default function VendorServiceApprovalPage() {
 
       <div className="bg-white rounded-lg min-h-[400px]">
         {loading && vendors.length === 0 ? (
-          <PageLoader />
+          <div className="flex items-center justify-center py-16">
+            <PageLoader fullScreen={false} />
+          </div>
         ) : vendors.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-40 text-gray-500">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
@@ -255,8 +257,10 @@ export default function VendorServiceApprovalPage() {
 
             {loadingMore && (
               <div className="flex justify-center items-center py-8 border-t border-gray-100">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center w-5 h-5">
+                    <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                  </div>
                   <span className="text-sm text-gray-500 font-medium">Loading more vendors...</span>
                 </div>
               </div>

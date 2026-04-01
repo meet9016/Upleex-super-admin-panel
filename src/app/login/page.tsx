@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { apiService } from "@/services/api";
 import Loader from "@/components/common/Loader";
+import { saveToken, getToken } from "@/utils/tokenManager";
 
 const loginSchema = z.object({
   email: z.string()
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   const {
     register: formRegister,
@@ -37,13 +39,25 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const existingToken = getToken();
+    if (existingToken) {
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirect") || "/dashboard";
+      router.replace(redirectTo);
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
       const response = await apiService.login(data.email, data.password)as any;
       if (response.success && response.data?.token) {
         // Save token and user info
-        localStorage.setItem("auth_token", response.data.token);
+        saveToken(response.data.token);
         localStorage.setItem("user_info", JSON.stringify(response.data.admin));
         
         toast.success("Login successful! Welcome back.");
@@ -58,6 +72,10 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">

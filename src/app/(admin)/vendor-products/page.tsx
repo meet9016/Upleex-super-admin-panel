@@ -264,7 +264,9 @@ export default function VendorProductApprovalPage() {
 
       <div className="bg-white rounded-lg">
         {loading && vendors.length === 0 ? (
-          <PageLoader />
+          <div className="flex items-center justify-center py-26">
+            <PageLoader fullScreen={false} />
+          </div>
         ) : (
           <>
             <VendorProductTreeTable
@@ -279,8 +281,10 @@ export default function VendorProductApprovalPage() {
             {/* Loading more indicator */}
             {loadingMore && (
               <div className="flex justify-center items-center py-6 border-t border-gray-200">
-                <div className="flex items-center gap-3">
-                  <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center w-5 h-5">
+                    <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                  </div>
                   <span className="text-sm text-gray-500">Loading more vendors...</span>
                 </div>
               </div>

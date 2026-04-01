@@ -4,9 +4,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-export const PageLoader = () => {
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-md">
+interface PageLoaderProps {
+  fullScreen?: boolean;
+}
+
+export const PageLoader = ({ fullScreen = true }: PageLoaderProps) => {
+  const LoaderContent = (
       <div className="relative flex flex-col items-center">
         <div className="relative w-20 h-20 mb-4">
           <motion.div
@@ -75,6 +78,19 @@ export const PageLoader = () => {
           </div>
         </motion.div>
       </div>
+    );
+
+  if (fullScreen) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-md">
+        {LoaderContent}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center">
+      {LoaderContent}
     </div>
   );
 };

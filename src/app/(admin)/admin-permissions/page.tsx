@@ -129,19 +129,10 @@ export default function AdminPermissionsPage() {
 
   const selectedAdminData = admins.find(a => a.email === selectedAdmin);
 
-  // Convert admins to dropdown options
   const adminOptions = admins.map(admin => ({
     label: `${admin.name} (${admin.email})`,
     value: admin.email
   }));
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <PageLoader />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -269,8 +260,12 @@ export default function AdminPermissionsPage() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent>
-                {!selectedAdmin ? (
+              <CardContent className="relative min-h-[500px]">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <PageLoader fullScreen={false} />
+                  </div>
+                ) : !selectedAdmin ? (
                   <div className="text-center py-16">
                     <div className="p-4 bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                       <Shield className="h-10 w-10 text-gray-400" />
@@ -363,7 +358,9 @@ export default function AdminPermissionsPage() {
               >
                 {saving ? (
                   <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <div className="flex items-center justify-center w-4 h-4">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    </div>
                     Saving...
                   </>
                 ) : (

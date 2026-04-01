@@ -253,7 +253,9 @@ export default function VendorPaymentsPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {isLoading && payments.length === 0 ? (
-                <PageLoader />
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <PageLoader fullScreen={false} />
+                </div>
             ) : payments.length === 0 ? (
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">

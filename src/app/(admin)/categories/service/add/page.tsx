@@ -368,7 +368,9 @@ export default function AddServiceCategoryPage() {
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {isFetching && categories.length === 0 ? (
-        <PageLoader />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <PageLoader fullScreen={false} />
+        </div>
       ) : (
         <>
           <div>
@@ -469,9 +471,17 @@ export default function AddServiceCategoryPage() {
                     <div className="flex gap-2 pt-1">
                       <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
                         {isLoading ? (
-                          <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {editingId ? 'Updating...' : 'Adding...'}</>
+                          <>
+                            <div className="flex items-center justify-center w-3 h-3">
+                              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            </div>
+                            {editingId ? 'Updating...' : 'Adding...'}
+                          </>
                         ) : (
-                          <><Plus className="mr-1 h-3 w-3" /> {editingId ? 'Update' : 'Add'}</>
+                          <>
+                            <Plus className="mr-1 h-3 w-3" />
+                            {editingId ? 'Update' : 'Add'}
+                          </>
                         )}
                       </Button>
                       <Button type="button" variant="outline" className="flex-1 h-9 rounded-lg text-sm" onClick={handleCancelEdit}>Cancel</Button>
@@ -538,11 +548,7 @@ export default function AddServiceCategoryPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 flex-1 relative">
-                  {categories.length === 0 && !isFetching ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                      <p className="text-slate-500 text-sm">No categories found</p>
-                    </div>
-                  ) : (
+
                     <AgGridTable
                       loading={isFetching}
                       rowData={categories}
@@ -552,7 +558,7 @@ export default function AddServiceCategoryPage() {
                       enableFilter={false}
                       gridHeight={600}
                     />
-                  )}
+                
                 </CardContent>
               </Card>
             </div>

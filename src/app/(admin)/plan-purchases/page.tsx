@@ -397,7 +397,11 @@ export default function ListingPlanPurchasesPage() {
     },
   ];
       if (loading && rows.length === 0) {
-        return <PageLoader />;
+        return (
+          <div className="flex items-center justify-center min-h-[500px]">
+            <PageLoader fullScreen={false} />
+          </div>
+        );
       }
   return (
     <div className="space-y-6">

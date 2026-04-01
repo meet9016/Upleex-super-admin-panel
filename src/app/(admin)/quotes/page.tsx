@@ -94,7 +94,9 @@ export default function QuotesPage() {
                     <CardContent className="p-0">
                         <div className="h-[calc(100vh-280px)] w-full relative flex flex-col">
                             {isLoading ? (
-                                <PageLoader />
+                                <div className="flex items-center justify-center h-full">
+                                    <PageLoader fullScreen={false} />
+                                </div>
                             ) : quotes.length === 0 ? (
                                 <div className="absolute inset-0 flex items-center justify-center py-20">
                                     <div className="text-center group">
@@ -119,8 +121,10 @@ export default function QuotesPage() {
                                     {/* Infinite Scroll Trigger */}
                                     <div ref={lastQuoteElementRef} className="h-10 flex items-center justify-center py-4">
                                         {isFetchingMore && (
-                                            <div className="flex items-center gap-2 text-indigo-600">
-                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            <div className="flex items-center justify-center gap-2 text-indigo-600">
+                                                <div className="flex items-center justify-center w-5 h-5">
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                </div>
                                                 <span className="text-sm font-medium">Loading more quotes...</span>
                                             </div>
                                         )}

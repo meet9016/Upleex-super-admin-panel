@@ -214,7 +214,13 @@ export default function DropdownsManagementPage() {
     );
   }, [data, activeTab, activeConfig, searchText]);
 
-  if (loading) return <PageLoader />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <PageLoader fullScreen={false} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">

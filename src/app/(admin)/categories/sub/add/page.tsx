@@ -479,7 +479,9 @@ export default function AddSubCategoryPage() {
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       {isFetching && subCategories.length === 0 ? (
-        <PageLoader />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <PageLoader fullScreen={false} />
+        </div>
       ) : (
         <>
       <div>
@@ -645,7 +647,9 @@ export default function AddSubCategoryPage() {
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        <div className="flex items-center justify-center w-3 h-3">
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        </div>
                         {editingSubCategory ? "Updating..." : "Saving..."}
                       </>
                     ) : (
@@ -728,7 +732,7 @@ export default function AddSubCategoryPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {filteredSubCategories.length === 0 && !isFetching ? (
+              {/* {filteredSubCategories.length === 0 && !isFetching ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50">
                   <div className="text-center">
                     <p className="text-slate-500 text-sm mb-2">
@@ -748,7 +752,7 @@ export default function AddSubCategoryPage() {
                     )}
                   </div>
                 </div>
-              ) : (
+              ) : ( */}
                 <AgGridTable
                   loading={isFetching}
                   rowData={filteredSubCategories}
@@ -760,7 +764,7 @@ export default function AddSubCategoryPage() {
                   enableFilter={false}
                   gridHeight={600}
                 />
-              )}
+              {/* )} */}
             </CardContent>
           </Card>
         </div>

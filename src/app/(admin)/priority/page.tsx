@@ -84,7 +84,11 @@ export default function PriorityPlansPage() {
   useEffect(() => { fetchData(); }, []);
 
   if (loading && rows.length === 0) {
-    return <PageLoader />;
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <PageLoader fullScreen={false} />
+      </div>
+    );
   }
 
   const resetForm = () => {

@@ -130,7 +130,11 @@ export default function VendorsPage() {
     }, []);
 
     if (isLoading && rowData.length === 0) {
-        return <PageLoader />;
+        return (
+            <div className="flex items-center justify-center min-h-[900px]">
+                <PageLoader fullScreen={false} />
+            </div>
+        );
     }
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
