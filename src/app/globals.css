@@ -210,7 +210,7 @@
   }
 
   .cute-ag-grid *::-webkit-scrollbar {
-    width: 2px !important;
+    width: 1px !important;
     height: 2px !important;
   }
 

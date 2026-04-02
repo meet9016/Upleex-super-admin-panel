@@ -454,7 +454,7 @@ export default function VendorServiceTreeTable({
     
   </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full border border-gray-200 overflow-hidden rounded-lg`} style={{ height: "700px" }}>
+      <div className={`${isDark ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full border border-gray-200 overflow-hidden rounded-lg cute-ag-grid`} style={{ height: "700px" }}>
         <AgGridReact
           ref={gridRef}
           rowData={rowData}

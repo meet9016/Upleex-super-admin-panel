@@ -628,7 +628,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
   <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
     <CardContent className="p-0">
       <div className="h-[600px] w-full">
-        <div className="ag-theme-alpine w-full h-full border-0">
+        <div className="ag-theme-alpine w-full h-full border-0 cute-ag-grid">
           <AgGridReact
             ref={gridRef}
             rowData={rowData}

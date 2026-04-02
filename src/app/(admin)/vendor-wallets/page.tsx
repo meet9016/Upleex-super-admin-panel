@@ -184,42 +184,46 @@ const VendorWalletsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800 ">
-          Vendor Wallets
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Manage and monitor vendor wallet balances
-        </p>
+    <div className="flex items-center justify-between mb-4">
+  <div>
+    <h1 className="text-2xl font-semibold text-gray-800">
+      Vendor Wallets
+    </h1>
+    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+      Manage and monitor vendor wallet balances
+    </p>
+  </div>
+
+  {/* RIGHT SIDE */}
+  <div className="flex items-center">
+    <div className="relative w-64">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <MdSearch className="h-5 w-5 text-gray-400" />
       </div>
-      <div className="mb-4 flex justify-between items-center">
-        <div className="relative w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MdSearch className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          />
-          {searchTerm && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-        {/* <div className="text-sm text-gray-500 dark:text-gray-400">
-          Total Vendors: {vendors.length}
-        </div> */}
-      </div>
+
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      />
+
+      {searchTerm && (
+        <button
+          onClick={handleClearSearch}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          <X size={16} />
+        </button>
+      )}
+    </div>
+  </div>
+
+</div>
       
       {/* AgGrid Table */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-white rounded-lg shadow-sm cute-ag-grid">
         <AgGridTable
           rowData={vendors}
           columns={columns}
