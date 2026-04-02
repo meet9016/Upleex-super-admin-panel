@@ -275,7 +275,7 @@ export default function PriorityPlanTab() {
             </CardHeader>
             <CardContent className="space-y-4 overflow-y-auto">
               <div>
-                <label className="text-sm font-semibold text-slate-700">Plan Type</label>
+                <label className="text-sm font-semibold text-slate-700">Plan Type <span className="text-red-500">*</span></label>
                 <div className="mt-1">
                   <div className={`rounded-lg ${errors.name ? "ring-1 ring-red-500" : ""}`}>
                     <SearchableDropdown
@@ -310,7 +310,7 @@ export default function PriorityPlanTab() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Monthly Price
+                    Monthly Price <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -347,7 +347,7 @@ export default function PriorityPlanTab() {
 
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Yearly Price
+                    Yearly Price <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -383,7 +383,7 @@ export default function PriorityPlanTab() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Slots</label>
+                  <label className="text-sm font-semibold text-slate-700">Slots <span className="text-red-500">*</span></label>
                   <input
                     type="number"
                     min="1"
@@ -431,7 +431,7 @@ export default function PriorityPlanTab() {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-slate-700">Description</label>
+                <label className="text-sm font-semibold text-slate-700">Description <span className="text-red-500">*</span></label>
                 <textarea
                   className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? "border-red-500 focus:ring-red-200" : "border-slate-200"}`}
                   rows={3}

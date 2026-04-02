@@ -110,7 +110,7 @@ export default function CreateAdminPage() {
               {/* Name Field */}
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-semibold text-gray-700">
-                  Full Name *
+                  Full Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -128,7 +128,7 @@ export default function CreateAdminPage() {
               {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-semibold text-gray-700">
-                  Email Address *
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -146,7 +146,7 @@ export default function CreateAdminPage() {
               {/* Phone Field */}
               <div className="space-y-2">
                 <label htmlFor="phone" className="text-sm font-semibold text-gray-700">
-                  Phone Number *
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -167,7 +167,7 @@ export default function CreateAdminPage() {
               {/* Password Field */}
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-semibold text-gray-700">
-                  Password *
+                  Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -192,7 +192,7 @@ export default function CreateAdminPage() {
               {/* Confirm Password Field */}
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
-                  Confirm Password *
+                  Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />

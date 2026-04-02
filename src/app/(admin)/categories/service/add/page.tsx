@@ -388,7 +388,7 @@ export default function AddServiceCategoryPage() {
                 <CardContent className="pt-0">
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                     <div className="space-y-1">
-                      <label htmlFor="name" className="text-xs font-semibold text-slate-700">Name</label>
+                      <label htmlFor="name" className="text-xs font-semibold text-slate-700">Name <span className="text-red-500">*</span></label>
                       <Input
                         id="name"
                         placeholder="e.g. Cleaning"
@@ -399,7 +399,7 @@ export default function AddServiceCategoryPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label htmlFor="image" className="text-xs font-semibold text-slate-700">Category Image</label>
+                      <label htmlFor="image" className="text-xs font-semibold text-slate-700">Category Image <span className="text-red-500">*</span></label>
                       <div
                         {...getRootProps()}
                         className={cn(

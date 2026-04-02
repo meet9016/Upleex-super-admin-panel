@@ -251,7 +251,7 @@ export default function ProductListingTab() {
               {/* Plan Type */}
               <div>
                 <label className="text-sm font-semibold text-slate-700">
-                  Plan Type
+                  Plan Type <span className="text-red-500">*</span>
                 </label>
                 <input
                   className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.plan_type ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
@@ -270,7 +270,7 @@ export default function ProductListingTab() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Months
+                    Months <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -282,7 +282,7 @@ export default function ProductListingTab() {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Max Products
+                    Max Products <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -294,7 +294,7 @@ export default function ProductListingTab() {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Amount
+                    Amount <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -335,7 +335,7 @@ export default function ProductListingTab() {
 
               <div>
                 <label className="text-sm font-semibold text-slate-700">
-                  Description
+                  Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}

@@ -271,6 +271,7 @@ export default function DropdownsManagementPage() {
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-700">
                     {activeConfig.displayLabel} Name
+                     <span className="text-red-500 ml-1">*</span>
                   </label>
                   <Input
                     value={inputValue}

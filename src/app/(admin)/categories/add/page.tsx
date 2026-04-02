@@ -432,7 +432,7 @@ export default function AddCategoryPage() {
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                     <div className="space-y-1">
                       <label htmlFor="name" className="text-xs font-semibold text-slate-700">
-                        Name
+                        Name <span className="text-red-500">*</span>
                       </label>
                       <Input
                         id="name"
@@ -446,7 +446,7 @@ export default function AddCategoryPage() {
                     {/* Image Upload Field */}
                     <div className="space-y-1">
                       <label htmlFor="image" className="text-xs font-semibold text-slate-700">
-                        Category Image
+                        Category Image <span className="text-red-500">*</span>
                       </label>
 
                       <div

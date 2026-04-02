@@ -352,7 +352,7 @@ export default function BannerPage() {
         <CardContent className="pt-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Banner Title</label>
+              <label className="text-xs font-semibold text-slate-700">Banner Title <span className="text-red-500">*</span></label>
               <Input {...register("title")} placeholder="Main title" error={errors.title?.message} className="h-9 text-sm" />
             </div>
             <div className="space-y-1">
@@ -398,7 +398,7 @@ export default function BannerPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Banner Image (1200x500)</label>
+              <label className="text-xs font-semibold text-slate-700">Banner Image (1200x500) <span className="text-red-500">*</span></label>
               <div
                 {...getRootProps()}
                 className={cn(

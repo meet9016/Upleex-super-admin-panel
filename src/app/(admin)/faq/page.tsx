@@ -344,7 +344,7 @@ const handleConfirmDelete = async () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="question" className="text-sm font-semibold text-slate-700">
-                    Question
+                    Question <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="question"
@@ -357,7 +357,7 @@ const handleConfirmDelete = async () => {
 
                 <div className="space-y-2">
                   <label htmlFor="answer" className="text-sm font-semibold text-slate-700">
-                    Answer
+                    Answer <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="answer"

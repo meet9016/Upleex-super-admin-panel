@@ -570,7 +570,7 @@ export default function BlogPage() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-semibold text-slate-700">
-                    Article Title
+                    Article Title <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="title"
@@ -583,7 +583,7 @@ export default function BlogPage() {
 
                 <div className="space-y-2">
                   <label htmlFor="sort_description" className="text-sm font-semibold text-slate-700">
-                    Short Description
+                    Short Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="sort_description"
@@ -602,7 +602,7 @@ export default function BlogPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">
-                    Long Description
+                    Long Description <span className="text-red-500">*</span>
                   </label>
 
                   <Controller
@@ -634,7 +634,7 @@ export default function BlogPage() {
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="date" className="text-sm font-semibold text-slate-700">
-                    Publish Date
+                    Publish Date <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="date"
@@ -657,7 +657,7 @@ export default function BlogPage() {
                 {/* Image Upload Field */}
                 <div className="space-y-2">
                   <label htmlFor="blog-image" className="text-sm font-semibold text-slate-700">
-                    Featured Image
+                    Featured Image <span className="text-red-500">*</span>
                   </label>
 
                   <div

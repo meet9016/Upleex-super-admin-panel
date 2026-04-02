@@ -503,7 +503,7 @@ export default function AddSubCategoryPage() {
               <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-3">
                 <div className="space-y-1">
                   <label htmlFor="categoryId" className="text-xs font-semibold text-slate-700">
-                    Parent Category
+                    Parent Category <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="categoryId"
@@ -534,7 +534,7 @@ export default function AddSubCategoryPage() {
 
                 <div className="space-y-1">
                   <label htmlFor="name" className="text-xs font-semibold text-slate-700">
-                    Sub Category Name
+                    Sub Category Name <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="name"
@@ -548,7 +548,7 @@ export default function AddSubCategoryPage() {
                 {/* Image Upload Field */}
                 <div className="space-y-1">
                   <label htmlFor="image" className="text-xs font-semibold text-slate-700">
-                    Sub Category Image
+                    Sub Category Image <span className="text-red-500">*</span>
                   </label>
 
                   <div
