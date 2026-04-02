@@ -129,13 +129,13 @@ export default function VendorsPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (isLoading && rowData.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[900px]">
-                <PageLoader fullScreen={false} />
-            </div>
-        );
-    }
+    // if (isLoading && rowData.length === 0) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-[900px]">
+    //             <PageLoader fullScreen={false} />
+    //         </div>
+    //     );
+    // }
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
         setIsUpdating(kycId);

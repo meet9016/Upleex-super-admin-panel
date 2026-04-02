@@ -29,6 +29,7 @@ import SearchableDropdown from "./SearchableDropdown";
 import StatusBadge from "@/components/common/StatusBadge";
 import { toast } from "react-toastify";
 import Loader from "@/components/common/Loader";
+import PageLoader from "@/components/common/PageLoader";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -97,6 +98,7 @@ interface VendorProductTreeTableProps {
   onStatusChange: (productId: string, status: string) => void;
   approving: boolean;
   rejecting?: boolean;
+  loading?: boolean;
 }
 
 // Product Detail Modal Component
@@ -384,6 +386,7 @@ export default function VendorProductTreeTable({
   onStatusChange,
   approving,
   rejecting,
+  loading,
 }: VendorProductTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -397,14 +400,14 @@ export default function VendorProductTreeTable({
   const processedVendors = useMemo(() => {
     const map: Record<string, any> = {};
     const filteredVendors: any[] = [];
-    
+
     vendors.forEach((vendor) => {
       const v = vendor as any;
       const products = vendor.products || [];
-      
+
       const filteredProducts = products.filter(p => {
-         const typeName = (p.product_type_name || '').toLowerCase();
-         return typeName === activeTab;
+        const typeName = (p.product_type_name || '').toLowerCase();
+        return typeName === activeTab;
       });
 
       if (filteredProducts.length > 0) {
@@ -691,9 +694,15 @@ export default function VendorProductTreeTable({
         )}
       </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'} w-full border border-gray-200 overflow-hidden`} style={{ height: "700px" }}>
-        <style dangerouslySetInnerHTML={{
-          __html: `
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px] rounded-xl">
+            <PageLoader fullScreen={false} />
+          </div>
+        )}
+        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'} w-full border border-gray-200 overflow-hidden`} style={{ height: "700px" }}>
+          <style dangerouslySetInnerHTML={{
+            __html: `
           .ag-cell-focus, .ag-cell:focus, .ag-cell-active, .ag-has-focus .ag-cell-focus {
             background-color: transparent !important;
             outline: none !important;
@@ -704,30 +713,31 @@ export default function VendorProductTreeTable({
             background-color: inherit !important;
           }
         ` }} />
-        <AgGridReact
-          ref={gridRef}
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          autoGroupColumnDef={autoGroupColumnDef}
-          rowSelection={rowSelection}
-          treeData={true}
-          animateRows={true}
-          context={context}
-          suppressRowClickSelection={true}
-          suppressCellFocus={true}
-          getRowId={getRowId}
-          getDataPath={getDataPath}
-          groupDefaultExpanded={0}
-          groupDisplayType="singleColumn"
-          treeDataChildrenField="children"
-          rowHeight={45}
-          headerHeight={48}
-          getRowStyle={(params) =>
-            params.data?.type === "vendor" ? { background: "#f9fafb" } : undefined
-          }
-          onSelectionChanged={updateCount}
-        />
+          <AgGridReact
+            ref={gridRef}
+            rowData={rowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            autoGroupColumnDef={autoGroupColumnDef}
+            rowSelection={rowSelection}
+            treeData={true}
+            animateRows={true}
+            context={context}
+            suppressRowClickSelection={true}
+            suppressCellFocus={true}
+            getRowId={getRowId}
+            getDataPath={getDataPath}
+            groupDefaultExpanded={0}
+            groupDisplayType="singleColumn"
+            treeDataChildrenField="children"
+            rowHeight={45}
+            headerHeight={48}
+            getRowStyle={(params) =>
+              params.data?.type === "vendor" ? { background: "#f9fafb" } : undefined
+            }
+            onSelectionChanged={updateCount}
+          />
+        </div>
       </div>
 
       {/* Product Detail Modal */}
