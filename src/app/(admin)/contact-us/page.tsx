@@ -53,8 +53,24 @@ const ContactUsPage = () => {
     try {
       setIsFetching(true);
       const response = await apiService.getAllContacts({ limit: 1000 });
-      setContacts(response.data);
-      setFilteredContacts(response.data);
+      
+      console.log('API Response:', response);
+      
+      // Ensure proper data mapping and date handling
+      const formattedContacts = response.data.map((contact: any) => {
+        return {
+          id: contact._id || contact.id,
+          name: contact.name || '',
+          email: contact.email || '',
+          phone: contact.phone || '',
+          message: contact.message || '',
+          created_at: contact.createdAt || contact.created_at || new Date().toISOString(),
+          updated_at: contact.updatedAt || contact.updated_at || new Date().toISOString(),
+        };
+      });
+      
+      setContacts(formattedContacts);
+      setFilteredContacts(formattedContacts);
     } catch (error) {
       console.error("Error fetching contacts:", error);
       toast.error("Failed to fetch contacts");
@@ -164,8 +180,22 @@ const ContactUsPage = () => {
       headerName: "Date",
       width: 120,
       cellStyle: { color: "#64748b", display: 'flex', alignItems: 'center' },
-      cellRenderer: (params: { data: Contact }) => 
-        new Date(params.data.created_at).toLocaleDateString()
+      cellRenderer: (params: { data: Contact }) => {
+        try {
+          const date = new Date(params.data.created_at);
+          if (isNaN(date.getTime())) {
+            console.warn('Invalid date for contact:', params.data.id, params.data.created_at);
+            return 'Invalid Date';
+          }
+          return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+        } catch (error) {
+          return 'Invalid Date';
+        }
+      }
     },
     {
           headerName: "Action",
