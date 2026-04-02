@@ -235,8 +235,6 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 const ActionCellRenderer = (props: ICellRendererParams) => {
   const [updating, setUpdating] = useState(false);
   const { onStatusChange, onViewProduct } = props.context;
-  const uniqueId = useRef(`dropdown-${Math.random().toString(36).substr(2, 9)}`).current;
-
   if (props.data?.type !== "product") return null;
 
   const handleView = (e: React.MouseEvent) => {
@@ -264,23 +262,6 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
     }
   };
 
-  // Style tag with unique class
-  React.useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .${uniqueId} .searchable-dropdown-options,
-      .${uniqueId} [class*="options"] {
-        max-height: 150px !important;
-        overflow-y: auto !important;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [uniqueId]);
-
   return (
     <>
       <div
@@ -298,23 +279,22 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
         >
           <Eye size={14} />
         </button>
-        <div className={uniqueId}>
-          <SearchableDropdown
-            options={[
-              { label: "Pending", value: "pending" },
-              { label: "Approved", value: "approved" },
-              { label: "Rejected", value: "rejected" },
-            ]}
-            value={String(props.data.approval_status || '').toLowerCase()}
-            onChange={handleChange}
-            disabled={updating}
-            placeholder="Select Status"
-            usePortal={true}
-            maxHeight="max-h-48 max-w-[135px]"
-            showClear={false}
-            buttonClassName="h-8 py-1 w-[135px]"
-          />
-        </div>
+
+        <SearchableDropdown
+          options={[
+            { label: "Pending", value: "pending" },
+            { label: "Approved", value: "approved" },
+            { label: "Rejected", value: "rejected" },
+          ]}
+          value={String(props.data.approval_status || '').toLowerCase()}
+          onChange={handleChange}
+          disabled={updating}
+          placeholder="Select Status"
+          usePortal={true}
+          maxHeight="max-h-48"
+          showClear={false}
+          buttonClassName="h-8 py-1 w-[135px]"
+        />
       </div>
     </>
   );

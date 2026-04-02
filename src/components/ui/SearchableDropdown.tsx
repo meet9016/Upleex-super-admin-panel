@@ -281,7 +281,7 @@ export default function SearchableDropdown({
             )}
 
             <div
-                className={`overflow-y-auto ${maxHeight}`}
+                className={`overflow-y-auto overflow-x-hidden ${maxHeight}`}
                 onScroll={(e) => {
                     const target = e.target as HTMLDivElement;
                     const scrollPercentage =
