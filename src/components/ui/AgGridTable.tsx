@@ -18,6 +18,7 @@ import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions, Column
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { ColumnMenuModule, ContextMenuModule } from "ag-grid-enterprise";
 import Loader from "@/components/common/Loader";
+import PageLoader from "@/components/common/PageLoader";
 
 ModuleRegistry.registerModules([AllCommunityModule, ColumnMenuModule, ContextMenuModule]);
 
@@ -236,9 +237,13 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
       </div>
 
       <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px] rounded-xl">
+            <PageLoader fullScreen={false} />
+          </div>
+        )}
         <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'}`} style={{ width: "100%", height: height ? (typeof height === 'number' ? `${height}px` : height) : (typeof gridHeight === 'number' ? `${gridHeight}px` : (gridHeight || "660px")) }}>
           <AgGridReact
-            loading={loading}
             rowHeight={rowHeight}
             ref={gridRef}
             rowData={rowData}

@@ -36,9 +36,9 @@ export default function VendorServiceApprovalPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [selectedCount, setSelectedCount] = useState(0);
-const [approvableCount, setApprovableCount] = useState(0);
-const [rejectableCount, setRejectableCount] = useState(0);
-const gridRef = useRef(null);
+  const [approvableCount, setApprovableCount] = useState(0);
+  const [rejectableCount, setRejectableCount] = useState(0);
+  const gridRef = useRef(null);
   const LIMIT = 10;
 
   useEffect(() => {
@@ -234,15 +234,8 @@ const gridRef = useRef(null);
     <div className="p-1">
       <div className="bg-white rounded-lg min-h-[400px]">
         {loading && vendors.length === 0 ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-36">
             <PageLoader fullScreen={false} />
-          </div>
-        ) : vendors.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-40 text-gray-500">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <Loader2 className="h-8 w-8 text-gray-300" />
-            </div>
-            <p className="text-lg font-medium">No vendors with services found</p>
           </div>
         ) : (
           <>
