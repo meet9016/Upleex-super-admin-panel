@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { MdSearch } from "react-icons/md";
 import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import PageLoader from "@/components/common/PageLoader";
+import ActionButtons from "@/components/common/ActionButtons";
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -104,11 +105,6 @@ const ContactUsPage = () => {
     setFilteredContacts(contacts);
   };
 
-  const handleViewMessage = (contact: Contact) => {
-    const phoneText = contact.phone ? `\nPhone: ${contact.phone}` : '';
-    alert(`From: ${contact.name}\nEmail: ${contact.email}${phoneText}\n\nMessage:\n${contact.message}`);
-  };
-
   if (isFetching && contacts.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
@@ -172,38 +168,19 @@ const ContactUsPage = () => {
         new Date(params.data.created_at).toLocaleDateString()
     },
     {
-      headerName: "Actions",
-      width: 120,
-      minWidth: 120,
-      maxWidth: 120,
-      pinned: "right",
-      suppressHeaderMenuButton: true,
-      sortable: false,
-      filter: false,
-      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
-      cellRenderer: (params: { data: Contact }) => (
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleViewMessage(params.data)}
-            className="h-8 w-8 p-0"
-            title="View full message"
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => handleDeleteClick(params.data)}
-            className="h-8 w-8 p-0"
-            title="Delete contact"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )
-    }
+          headerName: "Action",
+          width: 100,
+          minWidth: 100,
+          maxWidth: 100,
+          pinned: "right",
+          suppressHeaderMenuButton: true,
+          sortable: false,
+          filter: false,
+          cellStyle: { display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" },
+          cellRenderer: (params: { data: any }) => (
+            <ActionButtons onDelete={() => handleDeleteClick(params.data)} />
+          )
+        },
   ];
 
   return (
