@@ -121,13 +121,6 @@ const ContactUsPage = () => {
     setFilteredContacts(contacts);
   };
 
-  if (isFetching && contacts.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <PageLoader fullScreen={false} />
-      </div>
-    );
-  }
 
   const columnDefs: ColDef<Contact>[] = [
     {
@@ -219,8 +212,8 @@ const ContactUsPage = () => {
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Contact Us Management</h2>
       </div>
 
-      <Card className="border-slate-100 shadow-sm overflow-hidden" style={{ height: '774px' }}>
-        <CardHeader className="bg-slate-50/50 border-b border-slate-50">
+      <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             
             {/* LEFT */}
@@ -256,7 +249,7 @@ const ContactUsPage = () => {
                     toast.error(error?.response?.data?.message || 'Failed to delete selected contacts');
                   }
                 }}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto h-9 text-sm"
               >
                 Delete Selected ({selectedRows.length})
               </Button>

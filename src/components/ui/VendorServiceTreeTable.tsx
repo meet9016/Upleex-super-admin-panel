@@ -88,6 +88,7 @@ interface VendorServiceTreeTableProps {
   onStatusChange: (serviceId: string, status: string) => void;
   approving: boolean;
   rejecting?: boolean;
+  loading?: boolean;
 }
 
 const StatusCellRenderer = (props: ICellRendererParams) => {
@@ -228,6 +229,7 @@ export default function VendorServiceTreeTable({
   onStatusChange,
   approving,
   rejecting,
+  loading,
 }: VendorServiceTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -451,30 +453,37 @@ export default function VendorServiceTreeTable({
 
       </div>
 
-      <div className={`${isDark ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'} w-full border border-gray-200 overflow-hidden rounded-lg cute-ag-grid`} style={{ height: "700px" }}>
-        <AgGridReact
-          ref={gridRef}
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          autoGroupColumnDef={autoGroupColumnDef}
-          rowSelection={rowSelection}
-          treeData={true}
-          animateRows={true}
-          context={context}
-          suppressRowClickSelection={true}
-          getRowId={getRowId}
-          getDataPath={getDataPath}
-          groupDefaultExpanded={0}
-          groupDisplayType="singleColumn"
-          treeDataChildrenField="children"
-          rowHeight={50}
-          headerHeight={50}
-          getRowStyle={(params) =>
-            params.data?.type === "vendor" ? { background: "#f8fafc" } : undefined
-          }
-          onSelectionChanged={updateCount}
-        />
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
+            <PageLoader fullScreen={false} />
+          </div>
+        )}
+        <div className={`${isDark ? 'ag-theme-alpine-dark cute-ag-grid' : 'ag-theme-alpine cute-ag-grid'} w-full border border-gray-200 overflow-hidden rounded-lg`} style={{ height: "700px" }}>
+          <AgGridReact
+            ref={gridRef}
+            rowData={rowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            autoGroupColumnDef={autoGroupColumnDef}
+            rowSelection={rowSelection}
+            treeData={true}
+            animateRows={true}
+            context={context}
+            suppressRowClickSelection={true}
+            getRowId={getRowId}
+            getDataPath={getDataPath}
+            groupDefaultExpanded={0}
+            groupDisplayType="singleColumn"
+            treeDataChildrenField="children"
+            rowHeight={50}
+            headerHeight={50}
+            getRowStyle={(params) =>
+              params.data?.type === "vendor" ? { background: "#f8fafc" } : undefined
+            }
+            onSelectionChanged={updateCount}
+          />
+        </div>
       </div>
     </div>
   );

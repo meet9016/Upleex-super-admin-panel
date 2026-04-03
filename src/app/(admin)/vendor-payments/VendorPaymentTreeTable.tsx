@@ -34,11 +34,13 @@ import {
   Loader2,
   RefreshCw,
   Filter,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData } from "@/types/vendorPayment";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
+import PageLoader from "@/components/common/PageLoader";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -131,6 +133,7 @@ interface VendorPaymentTreeTableProps {
   onPageChange: (page: number) => void;
   onFilterChange: (filters: { status: string; vendor_id: string }) => void;
   isReleasing?: string | null;
+  loading?: boolean;
 }
 
 // Status cell renderer
@@ -322,6 +325,7 @@ export default function VendorPaymentTreeTable({
   onPageChange,
   onFilterChange,
   isReleasing,
+  loading = false,
 }: VendorPaymentTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [quickFilterText, setQuickFilterText] = useState('');
@@ -504,13 +508,13 @@ const handleStatusFilterChange = (status: string | string[]) => {
   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
     <div>
       <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Vendor Payment Management</h2>
-      <p className="text-sm text-slate-600">Manage vendor payments with hierarchical product view</p>
+      {/* <p className="text-sm text-slate-600">Manage vendor payments with hierarchical product view</p> */}
     </div>
   </div>
 
   {/* Summary Cards */}
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-    <Card className="border-none shadow-lg">
+    <Card className="border-none ">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div>
@@ -524,7 +528,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
       </CardContent>
     </Card>
 
-    <Card className="border-none shadow-lg">
+    <Card className="border-none ">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div>
@@ -538,7 +542,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
       </CardContent>
     </Card>
 
-    <Card className="border-none shadow-lg">
+    <Card className="border-none ">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div>
@@ -552,7 +556,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
       </CardContent>
     </Card>
 
-    <Card className="border-none shadow-lg">
+    <Card className="border-none ">
       <CardContent className="p-3">
         <div className="flex items-center justify-between">
           <div>
@@ -568,66 +572,82 @@ const handleStatusFilterChange = (status: string | string[]) => {
   </div>
 
   {/* Filters and Actions */}
-  <Card className="border-none shadow-lg">
-    <CardContent className="p-3">
-      {/* On mobile: stacked layout, on large: side by side */}
-      <div className="flex flex-col md:flex-row md:items-center gap-3">
-        {/* Search and Status Row */}
-        <div className="flex-1 flex flex-col sm:flex-row gap-3">
-          {/* SEARCH INPUT */}
+<Card className="border border-gray-100 shadow-sm rounded-2xl bg-white">
+  <CardContent className="p-4">
+    
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+      {/* LEFT SIDE */}
+      <div className="flex flex-col sm:flex-row gap-3 flex-1">
+
+        {/* 🔍 SEARCH */}
+        <div className="relative w-full">
           <input
             type="text"
-            placeholder="Search vendors, orders, customers..."
+            placeholder="Search anything..."
             value={quickFilterText}
             onChange={onQuickFilterChanged}
-            className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
           />
-
-          {/* DROPDOWN */}
-          <div className="w-full sm:w-56">
-            <SearchableDropdown
-              options={statusOptions}
-              value={statusFilter}
-              onChange={(val) => handleStatusFilterChange(val)}
-              placeholder="All Status"
-              searchable={false}
-            />
-          </div>
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
         </div>
 
-        {/* Action Buttons - Side by side on large screens, stacked on mobile */}
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setQuickFilterText('');
-              setStatusFilter('');
-              setVendorFilter('');
-              onFilterChange({ status: '', vendor_id: '' });
-              gridRef.current?.api.setGridOption('quickFilterText', '');
-            }}
-            className="w-full sm:w-auto h-9 text-sm"
-          >
-            <Filter size={14} className="mr-2" />
-            Clear Filters
-          </Button>
-          
-          <Button
-            onClick={onReleaseScheduledPayments}
-            className="bg-green-600 hover:bg-green-700 w-full sm:w-auto h-9 text-sm"
-          >
-            <RefreshCw size={14} className="mr-2" />
-            Release Scheduled
-          </Button>
+        {/* 📂 DROPDOWN */}
+        <div className="w-full sm:w-52">
+          <SearchableDropdown
+            options={statusOptions}
+            value={statusFilter}
+            onChange={(val) => handleStatusFilterChange(val)}
+            placeholder="All Status"
+            searchable={false}
+          />
         </div>
       </div>
-    </CardContent>
-  </Card>
 
+      {/* RIGHT SIDE ACTIONS */}
+      <div className="flex items-center gap-2">
+
+        {/* CLEAR */}
+        <button
+          onClick={() => {
+            setQuickFilterText('');
+            setStatusFilter('');
+            setVendorFilter('');
+            onFilterChange({ status: '', vendor_id: '' });
+            gridRef.current?.api.setGridOption('quickFilterText', '');
+          }}
+          className="px-3 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition flex items-center gap-2"
+        >
+          <Filter size={14} />
+          Clear
+        </button>
+
+        {/* PRIMARY ACTION */}
+        <button
+          onClick={onReleaseScheduledPayments}
+          className="px-4 py-2 text-sm rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
+        >
+          <RefreshCw size={14} />
+          Release
+        </button>
+
+      </div>
+    </div>
+
+  </CardContent>
+</Card>
   {/* Tree Table */}
   <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
     <CardContent className="p-0">
-      <div className="h-[600px] w-full">
+      <div className="h-[600px] w-full relative">
+        {loading && (
+          <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
+            <PageLoader fullScreen={false} />
+          </div>
+        )}
         <div className="ag-theme-alpine w-full h-full border-0 cute-ag-grid">
           <AgGridReact
             ref={gridRef}

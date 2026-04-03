@@ -409,11 +409,6 @@ export default function AddCategoryPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      {isFetching && categories.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <PageLoader fullScreen={false} />
-        </div>
-      ) : (
         <>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Categories</h2>
@@ -691,7 +686,6 @@ export default function AddCategoryPage() {
             </div>
           )}
         </>
-      )}
     </div>
   );
 }

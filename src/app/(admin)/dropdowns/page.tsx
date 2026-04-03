@@ -214,19 +214,12 @@ export default function DropdownsManagementPage() {
     );
   }, [data, activeTab, activeConfig, searchText]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <PageLoader fullScreen={false} />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-2xl font-bold tracking-tight text-slate-900">Dropdowns</h2>
-        <p className="text-sm text-slate-500">Manage dynamic values for various system dropdowns.</p>
+        {/* <p className="text-sm text-slate-500">Manage dynamic values for various system dropdowns.</p> */}
       </div>
 
       {/* Type Selector (Pill Style Tabs) */}
@@ -361,12 +354,8 @@ export default function DropdownsManagementPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-1 relative">
-              {isFetching && (
-                <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center">
-                  <Loader2 className="animate-spin h-6 w-6 text-primary" />
-                </div>
-              )}
               <AgGridTable
+                loading={loading || isFetching}
                 ref={gridRef}
                 rowData={filteredData}
                 columns={columnDefs}

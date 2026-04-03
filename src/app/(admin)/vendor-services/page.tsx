@@ -233,21 +233,15 @@ export default function VendorServiceApprovalPage() {
   return (
     <div className="p-1">
       <div className="bg-white rounded-lg min-h-[400px]">
-        {loading && vendors.length === 0 ? (
-          <div className="flex items-center justify-center py-36">
-            <PageLoader fullScreen={false} />
-          </div>
-        ) : (
-          <>
-            <VendorServiceTreeTable
-              vendors={vendors}
-              onBulkApprove={handleBulkApprove}
-              onBulkReject={handleBulkReject}
-              onStatusChange={handleStatusChange}
-              approving={approving}
-              rejecting={rejecting}
-            />
-
+        <VendorServiceTreeTable
+          vendors={vendors}
+          onBulkApprove={handleBulkApprove}
+          onBulkReject={handleBulkReject}
+          onStatusChange={handleStatusChange}
+          approving={approving}
+          rejecting={rejecting}
+          loading={loading}
+        />
             {loadingMore && (
               <div className="flex justify-center items-center py-8 border-t border-gray-100">
                 <div className="flex items-center justify-center gap-3">
@@ -264,8 +258,6 @@ export default function VendorServiceApprovalPage() {
                 <p className="text-sm text-gray-400 font-medium italic">All vendors loaded</p>
               </div>
             )}
-          </>
-        )}
       </div>
     </div>
   );

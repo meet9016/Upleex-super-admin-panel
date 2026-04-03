@@ -4,6 +4,7 @@ import React from "react";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry, ColDef } from "ag-grid-community";
 import { cn } from "@/lib/utils";
+import PageLoader from "@/components/common/PageLoader";
 
 // Register all community modules once
 if (typeof window !== "undefined") {
@@ -20,6 +21,7 @@ interface DataTableProps<TData> {
   height?: string | number;
   rowSelection?: "single" | "multiple";
   onSelectionChanged?: (event: any) => void;
+  loading?: boolean;
 }
 
 export function DataTable<TData>({
@@ -32,13 +34,19 @@ export function DataTable<TData>({
   height = "100%",
   rowSelection = "multiple",
   onSelectionChanged,
+  loading = false,
 }: DataTableProps<TData>) {
   console.log("🚀 ~ DataTable ~ rowData:", rowData)
   return (
     <div 
-      className={cn("ag-theme-quartz w-full", className)} 
+      className={cn("ag-theme-quartz w-full relative", className)} 
       style={{ height }}
     >
+      {loading && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
+          <PageLoader fullScreen={false} />
+        </div>
+      )}
       <AgGridReact
         rowData={rowData}
         columnDefs={columnDefs}

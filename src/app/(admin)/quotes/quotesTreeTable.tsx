@@ -30,6 +30,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import PageLoader from "@/components/common/PageLoader";
 
 // Register only necessary modules
 ModuleRegistry.registerModules([
@@ -97,6 +98,7 @@ interface TreeDataItem {
 interface QuotesTreeTableProps {
   data: Quote[];
   onViewDetails: (quote: any) => void;
+  loading?: boolean;
 }
 
 // Status cell renderer component
@@ -187,6 +189,7 @@ const VendorGroupCellRenderer = (props: ICellRendererParams) => {
 export default function QuotesTreeTable({
   data,
   onViewDetails,
+  loading = false,
 }: QuotesTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [quickFilterText, setQuickFilterText] = useState('');
@@ -397,7 +400,13 @@ export default function QuotesTreeTable({
   }), [onViewDetails]);
 
   return (
-    <div className="space-y-2 h-full flex flex-col">
+    <div className="space-y-2 h-full flex flex-col relative">
+      {loading && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
+          {/* We need to import PageLoader if not present */}
+          <PageLoader fullScreen={false} />
+        </div>
+      )}
       <div className="ag-theme-alpine w-full border border-gray-200 overflow-hidden rounded-none flex-1">
         <AgGridReact
           ref={gridRef}

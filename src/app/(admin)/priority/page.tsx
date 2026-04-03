@@ -13,9 +13,6 @@ import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import PageLoader from "@/components/common/PageLoader";
-import CommonDeleteModal from "@/components/common/CommonDeleteModal";
-import { Checkbox } from "@/components/ui/Checkbox";
-
 
 type PPlan = {
   _id?: string;
@@ -39,10 +36,6 @@ export default function PriorityPlansPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPlanType, setSelectedPlanType] = useState<string>("");
   const [errors, setErrors] = useState<{ [k: string]: string }>({});
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isBulkDelete, setIsBulkDelete] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState<PPlan>({
     name: "",
     monthly_price: 0,
@@ -83,13 +76,6 @@ export default function PriorityPlansPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  if (loading && rows.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <PageLoader fullScreen={false} />
-      </div>
-    );
-  }
 
   const resetForm = () => {
     setEditingId(null);
@@ -152,42 +138,32 @@ export default function PriorityPlansPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const deleteOne = (plan: PPlan) => {
+  const deleteOne = async (plan: PPlan) => {
     const id = plan._id || (plan as any).id;
     if (!id) { toast.error("Invalid plan id"); return; }
-    setDeleteId(id);
-    setIsBulkDelete(false);
-    setOpenDeleteModal(true);
-  };
-
-  const deleteSelected = () => {
-    if (!selected.length) { toast.info("Select rows to delete"); return; }
-    setIsBulkDelete(true);
-    setOpenDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    setIsDeleting(true);
     try {
-      if (isBulkDelete) {
-        for (const r of selected) {
-          const id = (r as any)._id || (r as any).id;
-          if (id) await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
-        }
-        toast.success("Selected plans deleted");
-        setSelected([]);
-        gridRef.current?.api?.deselectAll();
-      } else if (deleteId) {
-        await api.delete(`${endPointApi.deletePriorityPlan}/${deleteId}`);
-        toast.success("Deleted successfully");
-      }
+      await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
+      toast.success("Deleted successfully");
       fetchData();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || (isBulkDelete ? "Bulk delete failed" : "Delete failed"));
-    } finally {
-      setIsDeleting(false);
-      setOpenDeleteModal(false);
-      setDeleteId(null);
+      toast.error(e?.response?.data?.message || "Delete failed");
+    }
+  };
+
+  const deleteSelected = async () => {
+    if (!selected.length) { toast.info("Select rows to delete"); return; }
+    if (!confirm(`Delete ${selected.length} selected priority plans?`)) return;
+    try {
+      for (const r of selected) {
+        const id = (r as any)._id || (r as any).id;
+        if (id) await api.delete(`${endPointApi.deletePriorityPlan}/${id}`);
+      }
+      toast.success("Selected plans deleted");
+      setSelected([]);
+      gridRef.current?.api?.deselectAll();
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Bulk delete failed");
     }
   };
 
@@ -196,10 +172,12 @@ export default function PriorityPlansPage() {
     const isPopular = params.value;
     return (
       <div className="flex items-center justify-center h-full">
-        <Checkbox
+        <input
+          type="checkbox"
           checked={isPopular}
           disabled={true}
-          className="text-yellow-500"
+          className="w-4 h-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-500 cursor-default"
+          readOnly
         />
         {errors.product_slots ? (<p className="mt-1 text-xs text-red-600">{errors.product_slots}</p>) : null}
         {errors.yearly_price ? (<p className="mt-1 text-xs text-red-600">{errors.yearly_price}</p>) : null}
@@ -261,7 +239,7 @@ export default function PriorityPlansPage() {
             <div className="space-y-3">
               {/* Plan Type Dropdown */}
               <div>
-                <label className="text-sm font-semibold text-slate-700">Plan Type <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-700">Plan Type</label>
                 <div className="mt-1">
                   <div className={`rounded-lg ${errors.name ? 'ring-1 ring-red-500' : ''}`}>
                     <SearchableDropdown
@@ -291,7 +269,7 @@ export default function PriorityPlansPage() {
                 {/* Monthly Price Field */}
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Monthly Price <span className="text-red-500">*</span>
+                    Monthly Price
                   </label>
                   <input
                     type="number"
@@ -328,7 +306,7 @@ export default function PriorityPlansPage() {
                 {/* Yearly Price Field */}
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Yearly Price <span className="text-red-500">*</span>
+                    Yearly Price
                   </label>
                   <input
                     type="number"
@@ -365,7 +343,7 @@ export default function PriorityPlansPage() {
                 {/* Product Slots Field */}
                 <div>
                   <label className="text-sm font-semibold text-slate-700">
-                    Product Slots <span className="text-red-500">*</span>
+                    Product Slots
                   </label>
                   <input
                     type="number"
@@ -415,7 +393,7 @@ export default function PriorityPlansPage() {
 
               {/* Description */}
               <div>
-                <label className="text-sm font-semibold text-slate-700">Description <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-700">Description</label>
                 <textarea
                   className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
                   aria-invalid={!!errors.description}
@@ -436,9 +414,11 @@ export default function PriorityPlansPage() {
                   <div className="col-span-1">
                     <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
                     <div className="flex items-center gap-2 mt-1">
-                      <Checkbox
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                         checked={!!form.addon_available_for_yearly}
-                        onCheckedChange={(checked) => setForm({ ...form, addon_available_for_yearly: checked })}
+                        onChange={(e) => setForm({ ...form, addon_available_for_yearly: e.target.checked })}
                       />
                       <span className="text-sm text-slate-600">Available</span>
                     </div>
@@ -472,10 +452,11 @@ export default function PriorityPlansPage() {
               <div>
                 <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <Checkbox
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-yellow-300 text-yellow-500 focus:ring-yellow-500"
                     checked={!!form.is_popular}
-                    onCheckedChange={(checked) => setForm({ ...form, is_popular: checked })}
-                    className="border-yellow-300 text-yellow-500"
+                    onChange={(e) => setForm({ ...form, is_popular: e.target.checked })}
                   />
                   <span className="text-sm text-slate-700">⭐ Show as popular plan (only one can be popular)</span>
                 </div>
@@ -515,6 +496,7 @@ export default function PriorityPlansPage() {
             <CardContent className="p-0">
               {/* <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-2"> */}
               <AgGridTable
+                loading={loading}
                 ref={gridRef}
                 columns={columns}
                 rowData={rows}
@@ -529,21 +511,6 @@ export default function PriorityPlansPage() {
           </Card>
         </div>
       </div>
-
-      <CommonDeleteModal
-        open={openDeleteModal}
-        isLoading={isDeleting}
-        onCancel={() => {
-          setOpenDeleteModal(false);
-          setDeleteId(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        title={isBulkDelete ? "Delete Selected Plans?" : "Delete Priority Plan?"}
-        description={isBulkDelete 
-          ? `Are you sure you want to delete ${selected.length} selected priority plans? This action cannot be undone.`
-          : "Are you sure you want to delete this priority plan? This action cannot be undone."
-        }
-      />
     </div>
   );
 }

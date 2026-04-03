@@ -676,7 +676,7 @@ export default function VendorProductTreeTable({
 
       <div className="relative">
         {loading && (
-          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
             <PageLoader fullScreen={false} />
           </div>
         )}
