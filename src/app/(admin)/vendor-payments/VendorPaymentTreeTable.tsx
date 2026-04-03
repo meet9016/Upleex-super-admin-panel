@@ -667,6 +667,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
             quickFilterText={quickFilterText}
             rowHeight={45}
             headerHeight={42}
+            overlayNoRowsTemplate="<span></span>"
           />
         </div>
       </div>

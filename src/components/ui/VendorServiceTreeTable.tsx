@@ -482,6 +482,7 @@ export default function VendorServiceTreeTable({
               params.data?.type === "vendor" ? { background: "#f8fafc" } : undefined
             }
             onSelectionChanged={updateCount}
+            overlayNoRowsTemplate="<span></span>"
           />
         </div>
       </div>

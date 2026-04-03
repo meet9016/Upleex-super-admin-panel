@@ -427,6 +427,7 @@ export default function QuotesTreeTable({
           quickFilterText={quickFilterText}
           rowHeight={45}
           headerHeight={48}
+          overlayNoRowsTemplate="<span></span>"
           
         />
       </div>
