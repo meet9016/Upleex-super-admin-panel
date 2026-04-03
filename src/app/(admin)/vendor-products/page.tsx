@@ -24,8 +24,6 @@ interface Product {
   price: number;
   approval_status: string;
   createdAt: string;
-  product_type_name?: string;
-  product_type_id?: string;
 }
 
 export default function VendorProductApprovalPage() {
@@ -116,21 +114,6 @@ export default function VendorProductApprovalPage() {
 
   const handleStatusChange = async (productId: string, status: string) => {
     try {
-      // Find the product to check its current status
-      let currentStatus = "";
-      for (const vendor of vendors) {
-        const product = vendor.products?.find(p => String((p as any).id || p._id) === String(productId));
-        if (product) {
-          currentStatus = product.approval_status;
-          break;
-        }
-      }
-
-      if (currentStatus === status) {
-        toast.info(`Product is already ${status}`);
-        return;
-      }
-
       setApproving(true);
       
       // Use existing productApproval API with PUT method
@@ -263,13 +246,8 @@ export default function VendorProductApprovalPage() {
       </div>
 
       <div className="bg-white rounded-lg">
-        {loading && vendors.length === 0 ? (
-          <div className="flex items-center justify-center py-26">
-            <PageLoader fullScreen={false} />
-          </div>
-        ) : (
-          <>
             <VendorProductTreeTable
+              loading={loading}
               vendors={vendors}
               onBulkApprove={handleBulkApprove}
               onBulkReject={handleBulkReject}
@@ -281,17 +259,13 @@ export default function VendorProductApprovalPage() {
             {/* Loading more indicator */}
             {loadingMore && (
               <div className="flex justify-center items-center py-6 border-t border-gray-200">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="flex items-center justify-center w-5 h-5">
-                    <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
                   <span className="text-sm text-gray-500">Loading more vendors...</span>
                 </div>
               </div>
             )}
 
-          </>
-        )}
       </div>
     </div>
   );

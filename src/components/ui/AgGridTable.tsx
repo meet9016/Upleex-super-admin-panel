@@ -238,7 +238,7 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
 
       <div className="relative">
         {loading && (
-          <div className="absolute inset-0 z-[100] flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-[2px] rounded-xl">
+          <div className="absolute inset-0 z-[100] flex items-center justify-center rounded-xl bg-transparent">
             <PageLoader fullScreen={false} />
           </div>
         )}
@@ -264,6 +264,7 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
             getRowId={useCallback((params: any) => {
               return params.data.id || params.data.categories_id || params.data._id;
             }, [])}
+            overlayNoRowsTemplate="<span></span>"
           />
         </div>
       </div>

@@ -252,31 +252,19 @@ export default function VendorPaymentsPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {isLoading && payments.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <PageLoader fullScreen={false} />
-                </div>
-            ) : payments.length === 0 ? (
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="text-center">
-                        <Search size={48} className="text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 font-medium">No payment records found</p>
-                    </div>
-                </div>
-            ) : (
-                <VendorPaymentTreeTable
-                    data={transformedData}
-                    stats={stats}
-                    pagination={pagination}
-                    onViewDetails={handleViewDetails}
-                    onReleasePayment={handleReleasePayment}
-                    onCancelPayment={handleCancelPayment}
-                    onReleaseScheduledPayments={handleReleaseScheduledPayments}
-                    onPageChange={handlePageChange}
-                    onFilterChange={handleFilterChange}
-                    isReleasing={isReleasing}
-                />
-            )}
+            <VendorPaymentTreeTable
+                data={transformedData}
+                stats={stats}
+                pagination={pagination}
+                onViewDetails={handleViewDetails}
+                onReleasePayment={handleReleasePayment}
+                onCancelPayment={handleCancelPayment}
+                onReleaseScheduledPayments={handleReleaseScheduledPayments}
+                onPageChange={handlePageChange}
+                onFilterChange={handleFilterChange}
+                isReleasing={isReleasing}
+                loading={isLoading}
+            />
 
             {/* Vendor Payment Details Modal */}
             <VendorPaymentDetailsModal

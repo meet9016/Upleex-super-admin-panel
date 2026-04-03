@@ -49,6 +49,7 @@ export default function VendorsPage() {
     const [vendorNameFilter, setVendorNameFilter] = useState("");
     const [businessNameFilter, setBusinessNameFilter] = useState("");
     const [kycProgressFilter, setKycProgressFilter] = useState("");
+    const [vendorTypeFilter, setVendorTypeFilter] = useState("");
 
     // Filter Modal state and refs
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -58,11 +59,12 @@ export default function VendorsPage() {
     const [pendingVendorName, setPendingVendorName] = useState("");
     const [pendingBusinessName, setPendingBusinessName] = useState("");
     const [pendingKycProgress, setPendingKycProgress] = useState("");
+    const [pendingVendorType, setPendingVendorType] = useState("");
 
     const debouncedSearch = useDebounce(searchText, 500);
     // Only fetch if 3+ chars or empty string
     const validSearchText = debouncedSearch.length >= 3 || debouncedSearch.length === 0 ? debouncedSearch : "";
-    const activeFilterCount = [statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter].filter(v => v !== "").length;
+    const activeFilterCount = [statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter].filter(v => v !== "").length;
 
     console.log(rowData)
     const fetchVendors = useCallback(async (
@@ -70,7 +72,8 @@ export default function VendorsPage() {
         statusQuery = '',
         vendorName = '',
         businessName = '',
-        kycProgress = ''
+        kycProgress = '',
+        vendorType = ''
     ) => {
         setIsLoading(true);
         try {
@@ -80,6 +83,7 @@ export default function VendorsPage() {
             if (vendorName) params.append('vendor_name', vendorName);
             if (businessName) params.append('business_name', businessName);
             if (kycProgress) params.append('kyc_progress', kycProgress);
+            if (vendorType) params.append('vendor_type', vendorType);
 
             const queryString = params.toString();
             const url = queryString ? `${endPointApi.getVendorList}?${queryString}` : endPointApi.getVendorList;
@@ -110,8 +114,8 @@ export default function VendorsPage() {
 
     useEffect(() => {
         // use validSearchText instead of debouncedSearch  
-        fetchVendors(validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
-    }, [fetchVendors, validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter]);
+        fetchVendors(validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
+    }, [fetchVendors, validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter]);
 
     useEffect(() => {
         fetchDropdowns();
@@ -156,7 +160,7 @@ export default function VendorsPage() {
 
             if (response.data.status === 200 || response.data.success) {
                 toast.success(`Vendor status updated to ${newStatus}`);
-                fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter);
+                fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
             } else {
                 toast.error(response.data.message || "Failed to update status");
             }
@@ -415,6 +419,21 @@ export default function VendorsPage() {
                                                 showClear={false}
                                             />
                                         </div>
+                                        <div>
+                                            <label className="block font-semibold mb-2 text-sm text-gray-700">Vendor Type</label>
+                                            <SearchableDropdown
+                                                options={[
+                                                    { label: "Service", value: "service" },
+                                                    { label: "Vendor", value: "vendor" },
+                                                    { label: "Both", value: "both" }
+                                                ]}
+                                                value={pendingVendorType}
+                                                onChange={(val) => setPendingVendorType(Array.isArray(val) ? val[0] : val)}
+                                                placeholder="Select Vendor Type"
+                                                maxHeight="max-h-60"
+                                                showClear={false}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200">
@@ -424,10 +443,12 @@ export default function VendorsPage() {
                                                 setPendingVendorName('');
                                                 setPendingBusinessName('');
                                                 setPendingKycProgress('');
+                                                setPendingVendorType('');
                                                 setStatusFilter('');
                                                 setVendorNameFilter('');
                                                 setBusinessNameFilter('');
                                                 setKycProgressFilter('');
+                                                setVendorTypeFilter('');
                                                 setShowFilterModal(false);
                                             }}
                                             className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-100 transition-colors"
@@ -440,6 +461,7 @@ export default function VendorsPage() {
                                                 setVendorNameFilter(pendingVendorName);
                                                 setBusinessNameFilter(pendingBusinessName);
                                                 setKycProgressFilter(pendingKycProgress);
+                                                setVendorTypeFilter(pendingVendorType);
                                                 setShowFilterModal(false);
                                             }}
                                             className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"

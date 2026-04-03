@@ -255,13 +255,6 @@ export default function PriorityPlanTab() {
     },
   ];
 
-  if (loading && rows.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <PageLoader fullScreen={false} />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -547,6 +540,7 @@ export default function PriorityPlanTab() {
             </CardHeader>
             <CardContent className="p-0">
               <AgGridTable
+                loading={loading}
                 ref={gridRef}
                 columns={columns}
                 rowData={rows}

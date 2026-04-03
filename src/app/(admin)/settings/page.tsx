@@ -35,16 +35,6 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <div className="text-center">
-          <RefreshCw className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading admin settings...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -138,8 +128,15 @@ export default function SettingsPage() {
               Admin Accounts
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {admins.length === 0 ? (
+          <CardContent className="relative min-h-[200px]">
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                <div className="text-center">
+                  <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">Loading admins...</p>
+                </div>
+              </div>
+            ) : admins.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Admins Found</h3>
