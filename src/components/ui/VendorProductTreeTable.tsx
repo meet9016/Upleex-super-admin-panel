@@ -716,6 +716,7 @@ export default function VendorProductTreeTable({
               params.data?.type === "vendor" ? { background: "#f9fafb" } : undefined
             }
             onSelectionChanged={updateCount}
+            overlayNoRowsTemplate="<span></span>"
           />
         </div>
       </div>
