@@ -126,6 +126,9 @@ export interface EndPointApi {
     updateContactStatus: string;
     deleteContact: string;
     bulkDeleteContacts: string;
+
+    // Dashboard Stats
+    getDashboardStats: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -257,6 +260,9 @@ const endPointApi: EndPointApi = {
     updateContactStatus: 'contacts/add-notes',
     deleteContact: 'contacts/delete',
     bulkDeleteContacts: 'contacts/bulk-delete',
+
+    // Dashboard Stats
+    getDashboardStats: 'admin/dashboard-stats',
 };
 
 export default endPointApi;
