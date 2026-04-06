@@ -367,7 +367,12 @@ export default function AddServiceCategoryPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      <>
+      {isFetching && categories.length === 0 ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <PageLoader fullScreen={false} />
+        </div>
+      ) : (
+        <>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Service Categories</h2>
           </div>
@@ -462,7 +467,7 @@ export default function AddServiceCategoryPage() {
                       </div>
                       {errors.image && <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>}
                     </div>
-                    
+
                     <div className="flex gap-2 pt-1">
                       <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
                         {isLoading ? (
@@ -533,7 +538,7 @@ export default function AddServiceCategoryPage() {
                         {searchText && (
                           <button
                             onClick={handleClearSearch}
-                             className="absolute right-3 top-[45%] -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl"
+                            className="absolute right-3 top-[45%] -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xl"
                           >
                             ×
                           </button>
@@ -544,16 +549,16 @@ export default function AddServiceCategoryPage() {
                 </CardHeader>
                 <CardContent className="p-0 flex-1 relative">
 
-                    <AgGridTable
-                      loading={isFetching}
-                      rowData={categories}
-                      columns={columnDefs as ColDef[]}
-                      onSelectionChange={(selected) => setSelectedRows(selected)}
-                      enableSearch={false}
-                      enableFilter={false}
-                      gridHeight={600}
-                    />
-                
+                  <AgGridTable
+                    loading={isFetching}
+                    rowData={categories}
+                    columns={columnDefs as ColDef[]}
+                    onSelectionChange={(selected) => setSelectedRows(selected)}
+                    enableSearch={false}
+                    enableFilter={false}
+                    gridHeight={600}
+                  />
+
                 </CardContent>
               </Card>
             </div>
@@ -585,7 +590,8 @@ export default function AddServiceCategoryPage() {
               </div>
             </div>
           )}
-      </>
+        </>
+      )}
     </div>
   );
 }

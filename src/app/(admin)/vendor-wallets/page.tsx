@@ -1,4 +1,4 @@
-'use client';
+  'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '@/utils/axiosInstance';   // ← Your axios instance
@@ -9,6 +9,7 @@ import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
 import PageLoader from '@/components/common/PageLoader';
+import { X } from 'lucide-react';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -53,6 +54,11 @@ const VendorWalletsPage = () => {
 
   const debouncedSearch = useDebounce(searchTerm, 600);
 
+  // Handle clear search
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
+
   // Fetch all vendor wallets with optional search param
   const fetchVendorWallets = async (search?: string) => {
     try {
@@ -61,11 +67,13 @@ const VendorWalletsPage = () => {
       if (search) params.search = search;
       
       const res = await api.get(endPointApi.getAllVendorWallets, { params });
-
-      const wallets = res?.data?.data?.wallets || [];
+   // Handle different response structures
+      const payload = res?.data?.data;
+      const wallets = Array.isArray(payload) ? payload : payload?.wallets || [];
+      
       const walletsWithId = wallets.map((wallet: VendorWallet) => ({
         ...wallet,
-        id: wallet._id,
+         id: wallet._id || (wallet as any).id,
       }));
 
       setVendors(walletsWithId);
@@ -85,7 +93,10 @@ const VendorWalletsPage = () => {
 
       const res = await api.get(endpoint);
 
-      setTransactions(res?.data?.data?.transactions || []);
+      const payload = res?.data?.data;
+      const transactionsList = Array.isArray(payload) ? payload : payload?.transactions || [];
+
+      setTransactions(transactionsList);
     } catch (error: any) {
       console.error('Error fetching transactions:', error);
       toast.error(error?.response?.data?.message || 'Failed to fetch transactions');
@@ -98,7 +109,7 @@ const VendorWalletsPage = () => {
   const handleViewHistory = (vendor: VendorWallet) => {
     setSelectedVendor(vendor);
     setShowTransactions(true);
-    fetchVendorTransactions(vendor.vendor_id);
+     fetchVendorTransactions(vendor.vendor_id || vendor._id);
   };
 
   useEffect(() => {
@@ -165,17 +176,17 @@ const VendorWalletsPage = () => {
       
   return (
     <div className="space-y-6">
-     
+      <div className="flex items-center justify-between mb-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold ">
+        <h1 className="text-2xl font-semibold text-gray-800">
           Vendor Wallets
         </h1>
         {/* <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           Manage and monitor vendor wallet balances
         </p> */}
       </div>
-      <div className="mb-4 flex justify-between items-center">
+      <div className="flex items-center">
         <div className="relative w-64">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MdSearch className="h-5 w-5 text-gray-400" />
@@ -187,10 +198,16 @@ const VendorWalletsPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Total Vendors: {vendors.length}
-        </div>
+          {searchTerm && (
+            <button
+            onClick={handleClearSearch}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+          <X size={16} />
+        </button>
+      )}
+      </div>
+      </div>
       </div>
       {/* AgGrid Table */}
       <div className="bg-white rounded-lg shadow-sm">
@@ -199,6 +216,8 @@ const VendorWalletsPage = () => {
           columns={columns}
           loading={loading}
           gridHeight={600}
+          showCheckboxes={false}
+          height={"750px"}
         />
       </div>
 
@@ -310,16 +329,6 @@ const VendorWalletsPage = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {vendors.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <MdWallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 ">
-            {searchTerm ? 'No vendors found matching your search' : 'No vendor wallets found'}
-          </p>
         </div>
       )}
     </div>

@@ -553,11 +553,11 @@ export default function BlogPage() {
               <CardTitle className="text-lg">
                 {editingId ? 'Edit Blog Post' : 'New Blog Post'}
               </CardTitle>
-              <CardDescription>
+              {/* <CardDescription>
                 {editingId
                   ? 'Update your blog post details'
                   : 'Create a new article for your audience.'}
-              </CardDescription>
+              </CardDescription> */}
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">

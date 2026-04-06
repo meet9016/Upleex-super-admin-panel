@@ -338,10 +338,10 @@ export default function VendorsPage() {
                                 setPendingStatusFilter(statusFilter);
                                 setShowFilterModal(!showFilterModal);
                             }}
-                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 relative h-[38px] text-sm"
+                           className="w-full sm:w-10 h-10 flex items-center justify-center bg-white text-gray-500 border border-gray-100 rounded-xl hover:shadow-md border-gray-300 border-1 transition-all duration-300"
                         >
                             <Filter size={18} />
-                            Filter
+                            {/* Filter */}
                             {activeFilterCount > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                                     {activeFilterCount}
@@ -464,7 +464,7 @@ export default function VendorsPage() {
                                                 setVendorTypeFilter(pendingVendorType);
                                                 setShowFilterModal(false);
                                             }}
-                                            className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+                                            className="flex-1 px-3 py-2 btn-primary text-white rounded-lg text-sm transition-colors"
                                         >
                                             Apply
                                         </button>

@@ -327,11 +327,11 @@ const handleConfirmDelete = async () => {
               <CardTitle className="text-lg">
                 {editingId ? 'Edit FAQ' : 'Add New FAQ'}
               </CardTitle>
-              <CardDescription>
+              {/* <CardDescription>
                 {editingId
                   ? 'Update the FAQ details'
                   : 'Provide clear answers to common user questions.'}
-              </CardDescription>
+              </CardDescription> */}
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -338,9 +338,9 @@ export default function BannerPage() {
       <Card className="sticky top-16 border-slate-100 shadow-sm">
         <CardHeader className="pb-2 pt-4">
           <CardTitle className="text-base">{editingId ? 'Edit Banner' : 'New Banner'}</CardTitle>
-          <CardDescription className="text-xs">
+          {/* <CardDescription className="text-xs">
             {editingId ? 'Update banner details' : 'Add a new banner to the homepage carousel.'}
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
         <CardContent className="pt-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
