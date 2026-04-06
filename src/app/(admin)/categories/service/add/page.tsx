@@ -367,12 +367,6 @@ export default function AddServiceCategoryPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-      {isFetching && categories.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <PageLoader fullScreen={false} />
-        </div>
-      ) : (
-        <>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Service Categories</h2>
           </div>
@@ -589,8 +583,6 @@ export default function AddServiceCategoryPage() {
                 <img src={modalImageUrl} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
               </div>
             </div>
-          )}
-        </>
       )}
     </div>
   );
