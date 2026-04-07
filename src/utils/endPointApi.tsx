@@ -78,6 +78,12 @@ export interface EndPointApi {
     createPriorityPlan: string;
     updatePriorityPlan: string;
     deletePriorityPlan: string;
+    // Rental Boost Plans
+    getAllRentalBoostPlans: string;
+    createRentalBoostPlan: string;
+    updateRentalBoostPlan: string;
+    deleteRentalBoostPlan: string;
+
 
     // Vendor Products Approval
     getAllVendors: string;
@@ -212,6 +218,12 @@ const endPointApi: EndPointApi = {
     createPriorityPlan: 'priority-plans/create',
     updatePriorityPlan: 'priority-plans/update',
     deletePriorityPlan: 'priority-plans/delete',
+    // Rental Boost Plans
+    getAllRentalBoostPlans: 'rental-boost-plans/getall',
+    createRentalBoostPlan: 'rental-boost-plans/create',
+    updateRentalBoostPlan: 'rental-boost-plans/update',
+    deleteRentalBoostPlan: 'rental-boost-plans/delete',
+
 
     // Vendor Products Approval
     getAllVendors: 'products/vendors/getall',
