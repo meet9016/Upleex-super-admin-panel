@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 import ProductListingTab from "./components/ProductListingTab";
 import PriorityPlanTab from "./components/PriorityPlanTab";
 import PlanPurchasesTab from "./components/PlanPurchasesTab";
+import RentalBoostTab from "./components/RentalBoostTab";
+import { TrendingUp } from "lucide-react";
+
 
 const TABS = [
   {
@@ -25,6 +28,12 @@ const TABS = [
     label: "Plan Purchases",
     icon: CreditCard,
     component: PlanPurchasesTab,
+  },
+  {
+    key: "boost",
+    label: "Rental Boost",
+    icon: TrendingUp,
+    component: RentalBoostTab,
   },
 ];
 
@@ -76,6 +85,9 @@ export default function PlansPage() {
         </div>
         <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
           <PlanPurchasesTab />
+        </div>
+        <div className={cn(activeTab === "boost" ? "block" : "hidden")}>
+          <RentalBoostTab />
         </div>
       </div>
     </div>
