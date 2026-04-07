@@ -211,7 +211,7 @@ export function Sidebar({
         {(!isCollapsed || isMobile) && (
           <div className="flex items-center gap-2">
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Upleex Logo"
               width={120}
               height={40}
