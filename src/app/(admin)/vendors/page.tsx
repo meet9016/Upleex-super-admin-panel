@@ -275,7 +275,7 @@ export default function VendorsPage() {
                                     const next = Array.isArray(val) ? val[0] : val;
                                     const completed = params.data.completed_pages?.length || 0;
                                     const vendorType = params.data.vendor_type;
-                                    const requiredSteps = vendorType === 'service' ? 2 : 5;
+                                    const requiredSteps = vendorType === 'service' ? 4 : 5;
 
                                     if (next === 'approved' && completed < requiredSteps) {
                                         toast.error(`Complete all ${requiredSteps} pages before approving`);

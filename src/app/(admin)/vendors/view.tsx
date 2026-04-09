@@ -56,6 +56,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
+import { label } from 'framer-motion/client';
 
 type Props = {
   open: boolean;
@@ -147,7 +148,10 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
     { key: 'aadharcard_front_image', label: 'Aadhaar Front', url: cleanUrl(doc?.aadharcard_front_image), type: 'identity', icon: ScrollText },
     { key: 'aadharcard_back_image', label: 'Aadhaar Back', url: cleanUrl(doc?.aadharcard_back_image), type: 'identity', icon: ScrollText },
     { key: 'gst_certificate_image', label: 'GST Certificate', url: cleanUrl(doc?.gst_certificate_image), type: 'business', icon: FileText },
+    {key: 'qr_code_image' , label: 'Upload QR Code', url: cleanUrl(doc?.qr_code_image), type: 'qr', icon: FileText },
+    { key: 'cheque_image', label: 'Upload Cheque', url: cleanUrl(doc?.cheque_image), type: 'cheque', icon: FileImage },
   ].filter(img => img.url);
+  console.log("🚀 ~ VendorDetailsModal ~ images:", images)
 
   const contact = data?.ContactDetails || {};
   const identity = data?.Identity || {};

@@ -48,9 +48,9 @@ export default function PlansPage() {
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
           Plans Management
         </h1>
-        <p className="text-sm text-slate-500">
+        {/* <p className="text-sm text-slate-500">
           Manage listing plans, priority visibility, and track all plan purchases.
-        </p>
+        </p> */}
       </div>
 
       {/* Pill Style Tabs */}

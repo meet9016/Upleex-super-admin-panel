@@ -451,16 +451,16 @@ export default function AdminOrdersPage() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-3">Orders Management</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Orders Management</h2>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        {/* <div className="flex items-center gap-3 flex-wrap">
           <span className="px-3 py-1 rounded-full text-sm font-semibold border bg-indigo-50 text-indigo-700 border-indigo-200">
             Total Rent: {rentTotal}
           </span>
           <span className="px-3 py-1 rounded-full text-sm font-semibold border bg-orange-50 text-orange-700 border-orange-200">
             Total Sell: {sellTotal}
           </span>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid gap-6">
