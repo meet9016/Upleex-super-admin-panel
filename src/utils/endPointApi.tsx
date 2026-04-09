@@ -135,6 +135,10 @@ export interface EndPointApi {
 
     // Dashboard Stats
     getDashboardStats: string;
+
+    // Admin Orders
+    adminRentOrders: string;
+    adminSellOrders: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -275,6 +279,10 @@ const endPointApi: EndPointApi = {
 
     // Dashboard Stats
     getDashboardStats: 'admin/dashboard-stats',
+
+    // Admin Orders
+    adminRentOrders: 'admin/orders/rent',
+    adminSellOrders: 'admin/orders/sell',
 };
 
 export default endPointApi;

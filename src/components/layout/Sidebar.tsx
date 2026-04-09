@@ -18,6 +18,7 @@ import {
   Shield,
   FileText,
   Loader2,
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -48,6 +49,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendor-services", href: "/vendor-services", icon: FolderPlus, permission: "products" },
       { name: "Dropdowns", href: "/dropdowns", icon: Layers, permission: "dropdowns" },
       { name: "Quotes", href: "/quotes", icon: FileText, permission: "quotes" },
+      { name: "Orders", href: "/orders", icon: ShoppingBag },
       {
         name: "Categories",
         icon: Layers,
