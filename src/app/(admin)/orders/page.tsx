@@ -468,7 +468,7 @@ export default function AdminOrdersPage() {
           <CardContent className="p-0">
 
             {/* ── Tab Bar ─────────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-gray-100">
+            <div className="flex items-center justify-between  pt-3 pb-2 border-b border-gray-100">
 
               {/* Pill Tabs */}
               <div className="flex items-center bg-gray-100/80 rounded-xl p-1 gap-1">
