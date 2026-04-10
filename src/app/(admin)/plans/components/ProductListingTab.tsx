@@ -353,7 +353,7 @@ export default function ProductListingTab() {
         {/* TABLE */}
         <div className="lg:col-span-2">
           <Card className="border-slate-200 overflow-hidden flex flex-col h-full">
-            <CardHeader className="flex flex-row items-center justify-between ">
+            <CardHeader className="flex flex-row items-center justify-between text-sm ">
               <CardTitle>Plan List</CardTitle>
               <Button
                 size="md"

@@ -291,17 +291,17 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header - Fixed */}
-          <div className="absolute top-0 left-0 right-0 bg-white border-b border-slate-200 px-5 py-3 z-20">
+          <div className="absolute top-0 left-0 right-0  border-b bg-gradient-to-r from-gray-800 to-gray-700 border-slate-200 px-5 py-3 z-20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 ">
                 {/* Status Badge */}
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bgColor} ${statusConfig.color} border ${statusConfig.borderColor}`}>
+                <div className={` flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bgColor} ${statusConfig.color} border ${statusConfig.borderColor}`}>
                   <StatusIcon size={13} />
-                  <span className="text-sm font-medium">{statusConfig.label}</span>
+                  <span className="text-sm font-medium ">{statusConfig.label}</span>
                 </div>
 
                 {/* Progress */}
-                <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 rounded-full border border-slate-200">
+                <div className=" flex items-center gap-2 px-2.5 py-1 bg-slate-50 rounded-full border border-slate-200">
                   <Target size={12} className="text-slate-400" />
                   <div className="w-16 h-1 bg-slate-200 rounded-full overflow-hidden">
                     <div
@@ -319,7 +319,7 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
                 <button
                   onClick={downloadPDF}
                   disabled={isDownloading}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                  className="p-1.5 rounded-lg hover:bg-slate-400 transition-colors text-slate-200 hover:text-slate-600 disabled:opacity-50"
                 >
                   {isDownloading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-600"></div>
@@ -329,7 +329,7 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
                 </button>
                 <div className="w-px h-4 bg-slate-200 mx-1" />
                 <button
-                  className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+                  className="p-1.5 rounded-lg hover:bg-slate-400 transition-colors text-slate-200 hover:text-slate-600"
                   onClick={onClose}
                 >
                   <X size={16} />
@@ -339,10 +339,10 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
 
             {/* Vendor Name */}
             <div className="mt-3">
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-slate-50">
                 {contact?.full_name || 'N/A'}
               </h2>
-              <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
+              <p className="text-sm text-slate-50 flex items-center gap-1.5 mt-0.5">
                 <Building2 size={14} />
                 {identity?.business_name || data?.business_name || 'Individual Vendor'}
               </p>
