@@ -15,6 +15,8 @@ import {
   DateFilterModule,
   RowSelectionModule,
   QuickFilterModule,
+  RowStyle,
+  RowClassParams,
 } from "ag-grid-community";
 import {
   RowGroupingModule,
@@ -367,9 +369,9 @@ const OrdersTreeTable = React.forwardRef<any, OrdersTreeTableProps>(({
           treeDataChildrenField="children"
           rowHeight={50}
           headerHeight={50}
-          getRowStyle={(params) => {
-            if (params.data?.type === 'vendor') return { background: '#f8fafc', fontWeight: 'bold' };
-            if (params.data?.type === 'user') return { background: '#ffffff' };
+          getRowStyle={(params: RowClassParams<TreeDataItem>) => {
+            if (params.data?.type === 'vendor') return { background: '#f8fafc', fontWeight: 'bold' } as RowStyle;
+            if (params.data?.type === 'user') return { background: '#ffffff' } as RowStyle;
             return undefined;
           }}
           overlayNoRowsTemplate="<span class='text-slate-400 font-medium'>No orders found</span>"
