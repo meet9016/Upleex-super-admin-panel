@@ -6,8 +6,8 @@ import { Search, X, Filter } from 'lucide-react';
 import { ColDef } from 'ag-grid-community';
 import { api } from '@/utils/axiosInstance';
 import endPointApi from '@/utils/endPointApi';
-import AgGridTable from '@/components/ui/AgGridTable';
 import { Card, CardContent } from '@/components/ui/Card';
+import OrdersTreeTable from './ordersTreeTable';
 import SearchableDropdown from '@/components/ui/SearchableDropdown';
 import StatusBadge from '@/components/common/StatusBadge';
 
@@ -16,15 +16,20 @@ interface RentOrder {
   _id: string;
   user_name: string;
   user_email: string;
+  user_phone: string;
   vendor_name: string;
   vendor_email: string;
+  vendor_phone: string;
   product_name: string;
   product_type: string;
   qty: number;
   number_of_days: number;
+  product_listing_type_name: string;
   amount: number;
   quote_status: string;
   payment_status: string;
+  start_date: string;
+  end_date: string;
   createdAt: string;
 }
 
@@ -72,9 +77,10 @@ const VendorRenderer = (params: any) => {
   const email = params.data?.vendor_email || '';
   return (
     <div className="flex items-center gap-2 h-full">
-      <div className="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-        <span className="text-violet-600 font-bold text-xs">{name.charAt(0).toUpperCase()}</span>
+      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border border-blue-200">
+        <span className="text-blue-600 font-bold text-sm">{name.charAt(0).toUpperCase()}</span>
       </div>
+
       <div>
         <p className="text-sm font-medium text-slate-800 leading-tight">{name}</p>
         {email && <p className="text-xs text-slate-400 leading-tight">{email}</p>}
@@ -88,9 +94,10 @@ const UserRenderer = (params: any) => {
   const email = params.data?.user_email || '';
   return (
     <div className="flex items-center gap-2 h-full">
-      <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-        <span className="text-blue-600 font-bold text-xs">{name.charAt(0).toUpperCase()}</span>
+      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 border border-emerald-200">
+        <span className="text-emerald-600 font-bold text-sm">{name.charAt(0).toUpperCase()}</span>
       </div>
+
       <div>
         <p className="text-sm font-medium text-slate-800 leading-tight">{name}</p>
         {email && <p className="text-xs text-slate-400 leading-tight">{email}</p>}
@@ -229,28 +236,43 @@ export default function AdminOrdersPage() {
 
   // ── Rent Column Defs ───────────────────────────────────────────────────────
   const rentColDefs: ColDef<any>[]  = [
-    { headerName: 'Vendor', field: 'vendor_name', cellRenderer: VendorRenderer, minWidth: 190, flex: 1.5 },
-    { headerName: 'User', field: 'user_name', cellRenderer: UserRenderer, minWidth: 190, flex: 1.5 },
+    { headerName: 'Vendor', field: 'vendor_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.vendor_name || '—' },
+    { headerName: 'User', field: 'user_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.user_name || '—' },
     { headerName: 'Product Name', field: 'product_name', minWidth: 160, flex: 2, cellStyle: { fontWeight: '500', color: '#334155' } },
-    { headerName: 'Qty', field: 'qty', minWidth: 80, maxWidth: 90, cellStyle: { textAlign: 'center', fontWeight: '600', color: '#334155' } },
-    { headerName: 'Days', field: 'number_of_days', minWidth: 80, maxWidth: 90, cellStyle: { textAlign: 'center', color: '#64748b' }, valueFormatter: (p: any) => p.value > 0 ? String(p.value) : '—' },
+    { headerName: 'Type', field: 'product_listing_type_name', minWidth: 100, cellStyle: { textTransform: 'capitalize', fontWeight: 'bold' } },
+    { headerName: 'Qty', field: 'qty', minWidth: 70, maxWidth: 80, cellStyle: { textAlign: 'center' } },
+    { 
+      headerName: 'Duration', 
+      minWidth: 120, 
+      cellStyle: { textAlign: 'center' },
+      valueGetter: (p: any) => {
+        const val = p.data?.number_of_days;
+        const type = p.data?.product_listing_type_name?.toLowerCase();
+        if (!val || val <= 0) return '—';
+        if (type === 'hourly') return `${val} Hours`;
+        if (type === 'monthly') return `${val} Months`;
+        return `${val} Days`;
+      }
+    },
+    { headerName: 'Start Date', field: 'start_date', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
+    { headerName: 'End Date', field: 'end_date', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Quote Status', field: 'quote_status', cellRenderer: StatusRenderer, minWidth: 145 },
     { headerName: 'Payment Status', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#94a3b8', fontSize: '12px' } },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
   ];
 
   // ── Sell Column Defs ───────────────────────────────────────────────────────
   const sellColDefs: ColDef<any>[] = [
-    { headerName: 'Order ID', field: 'order_id', minWidth: 145, cellStyle: { fontFamily: 'monospace', fontSize: '12px', color: '#475569' } },
-    { headerName: 'Vendor', field: 'vendor_name', cellRenderer: VendorRenderer, minWidth: 190, flex: 1.5 },
-    { headerName: 'User', field: 'user_name', cellRenderer: UserRenderer, minWidth: 190, flex: 1.5 },
-    { headerName: 'Product Name', field: 'product_name', minWidth: 160, flex: 2, cellStyle: { fontWeight: '500', color: '#334155' } },
-    { headerName: 'Qty', field: 'quantity', minWidth: 80, maxWidth: 90, cellStyle: { textAlign: 'center', fontWeight: '600', color: '#334155' } },
+    { headerName: 'Vendor', field: 'vendor_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.vendor_name || '—' },
+    { headerName: 'User', field: 'user_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.user_name || '—' },
+    { headerName: 'Order ID', field: 'order_id', minWidth: 130, cellStyle: { fontFamily: 'monospace', fontSize: '12px' } },
+    { headerName: 'Product Name', field: 'product_name', minWidth: 160, flex: 2, cellStyle: { fontWeight: '500' } },
+    { headerName: 'Qty', field: 'quantity', minWidth: 80, maxWidth: 90, cellStyle: { textAlign: 'center' } },
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Payment', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 140 },
     { headerName: 'Order Status', field: 'order_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#94a3b8', fontSize: '12px' } },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
   ];
 
   // ── Rent Filter Modal ──────────────────────────────────────────────────────
@@ -600,26 +622,21 @@ export default function AdminOrdersPage() {
               )}
             </div>
 
-            {/* ── AG Grid ─────────────────────────────────────────────────── */}
-            <div className="h-full w-full relative">
-              {activeTab === 'rent' && (
-                <AgGridTable
+            {/* ── Tree Table ─────────────────────────────────────────────────── */}
+            <div className="h-[760px] w-full relative">
+              {activeTab === 'rent' ? (
+                <OrdersTreeTable
                   ref={gridRef}
-                  rowData={rentOrders}
-                  columns={rentColDefs}
-                  gridHeight={760}
+                  data={rentOrders}
+                  type="rent"
                   loading={rentLoading}
-                  showCheckboxes={false}
                 />
-              )}
-              {activeTab === 'sell' && (
-                <AgGridTable
+              ) : (
+                <OrdersTreeTable
                   ref={gridRef}
-                  rowData={sellOrders}
-                  columns={sellColDefs}
-                  gridHeight={760}
+                  data={sellOrders}
+                  type="sell"
                   loading={sellLoading}
-                  showCheckboxes={false}
                 />
               )}
             </div>

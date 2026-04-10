@@ -139,6 +139,7 @@ export interface EndPointApi {
     // Admin Orders
     adminRentOrders: string;
     adminSellOrders: string;
+    exportWalletTransactionsPDF: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -283,6 +284,7 @@ const endPointApi: EndPointApi = {
     // Admin Orders
     adminRentOrders: 'admin/orders/rent',
     adminSellOrders: 'admin/orders/sell',
+    exportWalletTransactionsPDF: 'export/wallet-transactions/pdf',
 };
 
 export default endPointApi;

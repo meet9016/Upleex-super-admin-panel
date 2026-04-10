@@ -13,7 +13,7 @@ import { TrendingUp } from "lucide-react";
 const TABS = [
   {
     key: "listing",
-    label: "Product Listing Plan",
+    label: "Product Listing Duration Plan",
     icon: FolderPlus,
     component: ProductListingTab,
   },
@@ -24,16 +24,16 @@ const TABS = [
     component: PriorityPlanTab,
   },
   {
-    key: "purchases",
-    label: "Plan Purchases",
-    icon: CreditCard,
-    component: PlanPurchasesTab,
-  },
-  {
     key: "boost",
     label: "Rental Boost",
     icon: TrendingUp,
     component: RentalBoostTab,
+  },
+  {
+    key: "purchases",
+    label: "Plan Purchases",
+    icon: CreditCard,
+    component: PlanPurchasesTab,
   },
 ];
 

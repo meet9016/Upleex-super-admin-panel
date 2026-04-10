@@ -1,10 +1,10 @@
-  'use client';
+'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '@/utils/axiosInstance';   // ← Your axios instance
 import endPointApi from '@/utils/endPointApi';
 import { toast } from 'react-toastify';
-import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch } from 'react-icons/md';
+import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch, MdDownload } from 'react-icons/md';
 import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
@@ -51,6 +51,7 @@ const VendorWalletsPage = () => {
   const [loading, setLoading] = useState(false);
   const [showTransactions, setShowTransactions] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [downloading, setDownloading] = useState(false);
 
   const debouncedSearch = useDebounce(searchTerm, 600);
 
@@ -65,15 +66,15 @@ const VendorWalletsPage = () => {
       setLoading(true);
       const params: any = {};
       if (search) params.search = search;
-      
+
       const res = await api.get(endPointApi.getAllVendorWallets, { params });
-   // Handle different response structures
+      // Handle different response structures
       const payload = res?.data?.data;
       const wallets = Array.isArray(payload) ? payload : payload?.wallets || [];
-      
+
       const walletsWithId = wallets.map((wallet: VendorWallet) => ({
         ...wallet,
-         id: wallet._id || (wallet as any).id,
+        id: wallet._id || (wallet as any).id,
       }));
 
       setVendors(walletsWithId);
@@ -109,7 +110,36 @@ const VendorWalletsPage = () => {
   const handleViewHistory = (vendor: VendorWallet) => {
     setSelectedVendor(vendor);
     setShowTransactions(true);
-     fetchVendorTransactions(vendor.vendor_id || vendor._id);
+    fetchVendorTransactions(vendor.vendor_id || vendor._id);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!selectedVendor) return;
+    try {
+      setDownloading(true);
+      const vendor_id = selectedVendor.vendor_id || selectedVendor.id || selectedVendor._id;
+      
+      const response = await api.get(endPointApi.exportWalletTransactionsPDF, {
+        params: { vendor_id },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `transactions_${selectedVendor.vendor_name || 'vendor'}_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("PDF Downloaded successfully");
+    } catch (error) {
+      console.error("PDF download error:", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   useEffect(() => {
@@ -173,41 +203,38 @@ const VendorWalletsPage = () => {
       },
     },
   ], []);
-      
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-4">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Vendor Wallets
-        </h1>
-        {/* <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Manage and monitor vendor wallet balances
-        </p> */}
-      </div>
-      <div className="flex items-center">
-        <div className="relative w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MdSearch className="h-5 w-5 text-gray-400" />
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Vendor Wallets
+          </h1>
+        </div>
+        <div className="flex items-center">
+          <div className="relative w-64">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MdSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+            {searchTerm && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          />
-          {searchTerm && (
-            <button
-            onClick={handleClearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-          <X size={16} />
-        </button>
-      )}
-      </div>
-      </div>
+        </div>
       </div>
       {/* AgGrid Table */}
       <div className="bg-white rounded-lg shadow-sm">
@@ -225,21 +252,30 @@ const VendorWalletsPage = () => {
       {showTransactions && selectedVendor && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 ">
+                <h2 className="text-xl font-semibold text-gray-800">
                   {selectedVendor.vendor_name}
                 </h2>
-                <p className="text-sm text-gray-600  mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                   {selectedVendor.vendor_email}
                 </p>
               </div>
-              <button
-                onClick={() => setShowTransactions(false)}
-                className="text-gray-500 hover:text-gray-700  text-2xl font-bold"
-              >
-                ×
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-semibold disabled:opacity-50"
+                >
+                  {downloading ? "Generating..." : <><MdDownload size={18} /> Download PDF</>}
+                </button>
+                <button
+                  onClick={() => setShowTransactions(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-6">
