@@ -258,10 +258,10 @@ export default function VendorsPage() {
                         <button
                             type="button"
                             onClick={() => { setDetailsRow(params.data); setShowDetails(true); }}
-                            className="p-2  rounded-lg bg-blue-50 text-blue-600  border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0"
+                            className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0 flex items-center justify-center"
                             title="View details"
                         >
-                            <Eye size={14} className="text-gray-600" />
+                            <Eye size={14} />
                         </button>
                         <div className="w-[100%]">
                             <SearchableDropdown

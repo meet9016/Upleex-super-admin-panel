@@ -45,7 +45,7 @@ export default function PlansPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           Plans Management
         </h1>
         {/* <p className="text-sm text-slate-500">
@@ -65,7 +65,7 @@ export default function PlansPage() {
               className={cn(
                 "flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200",
                 isActive
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                  ? "btn-primary shadow-md"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
               )}
             >

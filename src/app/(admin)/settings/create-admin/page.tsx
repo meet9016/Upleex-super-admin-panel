@@ -234,7 +234,7 @@ export default function CreateAdminPage() {
   <Button
     type="submit"
     disabled={isLoading}
-    className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold"
+    className="flex-1 h-12 btn-primary rounded-xl font-semibold"
   >
     {isLoading ? (
       <>

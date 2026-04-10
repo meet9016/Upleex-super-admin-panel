@@ -101,6 +101,7 @@ export default function QuotesPage() {
                                         setShowDetails(true);
                                     }}
                                     loading={isLoading}
+                                    
                                 />
                             </div>
                             
@@ -114,9 +115,9 @@ export default function QuotesPage() {
                                         <span className="text-sm font-medium">Loading more quotes...</span>
                                     </div>
                                 )}
-                                {!hasMore && quotes.length > 0 && (
+                                {/* {!hasMore && quotes.length > 0 && (
                                     <p className="text-sm text-slate-400 font-medium italic">No more quotes to load</p>
-                                )}
+                                )} */}
                             </div>
 
                             {showDetails && selectedQuote && (

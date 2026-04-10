@@ -100,7 +100,7 @@ const UserRenderer = (params: any) => {
 };
 
 const fmtDate = (val?: string | null) =>
-  val ? new Date(val).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  val ? new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  MAIN PAGE
@@ -237,7 +237,7 @@ export default function AdminOrdersPage() {
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Quote Status', field: 'quote_status', cellRenderer: StatusRenderer, minWidth: 145 },
     { headerName: 'Payment Status', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#94a3b8', fontSize: '12px' } },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#334155', fontSize: '13px', fontWeight: '500' } },
   ];
 
   // ── Sell Column Defs ───────────────────────────────────────────────────────
@@ -250,7 +250,7 @@ export default function AdminOrdersPage() {
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Payment', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 140 },
     { headerName: 'Order Status', field: 'order_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#94a3b8', fontSize: '12px' } },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: '#334155', fontSize: '13px', fontWeight: '500' } },
   ];
 
   // ── Rent Filter Modal ──────────────────────────────────────────────────────
@@ -607,7 +607,7 @@ export default function AdminOrdersPage() {
                   ref={gridRef}
                   rowData={rentOrders}
                   columns={rentColDefs}
-                  gridHeight={760}
+                  gridHeight={700}
                   loading={rentLoading}
                   showCheckboxes={false}
                 />

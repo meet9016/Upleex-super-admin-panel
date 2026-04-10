@@ -411,7 +411,7 @@ export default function AddCategoryPage() {
     <div className="space-y-4 animate-in fade-in duration-500">
         <>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Categories</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Categories</h2>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3 items-stretch">

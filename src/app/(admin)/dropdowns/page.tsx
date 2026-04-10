@@ -239,7 +239,7 @@ export default function DropdownsManagementPage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200",
                 isActive
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                  ? "btn-primary text-white shadow-md shadow-blue-200"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
               )}
             >

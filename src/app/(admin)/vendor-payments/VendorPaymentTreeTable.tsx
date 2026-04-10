@@ -507,7 +507,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
   {/* Header */}
   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
     <div>
-      <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-1">Vendor Payment Management</h2>
+      <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-1">Vendor Payment Management</h2>
       {/* <p className="text-sm text-slate-600">Manage vendor payments with hierarchical product view</p> */}
     </div>
   </div>

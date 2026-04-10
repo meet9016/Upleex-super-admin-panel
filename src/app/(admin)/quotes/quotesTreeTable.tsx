@@ -148,10 +148,10 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
     <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 mt-0.5">
       <button
         onClick={() => onViewDetails(props.data.originalData || props.data)}
-        className="p-1.5 mt-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
+        className="p-2 mt-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm"
         title="View Quote Details"
       >
-        <Eye size={16} />
+        <Eye size={14} />
       </button>
     </div>
   );

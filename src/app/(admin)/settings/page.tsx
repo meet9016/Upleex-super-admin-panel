@@ -52,7 +52,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <Link href="/settings/create-admin">
-              <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+              <Button className="flex items-center gap-2 btn-primary">
                 <UserPlus className="h-4 w-4" />
                 Create New Admin
               </Button>
