@@ -28,12 +28,12 @@ export default function QuotesPage() {
         try {
             const response = await api.get(`${endPointApi.postAllQuotes}?page=${pageNum}&limit=50`);
             const responseData = response.data;
-            
+
             if (responseData.success || responseData.status === 200) {
                 const newQuotes = responseData.data || [];
                 setQuotes(prev => isInitial ? newQuotes : [...prev, ...newQuotes]);
                 setTotalQuotes(responseData.total || 0);
-                
+
                 // Check if we Have more pages
                 const totalPages = responseData.totalPages || Math.ceil((responseData.total || 0) / 50);
                 setHasMore(pageNum < totalPages);
@@ -104,7 +104,7 @@ export default function QuotesPage() {
                                     
                                 />
                             </div>
-                            
+
                             {/* Infinite Scroll Trigger */}
                             <div ref={lastQuoteElementRef} className="h-10 flex items-center justify-center py-4">
                                 {isFetchingMore && (

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { ColDef } from "ag-grid-community";
-import AgGridTable from "@/components/ui/AgGridTable";
+import PlanPurchasesTreeTable from "./planPurchasesTreeTable";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
@@ -255,9 +255,15 @@ export default function PlanPurchasesTab() {
     {
       field: "vendor_name",
       headerName: "Vendor",
-      minWidth: 300,
-      resizable: false,
-      flex: 2,
+      rowGroup: true,
+      hide: true,
+      valueGetter: (p: any) => p.data?.vendor_name || "Unknown Vendor",
+    },
+    {
+      field: "vendor_phone",
+      headerName: "Phone",
+      hide: true,
+      valueGetter: (p: any) => p.data?.vendor_phone || "",
     },
     {
       field: "plan_type",
@@ -492,16 +498,14 @@ export default function PlanPurchasesTab() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <AgGridTable
-            loading={loading}
-            ref={gridRef}
-            columns={columns}
-            rowData={rows}
-            onSelectionChange={(sel: any[]) => setSelected(sel as Purchase[])}
-            filter={false}
-            tableName="Purchases"
-            gridHeight={750}
-          />
+          <div className="h-[750px] w-full relative">
+            <PlanPurchasesTreeTable
+              ref={gridRef}
+              data={rows}
+              loading={loading}
+              onDelete={handleDeleteClick}
+            />
+          </div>
         </CardContent>
       </Card>
       <CommonDeleteModal

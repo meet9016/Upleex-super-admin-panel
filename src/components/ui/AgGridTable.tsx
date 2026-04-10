@@ -16,11 +16,11 @@ import { useRouter } from "next/navigation";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ColDef, ModuleRegistry, RowSelectionOptions, ColumnMenuTab } from "ag-grid-community";
 import { MdDelete, MdModeEdit } from "react-icons/md";
-import { ColumnMenuModule, ContextMenuModule } from "ag-grid-enterprise";
+import { ColumnMenuModule, ContextMenuModule, RowGroupingModule } from "ag-grid-enterprise";
 import Loader from "@/components/common/Loader";
 import PageLoader from "@/components/common/PageLoader";
 
-ModuleRegistry.registerModules([AllCommunityModule, ColumnMenuModule, ContextMenuModule]);
+ModuleRegistry.registerModules([AllCommunityModule, ColumnMenuModule, ContextMenuModule, RowGroupingModule]);
 
 interface AgGridTableProps {
   tableName?: string;
@@ -42,6 +42,9 @@ interface AgGridTableProps {
   rowHeight?: number;
   height?: string | number;
   showCheckboxes?: boolean;
+  autoGroupColumnDef?: ColDef;
+  groupDefaultExpanded?: number;
+  getRowHeight?: (params: any) => number;
 }
 
 const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
@@ -62,6 +65,9 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
   rowHeight = 40,
   height,
   showCheckboxes = true,
+  autoGroupColumnDef,
+  groupDefaultExpanded,
+  getRowHeight,
 }, ref) => {
   const router = useRouter();
   const internalRef = useRef<any>(null);
@@ -265,6 +271,9 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
               return params.data.id || params.data.categories_id || params.data._id;
             }, [])}
             overlayNoRowsTemplate="<span></span>"
+            autoGroupColumnDef={autoGroupColumnDef}
+            groupDefaultExpanded={groupDefaultExpanded}
+            getRowHeight={getRowHeight}
           />
         </div>
       </div>
