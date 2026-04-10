@@ -357,7 +357,7 @@ const handleConfirmDelete = async () => {
                     rows={5}
                     className={cn(
                       "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
-                      errors.answer ? "border-red-500 focus-visible:ring-red-500/20" : ""
+                      errors.answer ? "border-red-500" : ""
                     )}
                     placeholder="Provide the solution here..."
                     {...register("answer")}

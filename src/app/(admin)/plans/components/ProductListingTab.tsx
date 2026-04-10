@@ -247,7 +247,7 @@ export default function ProductListingTab() {
                   Plan Type <span className="text-red-500">*</span>
                 </label>
                 <input
-                  className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.plan_type ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                  className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.plan_type ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
                   aria-invalid={!!errors.plan_type}
                   value={form.plan_type}
                   onChange={(e) => {
@@ -268,7 +268,7 @@ export default function ProductListingTab() {
                   <input
                     type="number"
                     min="1"
-                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.months ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.months ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
                     value={form.months}
                     onChange={(e) => setForm({ ...form, months: e.target.value === '' ? '' : Number(e.target.value) })}
                   />
@@ -280,7 +280,7 @@ export default function ProductListingTab() {
                   <input
                     type="number"
                     min="1"
-                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.max_products ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.max_products ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
                     value={form.max_products}
                     onChange={(e) => setForm({ ...form, max_products: e.target.value === '' ? '' : Number(e.target.value) })}
                   />
@@ -292,7 +292,7 @@ export default function ProductListingTab() {
                   <input
                     type="number"
                     min="0"
-                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.amount ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                    className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.amount ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
                     value={form.amount}
                     onChange={(e) => setForm({ ...form, amount: e.target.value === '' ? '' : Number(e.target.value) })}
                   />
@@ -331,11 +331,16 @@ export default function ProductListingTab() {
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-red-200' : 'border-slate-200'}`}
+                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
                   rows={3}
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setForm({ ...form, description: v });
+                    if (errors.description && v.trim()) setErrors(prev => ({ ...prev, description: '' }));
+                  }}
                 />
+                {errors.description ? (<p className="mt-1 text-xs text-red-600">{errors.description}</p>) : null}
               </div>
 
               <div className="flex gap-3 pt-2">
