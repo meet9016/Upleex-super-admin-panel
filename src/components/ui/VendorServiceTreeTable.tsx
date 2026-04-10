@@ -431,7 +431,7 @@ export default function VendorServiceTreeTable({
                 disabled={rejecting}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Reject ({rejectableCount})
+                Reject Selected({rejectableCount})
               </Button>
             )}
 
@@ -444,7 +444,7 @@ export default function VendorServiceTreeTable({
                 {approving ? (
                   <PageLoader fullScreen={false} />
                 ) : (
-                  <>Approve ({approvableCount})</>
+                  <>Approve Selected({approvableCount})</>
                 )}
               </Button>
             )}

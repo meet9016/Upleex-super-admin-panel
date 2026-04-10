@@ -437,8 +437,8 @@ export default function VendorPaymentTreeTable({
       pinned: "right",
       suppressHeaderMenuButton: true,
       suppressSizeToFit: true,
-      minWidth: 200,
-      maxWidth: 200,
+      minWidth: 250,
+      maxWidth: 250,
       cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     }
   ], []);

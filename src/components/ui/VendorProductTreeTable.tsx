@@ -274,7 +274,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onFocus={(e) => e.target.blur()}
           tabIndex={-1}
-          className="p-2 rounded-lg bg-blue-50 text-blue-600 mt-0.5 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0"
+          className="p-2 rounded-lg bg-blue-50 text-blue-600  border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0"
           title="View Product Details"
         >
           <Eye size={14} />

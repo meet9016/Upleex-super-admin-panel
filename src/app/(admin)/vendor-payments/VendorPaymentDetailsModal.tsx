@@ -86,215 +86,225 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     };
 
     return (
-       <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                    <div className="flex items-center gap-4">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <DollarSign className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
-                            <p className="text-gray-600">Order: <span className="font-semibold">{orderInfo.order_id}</span></p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        {getPaymentStatusBadge(data.payment_status)}
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            <X size={20} className="text-gray-500" />
-                        </button>
-                    </div>
-                </div>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div className="bg-white/90 backdrop-blur-xl rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200">
 
-                {/* Content */}
-                <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-                    <div className="p-6 space-y-6">
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="border-l-4 border-l-blue-500">
-                                <CardContent className="p-4">
-                                    <div className="flex items-center gap-3">
-                                        <Package className="h-8 w-8 text-blue-600" />
-                                        <div>
-                                            <p className="text-sm text-gray-600">Order Amount</p>
-                                            <p className="text-2xl font-bold text-gray-900">{formatAmount(orderInfo.total_amount)}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-l-4 border-l-green-500">
-                                <CardContent className="p-4">
-                                    <div className="flex items-center gap-3">
-                                        <DollarSign className="h-8 w-8 text-green-600" />
-                                        <div>
-                                            <p className="text-sm text-gray-600">Vendor Amount</p>
-                                            <p className="text-2xl font-bold text-green-600">{formatAmount(data.vendor_amount)}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-l-4 border-l-purple-500">
-                                <CardContent className="p-4">
-                                    <div className="flex items-center gap-3">
-                                        <User className="h-8 w-8 text-purple-600" />
-                                        <div>
-                                            <p className="text-sm text-gray-600">Customer</p>
-                                            <p className="text-lg font-bold text-gray-900">{orderInfo.user_name}</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Payment Information */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Order Details */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Package className="h-5 w-5 text-blue-600" />
-                                        Order Information
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Order ID</label>
-                                        <p className="text-gray-900 font-mono text-sm bg-gray-50 p-2 rounded">{orderInfo.order_id}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Customer Name</label>
-                                        <p className="text-gray-900 font-semibold">{orderInfo.user_name}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Total Order Amount</label>
-                                        <p className="text-gray-900 font-bold text-lg">{formatAmount(orderInfo.total_amount)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Vendor ID</label>
-                                        <p className="text-gray-900 font-mono text-sm">{data.vendor_id}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Payment Timeline */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Calendar className="h-5 w-5 text-purple-600" />
-                                        Payment Timeline
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Delivered At</label>
-                                        <p className="text-gray-900">{formatDate(data.delivered_at)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Release Date</label>
-                                        <p className="text-gray-900">{formatDate(data.release_date)}</p>
-                                    </div>
-                                    {data.released_at && (
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-600">Released At</label>
-                                            <p className="text-gray-900">{formatDate(data.released_at)}</p>
-                                        </div>
-                                    )}
-                                    {data.released_by && (
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-600">Released By</label>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                data.released_by === 'admin' 
-                                                    ? 'bg-blue-100 text-blue-800' 
-                                                    : 'bg-green-100 text-green-800'
-                                            }`}>
-                                                {data.released_by === 'admin' ? 'Admin' : 'System'}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <label className="text-sm font-medium text-gray-600">Payment Status</label>
-                                        <div className="mt-1">
-                                            {getPaymentStatusBadge(data.payment_status)}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Notes Section */}
-                        {(data.notes || canReleasePayment()) && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Hash className="h-5 w-5 text-indigo-600" />
-                                        Notes & Actions
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {data.notes && (
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-600">Existing Notes</label>
-                                            <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{data.notes}</p>
-                                        </div>
-                                    )}
-                                    {canReleasePayment() && (
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-600">Release Notes (Optional)</label>
-                                            <textarea
-                                                value={notes}
-                                                onChange={(e) => setNotes(e.target.value)}
-                                                placeholder="Add notes for manual release..."
-                                                className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                rows={3}
-                                            />
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="border-t border-gray-200 p-6 bg-gray-50">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                            Vendor Payment Amount: <span className="text-2xl font-bold text-green-600 ml-2">{formatAmount(data.vendor_amount)}</span>
-                        </div>
-                        <div className="flex gap-3">
-                            <Button variant="outline" onClick={onClose}>
-                                Close
-                            </Button>
-                            {canReleasePayment() && (
-                                <Button 
-                                    onClick={handleReleasePayment}
-                                    disabled={isReleasing}
-                                    className="bg-green-600 hover:bg-green-700"
-                                >
-                                    {isReleasing ? (
-                                        <>
-                                            <Loader2 size={16} className="mr-2 animate-spin" />
-                                            Releasing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <DollarSign size={16} className="mr-2" />
-                                            Release Payment
-                                        </>
-                                    )}
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
+    {/* HEADER */}
+    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-800 to-gray-700">
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-blue-100 rounded-xl shadow-sm">
+          <DollarSign className="h-6 w-6 text-blue-600" />
         </div>
+
+        <div>
+          <h2 className="text-xl font-semibold text-gray-50">
+            Payment Details
+          </h2>
+          <p className="text-xs Notes & Actions text-gray-100">
+            Order #{orderInfo.order_id}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {getPaymentStatusBadge(data.payment_status)}
+
+        <button
+          onClick={onClose}
+          className="p-2 rounded-lg hover:bg-gray-600 transition"
+        >
+          <X size={20} className="text-gray-50" />
+        </button>
+      </div>
+    </div>
+
+    {/* BODY */}
+    <div className="overflow-y-auto max-h-[calc(90vh-140px)] px-6 py-6 space-y-6">
+
+      {/* TOP SUMMARY */}
+      <div className="grid md:grid-cols-3 gap-5">
+        {[{
+          icon: Package,
+          label: "Order Amount",
+          value: formatAmount(orderInfo.total_amount),
+          color: "blue"
+        },
+        {
+          icon: DollarSign,
+          label: "Vendor Amount",
+          value: formatAmount(data.vendor_amount),
+          color: "green"
+        },
+        {
+          icon: User,
+          label: "Customer",
+          value: orderInfo.user_name,
+          color: "purple"
+        }].map((card, i) => (
+          <div
+            key={i}
+            className="p-5 rounded-2xl bg-white shadow-md border border-gray-100 hover:shadow-lg transition"
+          >
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl bg-${card.color}-100`}>
+                <card.icon className={`text-${card.color}-600`} />
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">{card.label}</p>
+                <p className="text-xl font-bold text-gray-800">
+                  {card.value}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* DETAILS */}
+      <div className="grid lg:grid-cols-2 gap-6">
+
+        {/* ORDER INFO */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Package size={18} className="text-blue-600" />
+            Order Information
+          </h3>
+
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Order ID</span>
+              <span className="font-mono text-gray-800">
+                {orderInfo.order_id}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Customer</span>
+              <span className="font-medium text-gray-800">
+                {orderInfo.user_name}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Total Amount</span>
+              <span className="font-bold text-gray-900">
+                {formatAmount(orderInfo.total_amount)}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Vendor ID</span>
+              <span className="font-mono text-gray-700">
+                {data.vendor_id}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* TIMELINE */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Calendar size={18} className="text-purple-600" />
+            Payment Timeline
+          </h3>
+
+          <div className="space-y-4">
+
+            {[
+              { label: "Delivered", value: formatDate(data.delivered_at) },
+              { label: "Release Date", value: formatDate(data.release_date) },
+              data.released_at && {
+                label: "Released At",
+                value: formatDate(data.released_at)
+              }
+            ].filter(Boolean).map((item: any, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <div className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
+                <div>
+                  <p className="text-xs text-gray-500">{item.label}</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {item.value}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+          </div>
+        </div>
+      </div>
+
+      {/* NOTES */}
+      {(data.notes || canReleasePayment()) && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+            <Hash size={18} className="text-indigo-600" />
+            Notes & Actions
+          </h3>
+
+          {data.notes && (
+            <div className="mb-4 bg-gray-50 p-3 rounded-lg text-sm text-gray-700">
+              {data.notes}
+            </div>
+          )}
+
+          {canReleasePayment() && (
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add release notes..."
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              rows={3}
+            />
+          )}
+        </div>
+      )}
+    </div>
+
+    {/* FOOTER */}
+    <div className="border-t border-gray-200 px-6 py-5 bg-gray-50 flex justify-between items-center">
+
+      <div>
+        <p className="text-sm text-gray-500">Vendor Amount</p>
+        <p className="text-2xl font-bold text-green-600">
+          {formatAmount(data.vendor_amount)}
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+
+        <Button
+          variant="outline"
+          onClick={onClose}
+          className="rounded-xl"
+        >
+          Close
+        </Button>
+
+        {canReleasePayment() && (
+          <Button
+            onClick={handleReleasePayment}
+            disabled={isReleasing}
+            className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-xl shadow-md hover:shadow-lg"
+          >
+            {isReleasing ? (
+              <>
+                <Loader2 className="animate-spin mr-2" size={16} />
+                Releasing...
+              </>
+            ) : (
+              <>
+                <DollarSign size={16} className="mr-2" />
+                Release Payment
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
+
+  </div>
+</div>
     );
 };
 

@@ -323,10 +323,10 @@ export default function DropdownsManagementPage() {
                   {/* DELETE BUTTON */}
                   <Button
                     variant="destructive"
-                    size="sm"
+                    size="md"
                     disabled={selectedRows.length === 0}
                     onClick={() => setShowBulkDeleteModal(true)}
-                    className="w-full sm:w-auto h-9"
+                    className="w-full sm:w-auto h-9 text-sm"
                   >
                     Delete Selected ({selectedRows.length})
                   </Button>

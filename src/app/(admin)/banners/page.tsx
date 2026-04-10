@@ -454,7 +454,7 @@ export default function BannerPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <CardTitle className="text-base">Banners</CardTitle>
-              <CardDescription className="text-xs">Homepage carousel banners</CardDescription>
+              {/* <CardDescription className="text-xs">Homepage carousel banners</CardDescription> */}
             </div>
             <div className="relative w-full sm:w-56">
               <Input 
