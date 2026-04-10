@@ -69,6 +69,8 @@ interface TreeDataItem {
   path?: string[];
   phone?: string;
   email?: string;
+  categoryName?: string;
+  subcategoryName?: string;
 }
 
 interface OrdersTreeTableProps {
@@ -246,6 +248,8 @@ const OrdersTreeTable = React.forwardRef<any, OrdersTreeTableProps>(({
             createdAt: order.createdAt,
             originalData: order,
             path: [...uPath, oId],
+            categoryName: order.category_name,
+            subcategoryName: order.subcategory_name,
           });
         });
 
@@ -292,6 +296,18 @@ const OrdersTreeTable = React.forwardRef<any, OrdersTreeTableProps>(({
       },
       hide: type === 'sell',
       minWidth: 150,
+    },
+    {
+      headerName: "Category",
+      field: "categoryName",
+      minWidth: 150,
+      cellRenderer: (p: any) => p.data?.type === 'order' ? <span className="font-semibold text-slate-600">{p.value || '—'}</span> : '',
+    },
+    {
+      headerName: "Subcategory",
+      field: "subcategoryName",
+      minWidth: 150,
+      cellRenderer: (p: any) => p.data?.type === 'order' ? <span className="text-slate-500">{p.value || '—'}</span> : '',
     },
     {
       headerName: "Qty",
