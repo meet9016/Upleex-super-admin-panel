@@ -223,7 +223,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                 onClick={onClose}
             >
                 <div
-                    className={`relative w-full max-w-6xl bg-gradient-to-br from-slate-50 to-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-500 ${
+                    className={`relative w-full max-w-5xl bg-gradient-to-br from-slate-50 to-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-500 ${
                         isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
                     }`}
                     style={{ height: '90vh' }}
@@ -282,13 +282,13 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                 <StatBadge 
                                     icon={CalendarDays} 
                                     label="Duration" 
-                                    value={`${data.number_of_days || 'N/A'} days`}
+                                    value={`${data.number_of_days || '-'} days`}
                                     color="bg-gradient-to-br from-purple-500 to-pink-600"
                                 />
                                 <StatBadge 
                                     icon={Layers} 
                                     label="Month" 
-                                    value={data.month_name || 'N/A'}
+                                    value={data.month_name || '-'}
                                     color="bg-gradient-to-br from-orange-500 to-amber-600"
                                 />
                             </div>
@@ -345,7 +345,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                                     day: 'numeric', 
                                                     month: 'long', 
                                                     year: 'numeric' 
-                                                }) : 'N/A'}
+                                                }) : '-'}
                                             </p>
                                         </div>
                                     </div>
@@ -360,7 +360,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                                     day: 'numeric', 
                                                     month: 'long', 
                                                     year: 'numeric' 
-                                                }) : 'N/A'}
+                                                }) : '-'}
                                             </p>
                                         </div>
                                     </div>
@@ -375,7 +375,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                                     day: 'numeric', 
                                                     month: 'long', 
                                                     year: 'numeric' 
-                                                }) : 'N/A'}
+                                                }) : '-'}
                                             </p>
                                         </div>
                                     </div>
@@ -475,7 +475,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                         year: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
-                                    }) : 'N/A'}
+                                    }) : '-'}
                                 </span>
                             </div>
                             <div className="flex gap-3">

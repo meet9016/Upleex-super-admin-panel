@@ -568,7 +568,7 @@ export default function BlogPage() {
                   <Input
                     id="title"
                     placeholder="Enter post title"
-                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="h-10 bg-slate-50 border-slate-100 focus:bg-white transition-all rounded-xl"
                     {...register("title")}
                     error={errors.title?.message}
                   />
@@ -582,7 +582,7 @@ export default function BlogPage() {
                     id="sort_description"
                     rows={3}
                     className={cn(
-                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans",
+                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 focus:bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all font-sans",
                       errors.sort_description ? "border-red-500" : ""
                     )}
                     placeholder="Brief overview of the post..."
@@ -604,10 +604,10 @@ export default function BlogPage() {
                     render={({ field }) => (
                       <div
                         className={cn(
-                          "rounded-xl overflow-hidden border transition-all",
+                          "rounded-xl overflow-hidden border transition-all ring-offset-background",
                           errors.long_description
                             ? "border-red-500"
-                            : "border-slate-200 focus-within:ring-2 focus-within:ring-primary/20"
+                            : "border-slate-200 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
                         )}
                       >
                         <Editor

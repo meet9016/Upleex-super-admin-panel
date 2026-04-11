@@ -28,6 +28,7 @@ type Props = {
     maxHeight?: string;
     showClear?: boolean;
     buttonClassName?: string;
+    minWidth?: number;
 };
 
 export default function SearchableDropdown({
@@ -47,6 +48,7 @@ export default function SearchableDropdown({
     maxHeight = "max-h-60",
     showClear = true,
     buttonClassName = "",
+    minWidth = 125,
 }: Props) {
     const ref = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -114,7 +116,7 @@ export default function SearchableDropdown({
             position: "fixed" as const,
             top: r.bottom + 4,
             left: r.left,
-            width: r.width,
+            width: Math.max(r.width, minWidth),
             zIndex: 9999,
             opacity: 1,
         };

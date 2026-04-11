@@ -182,13 +182,20 @@ export default function DropdownsManagementPage() {
           <span className="font-semibold text-slate-900">{params.value}</span>
         )
       },
-      // {
-      //   headerName: "Created",
-      //   field: "created_at",
-      //   minWidth: 150,
-      //   valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
-      //   cellStyle: { textAlign: "center" }
-      // },
+      {
+        headerName: "Created Date",
+        field: "created_at",
+        minWidth: 150,
+        valueFormatter: (params: any) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+        cellStyle: { color: "black", display: "flex", alignItems: "center" }
+      },
+      {
+        headerName: "Updated Date",
+        field: "updated_at",
+        minWidth: 150,
+        valueFormatter: (params: any) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+        cellStyle: { color: "black", display: "flex", alignItems: "center" }
+      },
       {
         headerName: "Action",
         width: 400,

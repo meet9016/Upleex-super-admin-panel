@@ -342,7 +342,7 @@ const handleConfirmDelete = async () => {
                   <Input
                     id="question"
                     placeholder="e.g. How to track order?"
-                    className="bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-xl"
+                    className="bg-slate-50 border-slate-100 focus:bg-white transition-all rounded-xl"
                     {...register("question")}
                     error={errors.question?.message}
                   />
@@ -356,7 +356,7 @@ const handleConfirmDelete = async () => {
                     id="answer"
                     rows={5}
                     className={cn(
-                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+                      "flex w-full rounded-xl border border-slate-100 bg-slate-50 focus:bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
                       errors.answer ? "border-red-500" : ""
                     )}
                     placeholder="Provide the solution here..."

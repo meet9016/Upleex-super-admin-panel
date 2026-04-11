@@ -259,7 +259,7 @@ export default function AdminOrdersPage() {
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Quote Status', field: 'quote_status', cellRenderer: StatusRenderer, minWidth: 145 },
     { headerName: 'Payment Status', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: "black", display: "flex", alignItems: "center" } },
   ];
 
   // ── Sell Column Defs ───────────────────────────────────────────────────────
@@ -272,7 +272,7 @@ export default function AdminOrdersPage() {
     { headerName: 'Amount', field: 'amount', cellRenderer: AmountRenderer, minWidth: 130 },
     { headerName: 'Payment', field: 'payment_status', cellRenderer: StatusRenderer, minWidth: 140 },
     { headerName: 'Order Status', field: 'order_status', cellRenderer: StatusRenderer, minWidth: 150 },
-    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value) },
+    { headerName: 'Date', field: 'createdAt', minWidth: 120, valueFormatter: (p: any) => fmtDate(p.value), cellStyle: { color: "black", display: "flex", alignItems: "center" } },
   ];
 
   // ── Rent Filter Modal ──────────────────────────────────────────────────────

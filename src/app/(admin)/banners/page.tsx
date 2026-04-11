@@ -356,7 +356,7 @@ export default function BannerPage() {
               <label className="text-xs font-semibold text-slate-700">Description</label>
               <textarea 
                 {...register("description")} 
-                className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[70px]" 
+                className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[70px] transition-all" 
                 placeholder="Short description"
               />
             </div>
