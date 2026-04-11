@@ -82,7 +82,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="flex justify-center">
-            <img src="/logo.png" alt="Upleex" className="h-12 object-contain" />
+            <img src="/logo.webp" alt="Upleex" className="h-12 object-contain" />
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
             Super Admin Login
