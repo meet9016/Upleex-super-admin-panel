@@ -50,11 +50,17 @@ interface TreeDataItem {
   phone?: string;
   plan_type?: string;
   months?: number;
+  days?: number;
   max_products?: number;
+  total_slots?: number;
   amount?: number;
+  price?: number;
   product_count?: number;
+  product_name?: string;
   start_at?: string;
   expire_at?: string;
+  start_date?: string;
+  expiry_date?: string;
   createdAt?: string;
   originalData?: any;
   children?: TreeDataItem[];
@@ -65,6 +71,7 @@ interface PlanPurchasesTreeTableProps {
   data: any[];
   onDelete: (purchase: any) => void;
   loading?: boolean;
+  type: 'listing' | 'priority' | 'booster';
 }
 
 // Custom group cell renderer
@@ -115,6 +122,7 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
   data,
   onDelete,
   loading = false,
+  type = 'listing',
 }, ref) => {
   const gridRef = useRef<AgGridReact>(null);
   const [isDark, setIsDark] = useState(false);
@@ -141,40 +149,62 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
 
     data.forEach((p) => {
       const vName = p.vendor_name || 'Unknown Vendor';
-      const vEmail = p.vendor_email || vName;
-      if (!vendorGroups[vEmail]) vendorGroups[vEmail] = [];
-      vendorGroups[vEmail].push(p);
+      if (!vendorGroups[vName]) vendorGroups[vName] = [];
+      vendorGroups[vName].push(p);
     });
 
     const result: TreeDataItem[] = [];
 
-    Object.entries(vendorGroups).forEach(([vKey, purchases], vIdx) => {
-      const vPath = [vKey];
+    Object.entries(vendorGroups).forEach(([vName, purchases]) => {
+      const vPath = [vName];
       const first = purchases[0];
-      
+
       const vendorNode: TreeDataItem = {
-        id: vKey,
-        name: first.vendor_name || 'Unknown Vendor',
+        id: vName,
+        name: vName,
         type: 'vendor',
         phone: first.vendor_phone,
         path: vPath,
         children: purchases.map((p, pIdx) => {
-          const pId = p._id || p.id || `${vKey}-${pIdx}`;
-          return {
+          const pId = p._id || p.id || `${vName}-${pIdx}`;
+          const purchasePath = [...vPath, pId];
+          
+          const purchaseNode: TreeDataItem = {
             id: pId,
-            name: p.plan_type || 'N/A',
+            name: p.plan_name || p.plan_type || 'N/A',
             type: 'purchase',
-            plan_type: p.plan_type,
+            plan_type: p.plan_name || p.plan_type,
             months: p.months,
-            max_products: p.max_products,
-            amount: p.amount,
-            product_count: p.product_ids?.length || 0,
-            start_at: p.start_at,
-            expire_at: p.expire_at,
+            days: p.days,
+            max_products: p.max_products || p.total_slots,
+            amount: p.amount || p.price,
+            product_count: p.product_ids?.length || (p.product_id ? 1 : 0),
+            product_name: p.product_name, // For booster
+            start_at: p.start_at || p.start_date,
+            expire_at: p.expire_at || p.expiry_date,
             createdAt: p.createdAt,
             originalData: p,
-            path: [...vPath, pId],
+            path: purchasePath,
           };
+
+          // If there are multiple products, add them as children
+          if (p.product_ids && Array.isArray(p.product_ids) && p.product_ids.length > 0) {
+            purchaseNode.children = p.product_ids.map((prod: any, prodIdx: number) => {
+              const prodId = typeof prod === 'string' ? prod : (prod._id || prod.id || `${pId}-${prodIdx}`);
+              const prodName = typeof prod === 'object' ? prod.product_name : `Product ID: ${prod}`;
+              return {
+                id: prodId,
+                name: prodName,
+                type: 'purchase', // Using 'purchase' type for children to show similar styling or just let it inherit
+                product_name: prodName,
+                path: [...purchasePath, prodId],
+              } as TreeDataItem;
+            });
+          } else if (p.product_name) {
+            // For booster, maybe just one child or no children since it's already shown
+          }
+
+          return purchaseNode;
         })
       };
 
@@ -186,21 +216,22 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
 
   const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
     {
-      headerName: "Months",
-      field: "months",
+      headerName: type === 'booster' ? "Duration (Days)" : "Months",
+      field: type === 'booster' ? "days" : "months",
       minWidth: 100,
-      valueGetter: (p) => p.data?.type === 'purchase' ? p.data.months : '',
+      valueGetter: (p) => p.data?.type === 'purchase' ? (p.data.days || p.data.months || '') : '',
     },
     {
-      headerName: "Max Products",
-      field: "max_products",
-      minWidth: 120,
-      valueGetter: (p) => p.data?.type === 'purchase' ? p.data.max_products : '',
+      headerName: type === 'booster' ? "Product Name" : "Max Products",
+      field: type === 'booster' ? "product_name" : "max_products",
+      minWidth: 150,
+      flex: 1.5,
+      valueGetter: (p) => p.data?.type === 'purchase' ? (p.data.product_name || p.data.max_products || '') : '',
     },
     {
       headerName: "Amount",
       field: "amount",
-      minWidth: 120,
+      minWidth: 110,
       valueGetter: (p) => p.data?.type === 'purchase' ? p.data.amount : '',
       valueFormatter: (p) => p.value ? `₹${p.value.toLocaleString('en-IN')}` : '',
       cellStyle: { fontWeight: 'bold', color: '#059669' },
