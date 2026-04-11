@@ -42,6 +42,7 @@ type Purchase = {
 };
 
 export default function PlanPurchasesTab() {
+  const [activeSubTab, setActiveSubTab] = useState<'listing' | 'priority' | 'booster'>('listing');
   const [rows, setRows] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Purchase[]>([]);
@@ -134,11 +135,16 @@ export default function PlanPurchasesTab() {
       });
 
       const queryString = params.toString();
-      const url = queryString
-        ? `${endPointApi.getAllListingPlans}?${queryString}`
-        : endPointApi.getAllListingPlans;
+      let url = "";
+      if (activeSubTab === 'listing') {
+        url = endPointApi.getAllListingPlans;
+      } else if (activeSubTab === 'priority') {
+        url = endPointApi.getAllPriorityPurchases;
+      } else if (activeSubTab === 'booster') {
+        url = endPointApi.getAllRentalBoostPurchases;
+      }
 
-      const res = await api.get(url);
+      const res = await api.get(queryString ? `${url}?${queryString}` : url);
       const list = res?.data?.data || [];
       setRows(list);
     } catch (e: any) {
@@ -158,7 +164,7 @@ export default function PlanPurchasesTab() {
     if (debouncedSearch.length >= 3 || debouncedSearch.length === 0) {
       fetchData(appliedFilters, debouncedSearch);
     }
-  }, [debouncedSearch, appliedFilters]);
+  }, [debouncedSearch, appliedFilters, activeSubTab]);
 
   // Handle click outside to close modal
   useEffect(() => {
@@ -365,7 +371,41 @@ export default function PlanPurchasesTab() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center bg-gray-100/80 rounded-xl p-1 gap-1 w-fit">
+        <button
+          onClick={() => setActiveSubTab('listing')}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+            activeSubTab === 'listing'
+              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+              : 'text-gray-500 hover:text-gray-800'
+          }`}
+        >
+          PRODUCT LISTING PLAN
+        </button>
+        <button
+          onClick={() => setActiveSubTab('priority')}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+            activeSubTab === 'priority'
+              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+              : 'text-gray-500 hover:text-gray-800'
+          }`}
+        >
+          PRIORITY PLAN
+        </button>
+        <button
+          onClick={() => setActiveSubTab('booster')}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+            activeSubTab === 'booster'
+              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+              : 'text-gray-500 hover:text-gray-800'
+          }`}
+        >
+          RENTAL BOOST PLAN
+        </button>
+      </div>
+
       <Card className="border-slate-200">
+
         <CardHeader>
           <div className="flex items-center justify-between w-full">
             <div className="relative">
@@ -504,6 +544,7 @@ export default function PlanPurchasesTab() {
               data={rows}
               loading={loading}
               onDelete={handleDeleteClick}
+              type={activeSubTab}
             />
           </div>
         </CardContent>
