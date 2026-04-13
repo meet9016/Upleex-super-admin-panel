@@ -49,7 +49,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendor-services", href: "/vendor-services", icon: FolderPlus, permission: "products" },
       { name: "Dropdowns", href: "/dropdowns", icon: Layers, permission: "dropdowns" },
       { name: "Quotes", href: "/quotes", icon: FileText, permission: "quotes" },
-      { name: "Orders", href: "/orders", icon: ShoppingBag },
+      { name: "Orders", href: "/orders", icon: ShoppingBag, permission: "orders" },
       {
         name: "Categories",
         icon: Layers,
@@ -82,7 +82,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Blog", href: "/blog", icon: BookOpen, permission: "blogs" },
       { name: "Banners", href: "/banners", icon: Layers, permission: "blogs" },
       { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },
-      { name: "Contact Us", href: "/contact-us", icon: HelpCircle },
+      { name: "Contact Us", href: "/contact-us", icon: HelpCircle, permission: "contact-us" },
     ],
   },
 ];
