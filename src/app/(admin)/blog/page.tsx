@@ -26,7 +26,7 @@ import PageLoader from "@/components/common/PageLoader";
 const blogSchema = z.object({
   title: z.string().min(5, "Title is required"),
   sort_description: z.string().min(10, "Short description is required"),
-  long_description: z.string().min(20, "Long description is required"),
+  long_description: z.string().min(20, "Long description must be at least 20 characters"),
   date: z.string().min(1, "Publish Date is required"),
   image: z.any().refine((files) => files && files.length > 0, "Image is required"),
 
@@ -601,6 +601,7 @@ export default function BlogPage() {
                   <Controller
                     name="long_description"
                     control={control}
+                    defaultValue=""
                     render={({ field }) => (
                       <div
                         className={cn(
@@ -612,7 +613,7 @@ export default function BlogPage() {
                       >
                         <Editor
                           value={field.value || ""}
-                          onTextChange={(e: any) => field.onChange(e.htmlValue)}
+                          onTextChange={(e: any) => field.onChange(e.htmlValue || "")}
                           style={{ height: "250px" }}
                         />
                       </div>

@@ -253,11 +253,11 @@ export default function VendorServiceApprovalPage() {
               </div>
             )}
 
-            {!hasMore && vendors.length > 0 && (
+            {/* {!hasMore && vendors.length > 0 && (
               <div className="flex justify-center py-8 border-t border-gray-100 bg-gray-50/30">
                 <p className="text-sm text-gray-400 font-medium italic">All vendors loaded</p>
               </div>
-            )}
+            )} */}
       </div>
     </div>
   );
