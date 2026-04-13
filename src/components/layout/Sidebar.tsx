@@ -242,7 +242,7 @@ export function Sidebar({
           {menuItems.filter(shouldShowGroup).map((group) => (
             <div key={group.group} className="space-y-2">
               {(!isCollapsed || isMobile) && (
-                <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <p className="px-3 text-sm font-semibold text-gray-400">
                   {group.group}
                 </p>
               )}

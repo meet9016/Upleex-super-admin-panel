@@ -120,7 +120,7 @@ export default function CircleChart({
 
         {/* Center content with animated counter */}
         <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-1">
+          <span className="text-xs font-semibold text-slate-400 mb-1">
             Current Balance
           </span>
           <span className="text-3xl font-extrabold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent tabular-nums">
@@ -147,7 +147,7 @@ export default function CircleChart({
         >
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-sm" />
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">
+            <span className="text-sm font-bold text-slate-600 ">
               Available Balance
             </span>
           </div>
@@ -175,7 +175,7 @@ export default function CircleChart({
         >
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm" />
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">
+            <span className="text-sm font-bold text-slate-600 ">
               Total Debited
             </span>
           </div>

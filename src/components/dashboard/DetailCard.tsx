@@ -61,7 +61,7 @@ export default function DetailCard({
                 position === "right" ? "left" : "right"
               }-2 duration-200`}
             >
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 whitespace-nowrap border-b border-slate-100 pb-1">
+              <p className="text-[10px] font-black  text-slate-400 mb-1 whitespace-nowrap border-b border-slate-100 pb-1">
                 {item.label} Status
               </p>
               {item.subItems.map((sub, si) => (

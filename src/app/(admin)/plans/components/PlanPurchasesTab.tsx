@@ -397,7 +397,7 @@ export default function PlanPurchasesTab() {
             : 'text-gray-500 hover:text-gray-800'
             }`}
         >
-          RENTAL BOOST PLAN
+          Rental Boost Plan
         </button>
       </div>
 

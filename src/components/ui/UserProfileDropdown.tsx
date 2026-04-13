@@ -57,7 +57,7 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
           <p className="text-sm font-semibold text-slate-900 group-hover:text-primary transition-colors leading-none">
             {userName}
           </p>
-          <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-1">
+          <p className="text-[11px] text-muted-foreground font-medium mt-1">
             Super Admin
           </p>
         </div>

@@ -150,7 +150,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                     <Icon size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</p>
+                    <p className="text-sm font-medium text-slate-400 ">{label}</p>
                     <p className="text-sm font-semibold text-slate-800 mt-1 truncate">{value || '—'}</p>
                 </div>
             </div>
@@ -194,7 +194,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                     </p>
                 </div>
                 <div className="absolute top-2 right-2">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold uppercase bg-white/20 backdrop-blur-sm text-white border border-white/30`}>
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30`}>
                         {type}
                     </span>
                 </div>

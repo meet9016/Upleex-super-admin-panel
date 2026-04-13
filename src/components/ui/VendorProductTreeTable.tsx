@@ -113,7 +113,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }: { product: TreeDataIte
         </div>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+        <p className="text-xs font-semibold text-gray-500  mb-1">{label}</p>
         {isPrice ? (
           <p className="text-lg font-bold text-green-600">₹{value?.toLocaleString() || '-'}</p>
         ) : typeof value === 'string' || typeof value === 'number' ? (
@@ -191,7 +191,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }: { product: TreeDataIte
               <div className="mb-4">
                 <div className="flex items-center space-x-2 mb-3 px-1">
                   <FileText className="h-4 w-4 text-indigo-500" />
-                  <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+                  <h4 className="text-sm font-bold text-gray-800 ">
                     Description
                   </h4>
                 </div>
@@ -274,7 +274,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onFocus={(e) => e.target.blur()}
           tabIndex={-1}
-          className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0 flex items-center justify-center"
+          className="p-2 mt-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0 flex items-center justify-center"
           title="View Product Details"
         >
           <Eye size={14} />
@@ -293,7 +293,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           usePortal={true}
           maxHeight="max-h-48"
           showClear={false}
-          buttonClassName="h-8 py-1 w-[135px]"
+          buttonClassName="h-8 py-1 w-[135px] mt-1.5"
         />
       </div>
     </>
@@ -623,7 +623,7 @@ export default function VendorProductTreeTable({
               <svg className={`w-3.5 h-3.5 ${activeTab === 'rent' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="hidden sm:inline">RENT</span>
+              <span className="hidden sm:inline">Rent</span>
               <span className="sm:hidden">R</span>
             </button>
 
@@ -641,7 +641,7 @@ export default function VendorProductTreeTable({
               <svg className={`w-3.5 h-3.5 ${activeTab === 'sell' ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span className="hidden sm:inline">SELL</span>
+              <span className="hidden sm:inline">Sell</span>
               <span className="sm:hidden">S</span>
             </button>
           </div>
