@@ -310,10 +310,10 @@ export default function PlanPurchasesTab() {
       valueFormatter: (p) =>
         p.value
           ? new Date(p.value).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
           : "-",
     },
     {
@@ -324,10 +324,10 @@ export default function PlanPurchasesTab() {
       valueFormatter: (p) =>
         p.value
           ? new Date(p.value).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
           : "-",
     },
     {
@@ -338,10 +338,10 @@ export default function PlanPurchasesTab() {
       valueFormatter: (p) =>
         p.value
           ? new Date(p.value).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
           : "-",
     },
     {
@@ -374,31 +374,28 @@ export default function PlanPurchasesTab() {
       <div className="flex items-center bg-gray-100/80 rounded-xl p-1 gap-1 w-fit">
         <button
           onClick={() => setActiveSubTab('listing')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
-            activeSubTab === 'listing'
-              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'listing'
+            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+            : 'text-gray-500 hover:text-gray-800'
+            }`}
         >
           PRODUCT LISTING PLAN
         </button>
         <button
           onClick={() => setActiveSubTab('priority')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
-            activeSubTab === 'priority'
-              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'priority'
+            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+            : 'text-gray-500 hover:text-gray-800'
+            }`}
         >
           PRIORITY PLAN
         </button>
         <button
           onClick={() => setActiveSubTab('booster')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
-            activeSubTab === 'booster'
-              ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
-              : 'text-gray-500 hover:text-gray-800'
-          }`}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'booster'
+            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+            : 'text-gray-500 hover:text-gray-800'
+            }`}
         >
           RENTAL BOOST PLAN
         </button>

@@ -13,9 +13,6 @@ export default function CircleChart({
   debited,
   balance,
 }: CircleChartProps) {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [currentBalance, setCurrentBalance] = useState(0);
-  const [currentDebited, setCurrentDebited] = useState(0);
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
 
   const total = credited || 1;
@@ -25,34 +22,6 @@ export default function CircleChart({
   const circumference = 2 * Math.PI * 54;
   const debitedStroke = (debitedPct / 100) * circumference;
   const balanceStroke = (balancePct / 100) * circumference;
-
-  useEffect(() => {
-    setIsAnimating(true);
-    const timer = setTimeout(() => setIsAnimating(false), 1000);
-    return () => clearTimeout(timer);
-  }, [credited, debited, balance]);
-
-  useEffect(() => {
-    const duration = 800;
-    const steps = 30;
-    const incrementBalance = balance / steps;
-    const incrementDebited = debited / steps;
-    let currentStep = 0;
-
-    const interval = setInterval(() => {
-      if (currentStep >= steps) {
-        setCurrentBalance(balance);
-        setCurrentDebited(debited);
-        clearInterval(interval);
-      } else {
-        setCurrentBalance((prev) => Math.min(prev + incrementBalance, balance));
-        setCurrentDebited((prev) => Math.min(prev + incrementDebited, debited));
-        currentStep++;
-      }
-    }, duration / steps);
-
-    return () => clearInterval(interval);
-  }, [balance, debited]);
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
@@ -155,7 +124,7 @@ export default function CircleChart({
             Current Balance
           </span>
           <span className="text-3xl font-extrabold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent tabular-nums">
-            ₹{currentBalance.toLocaleString("en-IN")}
+            ₹{balance.toLocaleString("en-IN")}
           </span>
           <div className="mt-3 px-3 py-1.5 bg-gradient-to-r from-slate-50 to-slate-100 rounded-full border border-slate-200 shadow-sm">
             <span className="text-xs font-medium text-slate-600">
@@ -184,7 +153,7 @@ export default function CircleChart({
           </div>
           <div>
             <span className="text-xl font-bold text-slate-800">
-              ₹{currentBalance.toLocaleString("en-IN")}
+              ₹{balance.toLocaleString("en-IN")}
             </span>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">
@@ -212,7 +181,7 @@ export default function CircleChart({
           </div>
           <div>
             <span className="text-xl font-bold text-slate-800">
-              ₹{currentDebited.toLocaleString("en-IN")}
+              ₹{debited.toLocaleString("en-IN")}
             </span>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full">
