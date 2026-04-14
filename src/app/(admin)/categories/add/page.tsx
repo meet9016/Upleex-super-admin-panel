@@ -178,6 +178,13 @@ export default function AddCategoryPage() {
       cellStyle: { textAlign: "center" }
     },
     {
+       field: "updated_at",
+      headerName: "Updated",
+      minWidth: 150,
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+      cellStyle: { textAlign: "center" }
+    },
+    {
       headerName: "Action",
       width: 90,
       minWidth: 90,

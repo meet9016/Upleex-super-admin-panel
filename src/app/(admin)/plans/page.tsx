@@ -7,10 +7,12 @@ import ProductListingTab from "./components/ProductListingTab";
 import PriorityPlanTab from "./components/PriorityPlanTab";
 import PlanPurchasesTab from "./components/PlanPurchasesTab";
 import RentalBoostTab from "./components/RentalBoostTab";
-import { TrendingUp } from "lucide-react";
+import ServiceListingTab from "./components/ServiceListingTab";
+import ServicePriorityTab from "./components/ServicePriorityTab";
+import { TrendingUp, Package, Briefcase } from "lucide-react";
 
 
-const TABS = [
+const PRODUCT_TABS = [
   {
     key: "listing",
     label: "Product Listing Duration Plan",
@@ -37,20 +39,75 @@ const TABS = [
   },
 ];
 
+const SERVICE_TABS = [
+  {
+    key: "service-listing",
+    label: "Service Listing Plan",
+    icon: FolderPlus,
+    component: ServiceListingTab,
+  },
+  {
+    key: "service-priority",
+    label: "Service Priority Plan",
+    icon: Zap,
+    component: ServicePriorityTab,
+  },
+  {
+    key: "purchases",
+    label: "Plan Purchases",
+    icon: CreditCard,
+    component: PlanPurchasesTab,
+  },
+];
+
 export default function PlansPage() {
+  const [planScope, setPlanScope] = useState<"product" | "service">("product");
   const [activeTab, setActiveTab] = useState("listing");
 
-  const ActiveComponent = TABS.find((t) => t.key === activeTab)?.component || ProductListingTab;
+  const TABS = planScope === "product" ? PRODUCT_TABS : SERVICE_TABS;
+
+  // Handle scope change
+  const handleScopeChange = (scope: "product" | "service") => {
+    setPlanScope(scope);
+    setActiveTab(scope === "product" ? "listing" : "service-listing");
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Plans Management
-        </h1>
-        {/* <p className="text-sm text-slate-500">
-          Manage listing plans, priority visibility, and track all plan purchases.
-        </p> */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            Plans Management
+          </h1>
+        </div>
+
+        {/* Scope Toggle (Product vs Service) */}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 w-fit self-end">
+          <button
+            onClick={() => handleScopeChange("product")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all",
+              planScope === "product"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            )}
+          >
+            <Package size={16} />
+            Product Plans
+          </button>
+          <button
+            onClick={() => handleScopeChange("service")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all",
+              planScope === "service"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            )}
+          >
+            <Briefcase size={16} />
+            Service Plans
+          </button>
+        </div>
       </div>
 
       {/* Pill Style Tabs */}
@@ -77,18 +134,34 @@ export default function PlansPage() {
       </div>
 
       <div className="mt-4">
-        <div className={cn(activeTab === "listing" ? "block" : "hidden")}>
-          <ProductListingTab />
-        </div>
-        <div className={cn(activeTab === "priority" ? "block" : "hidden")}>
-          <PriorityPlanTab />
-        </div>
-        <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
-          <PlanPurchasesTab />
-        </div>
-        <div className={cn(activeTab === "boost" ? "block" : "hidden")}>
-          <RentalBoostTab />
-        </div>
+        {planScope === "product" ? (
+          <>
+            <div className={cn(activeTab === "listing" ? "block" : "hidden")}>
+              <ProductListingTab />
+            </div>
+            <div className={cn(activeTab === "priority" ? "block" : "hidden")}>
+              <PriorityPlanTab />
+            </div>
+            <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
+              <PlanPurchasesTab />
+            </div>
+            <div className={cn(activeTab === "boost" ? "block" : "hidden")}>
+              <RentalBoostTab />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={cn(activeTab === "service-listing" ? "block" : "hidden")}>
+              <ServiceListingTab />
+            </div>
+            <div className={cn(activeTab === "service-priority" ? "block" : "hidden")}>
+              <ServicePriorityTab />
+            </div>
+            <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
+              <PlanPurchasesTab />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

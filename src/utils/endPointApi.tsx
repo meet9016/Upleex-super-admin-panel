@@ -73,12 +73,23 @@ export interface EndPointApi {
     createPlan: string;
     updatePlan: string;
     deletePlan: string;
+    // Service Plans
+    getAllServicePlans: string;
+    createServicePlan: string;
+    updateServicePlan: string;
+    deleteServicePlan: string;
     // Priority Plans
     getAllPriorityPlans: string;
     createPriorityPlan: string;
     updatePriorityPlan: string;
     deletePriorityPlan: string;
     getAllPriorityPurchases: string;
+    // Service Priority Plans
+    getAllServicePriorityPlans: string;
+    createServicePriorityPlan: string;
+    updateServicePriorityPlan: string;
+    deleteServicePriorityPlan: string;
+    getAllServicePriorityPurchases: string;
     // Rental Boost Plans
     getAllRentalBoostPlans: string;
     createRentalBoostPlan: string;
@@ -220,12 +231,23 @@ const endPointApi: EndPointApi = {
     createPlan: 'plans/create',
     updatePlan: 'plans/update',
     deletePlan: 'plans/delete',
+    // Service Plans
+    getAllServicePlans: 'service-plans/getall',
+    createServicePlan: 'service-plans/create',
+    updateServicePlan: 'service-plans/update',
+    deleteServicePlan: 'service-plans/delete',
     // Priority Plans
     getAllPriorityPlans: 'priority-plans/getall',
     createPriorityPlan: 'priority-plans/create',
     updatePriorityPlan: 'priority-plans/update',
     deletePriorityPlan: 'priority-plans/delete',
     getAllPriorityPurchases: 'priority-plans/purchases/getall',
+    // Service Priority Plans
+    getAllServicePriorityPlans: 'service-priority-plans/getall',
+    createServicePriorityPlan: 'service-priority-plans/create',
+    updateServicePriorityPlan: 'service-priority-plans/update',
+    deleteServicePriorityPlan: 'service-priority-plans/delete',
+    getAllServicePriorityPurchases: 'service-priority-purchases/getall',
     // Rental Boost Plans
     getAllRentalBoostPlans: 'rental-boost-plans/getall',
     createRentalBoostPlan: 'rental-boost-plans/create',

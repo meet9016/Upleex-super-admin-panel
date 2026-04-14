@@ -44,7 +44,9 @@ interface SubCategory {
   image: string;
   parent_category?: string;
   created_at?: string;
+  updated_at?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 interface SubCategoryRow {
@@ -55,6 +57,7 @@ interface SubCategoryRow {
   image: string;
   status: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 function useDebounce<T>(value: T, delay: number = 500): T {
@@ -176,6 +179,7 @@ export default function AddSubCategoryPage() {
                 image: sub.image || "",
                 status: "Active",
                 created_at: sub.created_at || sub.createdAt || new Date().toISOString(),
+                updated_at: sub.updated_at || sub.updatedAt || new Date().toISOString(),
               });
             });
           }
@@ -433,8 +437,17 @@ export default function AddSubCategoryPage() {
     {
       field: "created_at",
       headerName: "Created",
-      minWidth: 190,
+      minWidth: 150,
       cellClass: "ag-cell-with-border",
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
+      cellStyle: { textAlign: "center" }
+    },
+    {
+      field: "updated_at",
+      headerName: "Updated",
+      minWidth: 150,
+      cellClass: "ag-cell-with-border", 
+
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A',
       cellStyle: { textAlign: "center" }
     },

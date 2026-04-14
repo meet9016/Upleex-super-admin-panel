@@ -71,7 +71,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         //   { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus, permission: "orders" },
         // ],
       },
-      { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
+      // { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
       { name: "Vendor Wallet", href: "/vendor-wallets", icon: Loader2, permission: "vendor-wallets" },
       { name: "Vendor Payments", href: "/vendor-payments", icon: FileText, permission: "vendor-payments" },
     ],
