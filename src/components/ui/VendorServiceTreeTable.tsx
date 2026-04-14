@@ -143,6 +143,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
   return (
     <div onClick={(e) => e.stopPropagation()} className="w-40 mt-[8px]">
       <div className={uniqueId}>
+         <div className="relative">
         <SearchableDropdown
           // key={`${props.data.id}-${String(props.data.approval_status || '').toLowerCase()}`}
           options={[
@@ -159,6 +160,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           showClear={false}
           buttonClassName="h-8 py-1"
         />
+      </div>
       </div>
     </div>
   );
@@ -439,10 +441,10 @@ export default function VendorServiceTreeTable({
               <Button
                 onClick={handleBulkApprove}
                 disabled={approving}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white min-w-[150px]"
               >
                 {approving ? (
-                  <PageLoader fullScreen={false} />
+                   <Loader type="button" text="Approving..." iconClassName="text-white" />
                 ) : (
                   <>Approve Selected({approvableCount})</>
                 )}

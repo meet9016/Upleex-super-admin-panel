@@ -623,7 +623,7 @@ export default function AdminOrdersPage() {
             </div>
 
             {/* ── Tree Table ─────────────────────────────────────────────────── */}
-            <div className="h-[760px] w-full relative">
+            <div className="h-[700px] w-full relative">
               {activeTab === 'rent' ? (
                 <OrdersTreeTable
                   ref={gridRef}

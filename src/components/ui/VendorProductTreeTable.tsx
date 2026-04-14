@@ -274,12 +274,12 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
           onFocus={(e) => e.target.blur()}
           tabIndex={-1}
-          className="p-2 mt-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0 flex items-center justify-center"
+          className="p-2  rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all shadow-sm outline-none focus:outline-none focus:ring-0 flex items-center justify-center"
           title="View Product Details"
         >
           <Eye size={14} />
         </button>
-
+      <div className="relative flex-1">
         <SearchableDropdown
           options={[
             { label: "Pending", value: "pending" },
@@ -293,8 +293,9 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           usePortal={true}
           maxHeight="max-h-48"
           showClear={false}
-          buttonClassName="h-8 py-1 w-[135px] mt-1.5"
+          buttonClassName="h-8 py-1 w-full"
         />
+      </div>
       </div>
     </>
   );

@@ -117,30 +117,42 @@ export default function VendorServiceApprovalPage() {
   };
 
   const handleStatusChange = async (serviceId: string, status: string) => {
+    // Optimistic update
+    const previousVendors = [...vendors];
+    setVendors(prev => prev.map(v => {
+      const updated = { ...v } as any;
+      updated.services = (v.services || []).map(s => {
+        const sid = String((s as any).id || (s as any)._id || '');
+        return sid === String(serviceId) ? { ...s, approval_status: status } : s;
+      });
+      return updated;
+    }));
+
     try {
       setApproving(true);
       const res = await api.put(`${endPointApi.approveService}/${serviceId}`, { approval_status: status });
       const vid = res?.data?.vendor_id;
       const counts = res?.data?.counts;
-      setVendors(prev => prev.map(v => {
-        const updated = { ...v } as any;
-        if (vid && (v as any).vendor_id === vid) {
-          if (counts) {
-            updated.pending_count = counts.pending;
-            updated.approved_count = counts.approved;
-            updated.rejected_count = counts.rejected;
+      
+      // Update counts if they came back, status is already updated
+      if (vid || counts) {
+        setVendors(prev => prev.map(v => {
+          const updated = { ...v } as any;
+          if (vid && (v as any).vendor_id === vid) {
+            if (counts) {
+              updated.pending_count = counts.pending;
+              updated.approved_count = counts.approved;
+              updated.rejected_count = counts.rejected;
+            }
           }
-        }
-        updated.services = (v.services || []).map(s => {
-          const sid = String((s as any).id || (s as any)._id || '');
-          return sid === String(serviceId) ? { ...s, approval_status: status } : s;
-        });
-        return updated;
-      }));
+          return updated;
+        }));
+      }
       toast.success(`Service ${status}`);
     } catch (error) {
       console.error('Failed to update status:', error);
       toast.error("Failed to update status");
+      setVendors(previousVendors); // Revert on failure
     } finally {
       setApproving(false);
     }
