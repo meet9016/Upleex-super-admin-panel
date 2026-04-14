@@ -279,7 +279,7 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
         >
           <Eye size={14} />
         </button>
-
+      <div className="relative flex-1">
         <SearchableDropdown
           options={[
             { label: "Pending", value: "pending" },
@@ -293,8 +293,9 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
           usePortal={true}
           maxHeight="max-h-48"
           showClear={false}
-          buttonClassName="h-8 py-1 w-[135px]"
+          buttonClassName="h-8 py-1 w-full"
         />
+      </div>
       </div>
     </>
   );

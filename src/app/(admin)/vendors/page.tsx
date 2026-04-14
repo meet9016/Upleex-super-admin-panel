@@ -142,6 +142,14 @@ export default function VendorsPage() {
     // }
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
+        // Optimistic update
+        const previousData = [...rowData];
+        setRowData(prev => prev.map(row => 
+            row._id === kycId
+                ? { ...row, status: newStatus.toLowerCase() as any } 
+                : row
+        ));
+
         setIsUpdating(kycId);
         try {
             // Send both kyc_id and vendor_id in payload
@@ -160,13 +168,15 @@ export default function VendorsPage() {
 
             if (response.data.status === 200 || response.data.success) {
                 toast.success(`Vendor status updated to ${newStatus}`);
-                fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
+                // fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
             } else {
                 toast.error(response.data.message || "Failed to update status");
+                setRowData(previousData); // Revert on failure
             }
         } catch (error: any) {
             console.error("Error updating status:", error);
             toast.error(error.response?.data?.message || "Failed to update vendor status");
+            setRowData(previousData); // Revert on error
         } finally {
             setIsUpdating(null);
         }
@@ -263,7 +273,7 @@ export default function VendorsPage() {
                         >
                             <Eye size={14} />
                         </button>
-                        <div className="w-[100%]">
+                        <div className="relative w-[100%]">
                             <SearchableDropdown
                                 options={[
                                     { label: "Pending", value: "pending" },

@@ -113,37 +113,47 @@ export default function VendorProductApprovalPage() {
   };
 
   const handleStatusChange = async (productId: string, status: string) => {
+    // Optimistic update
+    const previousVendors = [...vendors];
+    setVendors(prev => prev.map(v => {
+      const updated = { ...v } as any;
+      updated.products = (v.products || []).map(p => {
+        const pid = String((p as any).id || (p as any)._id || '');
+        return pid === String(productId) ? { ...p, approval_status: status } : p;
+      });
+      return updated;
+    }));
+
     try {
-      // Use existing productApproval API with PUT method
       const res = await api.put(`${endPointApi.approveProduct}/${productId}`, { 
         approval_status: status 
       });
       
       const vid = res?.data?.vendor_id;
       const counts = res?.data?.counts;
-      setVendors(prev => prev.map(v => {
-        const updated = { ...v } as any;
-        if (vid && (v as any).vendor_id === vid) {
-          if (counts) {
-            updated.pending_count = counts.pending;
-            updated.approved_count = counts.approved;
-            updated.rejected_count = counts.rejected;
-          }
-        }
-        updated.products = (v.products || []).map(p => {
-          const pid = String((p as any).id || (p as any)._id || '');
-          return pid === String(productId) ? { ...p, approval_status: status } : p;
-        });
-        return updated;
-      }));
       
-      // Show appropriate message based on response
+      // Update counts if they came back from API, but status is already updated
+      if (vid || counts) {
+        setVendors(prev => prev.map(v => {
+          const updated = { ...v } as any;
+          if (vid && (v as any).vendor_id === vid) {
+            if (counts) {
+              updated.pending_count = counts.pending;
+              updated.approved_count = counts.approved;
+              updated.rejected_count = counts.rejected;
+            }
+          }
+          return updated;
+        }));
+      }
+      
       const message = res?.data?.message || `Product ${status} successfully`;
       toast.success(message);
     } catch (error: any) {
       console.error('Failed to update status:', error);
       const errorMessage = error?.response?.data?.message || 'Failed to update status';
       toast.error(errorMessage);
+      setVendors(previousVendors); // Revert on failure
     }
   };
 
