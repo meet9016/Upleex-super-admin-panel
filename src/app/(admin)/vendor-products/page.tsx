@@ -114,8 +114,6 @@ export default function VendorProductApprovalPage() {
 
   const handleStatusChange = async (productId: string, status: string) => {
     try {
-      setApproving(true);
-      
       // Use existing productApproval API with PUT method
       const res = await api.put(`${endPointApi.approveProduct}/${productId}`, { 
         approval_status: status 
@@ -146,8 +144,6 @@ export default function VendorProductApprovalPage() {
       console.error('Failed to update status:', error);
       const errorMessage = error?.response?.data?.message || 'Failed to update status';
       toast.error(errorMessage);
-    } finally {
-      setApproving(false);
     }
   };
 

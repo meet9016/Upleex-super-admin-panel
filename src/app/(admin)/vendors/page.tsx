@@ -299,7 +299,7 @@ export default function VendorsPage() {
 
                             />
                         </div>
-                        {isUpdating === kycId && <Loader className="text-indigo-600" />}
+                        {/* {isUpdating === kycId && <Loader className="text-indigo-600" />} */}
                     </div>
                 );
             }
