@@ -251,3 +251,25 @@
     border-radius: 0 !important;
   }
 }
+
+
+/* Global scrollbar for all overflow elements */
+* {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #7c3aed, #3b82f6, #0ea5e9);
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #6d28d9, #2563eb, #0284c7);
+  }
+}
