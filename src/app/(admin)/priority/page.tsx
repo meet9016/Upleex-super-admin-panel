@@ -22,9 +22,7 @@ type PPlan = {
   product_slots: number | '';
   status?: string;
   description?: string;
-  addon_available_for_yearly?: boolean;
-  addon_price_per_year?: number;
-  addon_max_slots?: number;
+
   is_popular?: boolean;
 };
 
@@ -43,9 +41,6 @@ export default function PriorityPlansPage() {
     product_slots: 1,
     status: "active",
     description: "",
-    addon_available_for_yearly: false,
-    addon_price_per_year: 0,
-    addon_max_slots: 0,
     is_popular: false,
   });
 
@@ -87,9 +82,7 @@ export default function PriorityPlansPage() {
       product_slots: 1,
       status: "active",
       description: "",
-      addon_available_for_yearly: false,
-      addon_price_per_year: 0,
-      addon_max_slots: 0,
+    
       is_popular: false,
     });
   };
@@ -128,9 +121,6 @@ export default function PriorityPlansPage() {
       product_slots: p.product_slots,
       status: p.status || "active",
       description: p.description || "",
-      addon_available_for_yearly: !!p.addon_available_for_yearly,
-      addon_price_per_year: p.addon_price_per_year || 0,
-      addon_max_slots: p.addon_max_slots || 0,
       is_popular: !!p.is_popular,
     });
     setSelectedPlanType(p.name.toLowerCase());
@@ -197,9 +187,6 @@ export default function PriorityPlansPage() {
       minWidth: 120,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "addon_available_for_yearly", headerName: "Annual Add-on", minWidth : 100, valueFormatter: (p) => p.value ? 'Yes' : 'No' },
-    { field: "addon_price_per_year", headerName: "Add-on Price", minWidth: 100, valueFormatter: (p) => p.value ? `₹${p.value}` : '-' },
-    { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 100 },
     {
       field: "is_popular",
       headerName: "Popular",
@@ -409,7 +396,7 @@ export default function PriorityPlansPage() {
               </div>
 
               {/* Add-on Section for Premium */}
-              {selectedPlanType === "premium" && (
+              {/* {selectedPlanType === "premium" && (
                 <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg">
                   <div className="col-span-1">
                     <label className="text-sm font-semibold text-slate-700">Annual Add-on</label>
@@ -446,7 +433,7 @@ export default function PriorityPlansPage() {
                     />
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Popular Checkbox */}
               <div>

@@ -24,10 +24,10 @@ type PPlan = {
   product_slots: number | '';
   status?: string;
   description?: string;
+  is_popular?: boolean;
   addon_available_for_yearly?: boolean;
   addon_price_per_year?: number;
   addon_max_slots?: number;
-  is_popular?: boolean;
 };
 
 export default function PriorityPlanTab() {
@@ -45,10 +45,10 @@ export default function PriorityPlanTab() {
     product_slots: 1,
     status: "active",
     description: "",
+    is_popular: false,
     addon_available_for_yearly: false,
     addon_price_per_year: 0,
     addon_max_slots: 0,
-    is_popular: false,
   });
 
   const planTypeOptions = [
@@ -89,10 +89,10 @@ export default function PriorityPlanTab() {
       product_slots: 1,
       status: "active",
       description: "",
+      is_popular: false,
       addon_available_for_yearly: false,
       addon_price_per_year: 0,
       addon_max_slots: 0,
-      is_popular: false,
     });
     setErrors({});
   };
@@ -138,10 +138,10 @@ export default function PriorityPlanTab() {
       product_slots: p.product_slots,
       status: p.status || "active",
       description: p.description || "",
+      is_popular: !!p.is_popular,
       addon_available_for_yearly: !!p.addon_available_for_yearly,
       addon_price_per_year: p.addon_price_per_year || 0,
       addon_max_slots: p.addon_max_slots || 0,
-      is_popular: !!p.is_popular,
     });
     setSelectedPlanType(p.name.toLowerCase());
     setErrors({});
@@ -217,24 +217,17 @@ export default function PriorityPlanTab() {
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
     {
-      field: "addon_available_for_yearly",
-      headerName: "Annual Add-on",
-      minWidth: 100,
-      valueFormatter: (p) => (p.value ? "Yes" : "No"),
-    },
-    {
-      field: "addon_price_per_year",
-      headerName: "Add-on Price",
-      minWidth: 100,
-      valueFormatter: (p) => (p.value ? `₹${p.value}` : "-"),
-    },
-    { field: "addon_max_slots", headerName: "Add-on Slots", minWidth: 100 },
-    {
       field: "is_popular",
       headerName: "Popular",
       minWidth: 80,
       cellRenderer: PopularCellRenderer,
       cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
+    },
+    {
+      field: "addon_available_for_yearly",
+      headerName: "Annual Addon",
+      minWidth: 120,
+      cellRenderer: (params: any) => params.value ? "Available" : "No",
     },
     {
       headerName: "Action",
@@ -443,58 +436,60 @@ export default function PriorityPlanTab() {
                 ) : null}
               </div>
 
-              {selectedPlanType === "premium" && (
-                <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg">
-                  <div className="col-span-1">
-                    <label className="text-sm font-semibold text-slate-700">
-                      Annual Add-on
-                    </label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Checkbox
-                        checked={!!form.addon_available_for_yearly}
-                        onCheckedChange={(checked) =>
-                          setForm({ ...form, addon_available_for_yearly: checked })
-                        }
-                      />
-                      <span className="text-sm text-slate-600">Available</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-slate-700">
-                      Add-on Price/Year
-                    </label>
-                    <input
-                      type="number"
-                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${!form.addon_available_for_yearly ? "bg-slate-100" : ""}`}
-                      value={form.addon_price_per_year}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          addon_price_per_year: Number(e.target.value || 0),
-                        })
+              <div className="grid grid-cols-1 gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold text-indigo-700">
+                    Annual Benefit (Duration Add-on)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={!!form.addon_available_for_yearly}
+                      onCheckedChange={(checked) =>
+                        setForm({ ...form, addon_available_for_yearly: !!checked })
                       }
-                      disabled={!form.addon_available_for_yearly}
                     />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold text-slate-700">
-                      Add-on Max Slots
-                    </label>
-                    <input
-                      type="number"
-                      className={`mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${!form.addon_available_for_yearly ? "bg-slate-100" : ""}`}
-                      value={form.addon_max_slots}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          addon_max_slots: Number(e.target.value || 0),
-                        })
-                      }
-                      disabled={!form.addon_available_for_yearly}
-                    />
+                    <span className="text-xs text-indigo-600 font-semibold">Enabled</span>
                   </div>
                 </div>
-              )}
+
+                {form.addon_available_for_yearly && (
+                  <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600">
+                        Price per Year (₹)
+                      </label>
+                      <input
+                        type="number"
+                        className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={form.addon_price_per_year}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            addon_price_per_year: Number(e.target.value || 0),
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600">
+                        Max Product Slots
+                      </label>
+                      <input
+                        type="number"
+                        className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={form.addon_max_slots}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            addon_max_slots: Number(e.target.value || 0),
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
 
               <div>
                 <label className="text-sm font-semibold text-slate-700">
