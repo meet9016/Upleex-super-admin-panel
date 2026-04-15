@@ -16,6 +16,8 @@ export interface EndPointApi {
     getVendorList: string;
     updateVendorStatus: string;
     downloadVendorKycPdf: string;
+    exportVendorsExcel: string;
+    exportVendorsPDF: string;
     // Dropdowns
     getDropdowns: string;
     postDropdowns: string;
@@ -131,6 +133,8 @@ export interface EndPointApi {
     getAllVendorWallets: string;
     getVendorWalletDetails: string;
     getVendorWalletTransactions: string;
+    exportVendorWalletsExcel: string;
+    exportVendorWalletsPDF: string;
     // BANNERS
     createBanner: string;
     getAllBanners: string;
@@ -173,6 +177,8 @@ const endPointApi: EndPointApi = {
     getVendorList: 'vendor-kyc',
     updateVendorStatus: 'change-status',
     downloadVendorKycPdf: 'vendor-kyc/:id/download-pdf',
+    exportVendorsExcel: 'export/vendors/excel',
+    exportVendorsPDF: 'export/vendors/pdf',
 
     // Dropdowns
     getDropdowns: 'dropdowns',
@@ -289,6 +295,8 @@ const endPointApi: EndPointApi = {
     getAllVendorWallets: 'admin/vendor-wallets',
     getVendorWalletDetails: 'admin/vendor-wallets/:vendorId',
     getVendorWalletTransactions: 'admin/vendor-wallets/:vendorId/transactions',
+    exportVendorWalletsExcel: 'export/vendor-wallets/excel',
+    exportVendorWalletsPDF: 'export/vendor-wallets/pdf',
     // BANNERS
     createBanner: 'banners/create-banner',
     getAllBanners: 'banners/getall',

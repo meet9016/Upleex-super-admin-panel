@@ -4,12 +4,16 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { api } from '@/utils/axiosInstance';   // ← Your axios instance
 import endPointApi from '@/utils/endPointApi';
 import { toast } from 'react-toastify';
-import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch, MdDownload } from 'react-icons/md';
+import { MdWallet, MdHistory, MdArrowUpward, MdArrowDownward, MdSearch, MdDownload, MdMoreVert } from 'react-icons/md';
+import { FaFileExcel, FaFilePdf } from 'react-icons/fa';
 import AgGridTable from '@/components/ui/AgGridTable';
 import ActionButtons from '@/components/common/ActionButtons';
 import { ColDef } from 'ag-grid-community';
 import PageLoader from '@/components/common/PageLoader';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { exportVendorWalletsToExcel, exportVendorWalletsToPDF } from '@/utils/exportUtils';
+import Loader from '@/components/common/Loader';
+import { BsThreeDotsVertical } from 'react-icons/bs';
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -52,6 +56,10 @@ const VendorWalletsPage = () => {
   const [showTransactions, setShowTransactions] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [excelLoading, setExcelLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsMenuRef = React.useRef<HTMLDivElement>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 600);
 
@@ -148,6 +156,44 @@ const VendorWalletsPage = () => {
     }
   }, [debouncedSearch]);
 
+  const handleExportExcel = async () => {
+    try {
+      setExcelLoading(true);
+      const params = searchTerm ? { search: searchTerm } : {};
+      await exportVendorWalletsToExcel(params);
+      toast.success('Vendor Wallets exported to Excel successfully!');
+      setShowActionsMenu(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export to Excel');
+    } finally {
+      setExcelLoading(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      setPdfLoading(true);
+      const params = searchTerm ? { search: searchTerm } : {};
+      await exportVendorWalletsToPDF(params);
+      toast.success('Vendor Wallets exported to PDF successfully!');
+      setShowActionsMenu(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export to PDF');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setShowActionsMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const columns: ColDef[] = useMemo(() => [
     { field: 'vendor_name', headerName: 'Vendor Name', flex: 1, minWidth: 150 },
     { field: 'vendor_email', headerName: 'Email', flex: 1, minWidth: 180 },
@@ -213,7 +259,7 @@ const VendorWalletsPage = () => {
             Vendor Wallets
           </h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
           <div className="relative w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MdSearch className="h-5 w-5 text-gray-400" />
@@ -234,8 +280,44 @@ const VendorWalletsPage = () => {
               </button>
             )}
           </div>
+
+          {/* Export Actions Menu */}
+          <div className="relative" ref={actionsMenuRef}>
+            <button
+              onClick={() => setShowActionsMenu((v) => !v)}
+              className="flex items-center justify-center gap-2 w-full sm:w-10 h-10  bg-gray-50 border-1 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-sm font-semibold"
+              title="Export options"
+            >
+              <BsThreeDotsVertical size={18} />
+            </button>
+
+            {showActionsMenu && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                <button
+                  onClick={handleExportExcel}
+                  disabled={excelLoading || pdfLoading}
+                  className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-50"
+                >
+                  <FaFileExcel className="text-lg text-emerald-600" />
+                  <span>Export to Excel</span>
+                  {excelLoading && <Loader2 className="ml-auto text-emerald-600 w-3.5 h-3.5 animate-spin" />}
+                </button>
+
+                <button
+                  onClick={handleExportPDF}
+                  disabled={excelLoading || pdfLoading}
+                  className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-rose-500 hover:bg-rose-50 transition-all duration-200 disabled:opacity-50"
+                >
+                  <FaFilePdf className="text-lg text-rose-600" />
+                  <span>Export to PDF</span>
+                  {pdfLoading && <Loader2 className="ml-auto text-rose-600 w-3.5 h-3.5 animate-spin" />}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
       {/* AgGrid Table */}
       <div className="bg-white rounded-lg shadow-sm">
         <AgGridTable

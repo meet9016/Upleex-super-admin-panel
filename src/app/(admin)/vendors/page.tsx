@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
-import { Loader2, Search, Eye, X, Filter } from "lucide-react";
+import { Loader2, Search, Eye, X, Filter, FileJson, FileText } from "lucide-react";
 import StatusBadge from "@/components/common/StatusBadge";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { DataTable } from "@/components/ui/DataTable";
@@ -15,6 +15,8 @@ import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import VendorDetailsModal from "./view";
 import Loader from "@/components/common/Loader";
 import PageLoader from "@/components/common/PageLoader";
+import { exportVendorsToExcel, exportVendorsToPDF } from "@/utils/exportUtils";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 interface VendorRow {
     _id: string; // This is the KYC ID
@@ -50,6 +52,9 @@ export default function VendorsPage() {
     const [businessNameFilter, setBusinessNameFilter] = useState("");
     const [kycProgressFilter, setKycProgressFilter] = useState("");
     const [vendorTypeFilter, setVendorTypeFilter] = useState("");
+    const [excelLoading, setExcelLoading] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
+    const [showActionsMenu, setShowActionsMenu] = useState(false);
 
     // Filter Modal state and refs
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -60,11 +65,32 @@ export default function VendorsPage() {
     const [pendingBusinessName, setPendingBusinessName] = useState("");
     const [pendingKycProgress, setPendingKycProgress] = useState("");
     const [pendingVendorType, setPendingVendorType] = useState("");
+    const actionsMenuRef = React.useRef<HTMLDivElement>(null);
 
     const debouncedSearch = useDebounce(searchText, 500);
     // Only fetch if 3+ chars or empty string
     const validSearchText = debouncedSearch.length >= 3 || debouncedSearch.length === 0 ? debouncedSearch : "";
     const activeFilterCount = [statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter].filter(v => v !== "").length;
+
+    const getCurrentParams = () => {
+        const params: any = {};
+        if (statusFilter && statusFilter.trim() !== '') {
+            params.status = statusFilter.trim();
+        }
+        if (vendorNameFilter && vendorNameFilter.trim() !== '') {
+            params.vendor_name = vendorNameFilter.trim();
+        }
+        if (businessNameFilter && businessNameFilter.trim() !== '') {
+            params.business_name = businessNameFilter.trim();
+        }
+        if (vendorTypeFilter && vendorTypeFilter.trim() !== '') {
+            params.vendor_type = vendorTypeFilter.trim();
+        }
+        if (validSearchText && validSearchText.trim() !== '') {
+            params.search = validSearchText.trim();
+        }
+        return params;
+    };
 
     console.log(rowData)
     const fetchVendors = useCallback(async (
@@ -182,6 +208,44 @@ export default function VendorsPage() {
         }
     };
 
+    const handleExportExcel = async () => {
+        try {
+            setExcelLoading(true);
+            const params = getCurrentParams();
+            await exportVendorsToExcel(params);
+            toast.success('Vendors exported to Excel successfully!');
+            setShowActionsMenu(false);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to export to Excel');
+        } finally {
+            setExcelLoading(false);
+        }
+    };
+
+    const handleExportPDF = async () => {
+        try {
+            setPdfLoading(true);
+            const params = getCurrentParams();
+            await exportVendorsToPDF(params);
+            toast.success('Vendors exported to PDF successfully!');
+            setShowActionsMenu(false);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to export to PDF');
+        } finally {
+            setPdfLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+                setShowActionsMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const columnDefs: ColDef<any>[] = [
         {
             headerName: "Vendor Name",
@@ -224,7 +288,7 @@ export default function VendorsPage() {
                 const percentage = Math.min((completed / totalSteps) * 100, 100);
 
                 return (
-                    <div className="flex flex-col justify-center h-full space-y-1 w-full max-w-[120px]">
+                    <div className="flex flex-col justify-center h-full space-y-1 w-full max-w-32">
                         <div className="flex justify-between text-xs text-slate-500 font-medium">
                             <span>{completed}/{totalSteps} Pages</span>
                         </div>
@@ -273,7 +337,7 @@ export default function VendorsPage() {
                         >
                             <Eye size={14} />
                         </button>
-                        <div className="relative w-[100%]">
+                        <div className="relative w-full">
                             <SearchableDropdown
                                 options={[
                                     { label: "Pending", value: "pending" },
@@ -348,7 +412,7 @@ export default function VendorsPage() {
                                 setPendingStatusFilter(statusFilter);
                                 setShowFilterModal(!showFilterModal);
                             }}
-                           className="w-full sm:w-10 h-10 flex items-center justify-center bg-white text-gray-500 border border-gray-100 rounded-xl hover:shadow-md border-gray-300 border-1 transition-all duration-300"
+                           className="w-full sm:w-10 h-10 flex items-center justify-center bg-white text-gray-500 border border-gray-300 rounded-xl hover:shadow-md hover:text-indigo-600 transition-all duration-300"
                         >
                             <Filter size={18} />
                             {/* Filter */}
@@ -482,8 +546,42 @@ export default function VendorsPage() {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
+                    </div>                    {/* Actions Menu (Export) */}
+                    <div className="relative" ref={actionsMenuRef}>
+                        <button
+                            onClick={() => setShowActionsMenu((v) => !v)}
+                            className="w-full sm:w-10 h-10 flex items-center justify-center bg-white text-gray-500 border border-gray-300 rounded-xl hover:shadow-md hover:text-gray-600 transition-all duration-300"
+                            title="Export options"
+                        >
+                            <BsThreeDotsVertical  size={18} />
+                        </button>
+
+                        {showActionsMenu && (
+                            <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl w-64 z-50 border border-gray-200 overflow-hidden">
+                                <div className="py-1">
+                                    <button
+                                        onClick={handleExportExcel}
+                                        disabled={excelLoading || pdfLoading}
+                                        className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-50"
+                                    >
+                                        <FileJson className="text-lg text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
+                                        <span>Export to Excel</span>
+                                        {excelLoading && <Loader2 className="ml-auto text-emerald-600 w-3.5 h-3.5 animate-spin" />}
+                                    </button>
+
+                                    <button
+                                        onClick={handleExportPDF}
+                                        disabled={excelLoading || pdfLoading}
+                                        className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-rose-500 hover:bg-rose-50 transition-all duration-200 disabled:opacity-50"
+                                    >
+                                        <FileText className="text-lg text-rose-600 group-hover:scale-110 transition-transform duration-200" />
+                                        <span>Export to PDF</span>
+                                        {pdfLoading && <Loader2 className="ml-auto text-rose-600 w-3.5 h-3.5 animate-spin" />}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>                </div>
             </div>
 
             <div className="grid gap-6">
