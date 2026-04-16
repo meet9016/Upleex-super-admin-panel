@@ -294,6 +294,7 @@ const ContactUsPage = () => {
             enableSearch={false}
             enableFilter={false}
             gridHeight={680}
+            noRowsMessage="No contact found"
           />
         </CardContent>
       </Card>

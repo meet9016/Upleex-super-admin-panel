@@ -194,7 +194,7 @@ export default function VendorsPage() {
 
             if (response.data.status === 200 || response.data.success) {
                 toast.success(`Vendor status updated to ${newStatus}`);
-                // fetchVendors(debouncedSearch, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
+                fetchVendors(validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
             } else {
                 toast.error(response.data.message || "Failed to update status");
                 setRowData(previousData); // Revert on failure
