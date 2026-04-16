@@ -23,7 +23,6 @@ type PPlan = {
   yearly_price: number | '';
   product_slots: number | '';
   status?: string;
-  description?: string;
   is_popular?: boolean;
   addon_available_for_yearly?: boolean;
   addon_price_per_year?: number;
@@ -44,9 +43,8 @@ export default function PriorityPlanTab() {
     yearly_price: 0,
     product_slots: 1,
     status: "active",
-    description: "",
     is_popular: false,
-    addon_available_for_yearly: false,
+    addon_available_for_yearly: true,
     addon_price_per_year: 0,
     addon_max_slots: 0,
   });
@@ -88,9 +86,8 @@ export default function PriorityPlanTab() {
       yearly_price: 0,
       product_slots: 1,
       status: "active",
-      description: "",
       is_popular: false,
-      addon_available_for_yearly: false,
+      addon_available_for_yearly: true,
       addon_price_per_year: 0,
       addon_max_slots: 0,
     });
@@ -106,15 +103,13 @@ export default function PriorityPlanTab() {
       newErrors.yearly_price = "Yearly price must be 0 or more";
     if (form.product_slots === "" || Number(form.product_slots) < 1)
       newErrors.product_slots = "Slots must be at least 1";
-    if (!String(form.description || "").trim())
-      newErrors.description = "Description is required";
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
     setErrors({});
     try {
-      const payload = { ...form, name: String(form.name).trim() };
+      const payload = { ...form, name: String(form.name).trim(), addon_available_for_yearly: true };
       if (editingId) {
         await api.put(`${endPointApi.updatePriorityPlan}/${editingId}`, payload);
         toast.success("Priority plan updated");
@@ -137,9 +132,8 @@ export default function PriorityPlanTab() {
       yearly_price: p.yearly_price,
       product_slots: p.product_slots,
       status: p.status || "active",
-      description: p.description || "",
       is_popular: !!p.is_popular,
-      addon_available_for_yearly: !!p.addon_available_for_yearly,
+      addon_available_for_yearly: true,
       addon_price_per_year: p.addon_price_per_year || 0,
       addon_max_slots: p.addon_max_slots || 0,
     });
@@ -274,16 +268,7 @@ export default function PriorityPlanTab() {
                         setSelectedPlanType(val);
                         setForm({ ...form, name: val.charAt(0).toUpperCase() + val.slice(1) });
                         if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
-                        if (val === "premium") {
-                          setForm((prev) => ({ ...prev, addon_available_for_yearly: true }));
-                        } else {
-                          setForm((prev) => ({
-                            ...prev,
-                            addon_available_for_yearly: false,
-                            addon_price_per_year: 0,
-                            addon_max_slots: 0,
-                          }));
-                        }
+                        setForm((prev) => ({ ...prev, name: val.charAt(0).toUpperCase() + val.slice(1), addon_available_for_yearly: true }));
                       }}
                     />
                   </div>
@@ -416,78 +401,38 @@ export default function PriorityPlanTab() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Description <span className="text-red-500">*</span></label>
-                <textarea
-                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? "border-red-500 focus:ring-red-200" : "border-slate-200"}`}
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setForm({ ...form, description: v });
-                    if (errors.description && v.trim())
-                      setErrors((prev) => ({ ...prev, description: "" }));
-                  }}
-                />
-                {errors.description ? (
-                  <p className="mt-1 text-xs text-red-600">
-                    {errors.description}
-                  </p>
-                ) : null}
-              </div>
-
               <div className="grid grid-cols-1 gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-bold text-indigo-700">
-                    Annual Benefit (Duration Add-on)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={!!form.addon_available_for_yearly}
-                      onCheckedChange={(checked) =>
-                        setForm({ ...form, addon_available_for_yearly: !!checked })
+                <label className="text-sm font-bold text-indigo-700">
+                  Annual Benefit (Duration Add-on)
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600">
+                      Price per Year (₹)
+                    </label>
+                    <input
+                      type="number"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      value={form.addon_price_per_year}
+                      onChange={(e) =>
+                        setForm({ ...form, addon_price_per_year: Number(e.target.value || 0) })
                       }
                     />
-                    <span className="text-xs text-indigo-600 font-semibold">Enabled</span>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600">
+                      Max Product Slots
+                    </label>
+                    <input
+                      type="number"
+                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      value={form.addon_max_slots}
+                      onChange={(e) =>
+                        setForm({ ...form, addon_max_slots: Number(e.target.value || 0) })
+                      }
+                    />
                   </div>
                 </div>
-
-                {form.addon_available_for_yearly && (
-                  <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-600">
-                        Price per Year (₹)
-                      </label>
-                      <input
-                        type="number"
-                        className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        value={form.addon_price_per_year}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            addon_price_per_year: Number(e.target.value || 0),
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-600">
-                        Max Product Slots
-                      </label>
-                      <input
-                        type="number"
-                        className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        value={form.addon_max_slots}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            addon_max_slots: Number(e.target.value || 0),
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
 

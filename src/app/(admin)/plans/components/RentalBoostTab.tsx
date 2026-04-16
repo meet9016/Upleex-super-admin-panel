@@ -20,7 +20,6 @@ type RPlan = {
   days: number | '';
   price: number | '';
   status: string;
-  description: string;
   is_popular: boolean;
 };
 
@@ -36,7 +35,6 @@ export default function RentalBoostTab() {
     days: 7,
     price: 39,
     status: "active",
-    description: "",
     is_popular: false,
   });
 
@@ -69,7 +67,6 @@ export default function RentalBoostTab() {
       days: 7,
       price: 39,
       status: "active",
-      description: "",
       is_popular: false,
     });
     setErrors({});
@@ -80,7 +77,6 @@ export default function RentalBoostTab() {
     // if (!String(form.name || "").trim()) newErrors.name = "Plan name is required";
     if (form.days === "" || Number(form.days) < 1) newErrors.days = "Days must be at least 1";
     if (form.price === "" || Number(form.price) < 0) newErrors.price = "Price must be 0 or more";
-    if (!String(form.description || "").trim()) newErrors.description = "Description is required";
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
@@ -110,7 +106,6 @@ export default function RentalBoostTab() {
       days: p.days,
       price: p.price,
       status: p.status || "active",
-      description: p.description || "",
       is_popular: !!p.is_popular,
     });
     setErrors({});
@@ -223,18 +218,6 @@ export default function RentalBoostTab() {
                     onChange={(val) => setForm({ ...form, status: val as string })}
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Description <span className="text-red-500">*</span></label>
-                <textarea
-                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? "border-red-500" : "border-slate-200"}`}
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Describe the plan benefits..."
-                />
-                {errors.description && <p className="mt-1 text-xs text-red-600">{errors.description}</p>}
               </div>
 
               <div>

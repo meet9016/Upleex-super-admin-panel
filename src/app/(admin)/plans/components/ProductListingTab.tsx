@@ -24,7 +24,6 @@ type Plan = {
   max_products: number | '';
   amount: number | '';
   status?: string;
-  description?: string;
   popular?: boolean;
 };
 
@@ -44,12 +43,16 @@ export default function ProductListingTab() {
     max_products: 1,
     amount: 0,
     status: "active",
-    description: "",
     popular: false,
   });
   const statusOptions = [
     { label: "Active", value: "active" },
     { label: "Inactive", value: "inactive" }
+  ];
+  const planTypeOptions = [
+    { label: "Basic", value: "basic" },
+    { label: "Standard", value: "standard" },
+    { label: "Premium", value: "premium" },
   ];
 
   const fetchData = async () => {
@@ -77,7 +80,6 @@ export default function ProductListingTab() {
       max_products: 1,
       amount: 0,
       status: "active",
-      description: "",
       popular: false,
     });
   };
@@ -88,7 +90,6 @@ export default function ProductListingTab() {
     if (form.months === '' || Number(form.months) < 1) newErrors.months = 'Months must be at least 1';
     if (form.max_products === '' || Number(form.max_products) < 1) newErrors.max_products = 'Max products must be at least 1';
     if (form.amount === '' || Number(form.amount) < 0) newErrors.amount = 'Amount must be 0 or more';
-    if (!String(form.description || '').trim()) newErrors.description = 'Description is required';
     if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
     setErrors({});
     try {
@@ -98,7 +99,6 @@ export default function ProductListingTab() {
         max_products: Number(form.max_products),
         amount: Number(form.amount),
         status: form.status || "active",
-        description: form.description || "",
         popular: !!form.popular,
       };
       if (editingId) {
@@ -123,7 +123,6 @@ export default function ProductListingTab() {
       max_products: p.max_products,
       amount: p.amount,
       status: p.status || "active",
-      description: p.description || "",
       popular: !!p.popular,
     });
     setErrors({});
@@ -210,7 +209,6 @@ export default function ProductListingTab() {
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
     { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p) => p.value ? '⭐ Yes' : 'No' },
-    { field: "description", headerName: "Description", minWidth: 200 },
     {
       headerName: "Action",
       width: 100,
@@ -246,16 +244,18 @@ export default function ProductListingTab() {
                 <label className="text-sm font-semibold text-slate-700">
                   Plan Type <span className="text-red-500">*</span>
                 </label>
-                <input
-                  className={`mt-1 w-full rounded-lg px-3 py-2 border ${errors.plan_type ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
-                  aria-invalid={!!errors.plan_type}
-                  value={form.plan_type}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setForm({ ...form, plan_type: v });
-                    if (errors.plan_type && v.trim()) setErrors(prev => ({ ...prev, plan_type: '' }));
-                  }}
-                />
+                <div className="mt-1">
+                  <SearchableDropdown
+                    options={planTypeOptions}
+                    value={form.plan_type}
+                    placeholder="Select Plan Type"
+                    onChange={(val) => {
+                      const v = Array.isArray(val) ? val[0] : val;
+                      setForm({ ...form, plan_type: v });
+                      if (errors.plan_type && v) setErrors(prev => ({ ...prev, plan_type: '' }));
+                    }}
+                  />
+                </div>
                 {errors.plan_type ? (<p className="mt-1 text-xs text-red-600">{errors.plan_type}</p>) : null}
               </div>
 
@@ -324,23 +324,6 @@ export default function ProductListingTab() {
                     }
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-slate-700">
-                  Description <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  className={`mt-1 w-full rounded-lg px-3 py-2 text-sm border ${errors.description ? 'border-red-500 focus:ring-0' : 'border-slate-200'}`}
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setForm({ ...form, description: v });
-                    if (errors.description && v.trim()) setErrors(prev => ({ ...prev, description: '' }));
-                  }}
-                />
-                {errors.description ? (<p className="mt-1 text-xs text-red-600">{errors.description}</p>) : null}
               </div>
 
               <div className="flex gap-3 pt-2">
