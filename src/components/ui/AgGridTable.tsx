@@ -44,7 +44,8 @@ interface AgGridTableProps {
   showCheckboxes?: boolean;
   autoGroupColumnDef?: ColDef;
   groupDefaultExpanded?: number;
-  getRowHeight?: (params: any) => number;
+  getRowHeight?: (params: any) => number; 
+  noRowsMessage?: string;
 }
 
 const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
@@ -68,6 +69,7 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
   autoGroupColumnDef,
   groupDefaultExpanded,
   getRowHeight,
+  noRowsMessage
 }, ref) => {
   const router = useRouter();
   const internalRef = useRef<any>(null);
@@ -270,7 +272,8 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
             getRowId={useCallback((params: any) => {
               return params.data.id || params.data.categories_id || params.data._id;
             }, [])}
-            overlayNoRowsTemplate="<span></span>"
+            suppressNoRowsOverlay={loading}
+            overlayNoRowsTemplate={noRowsMessage ? `<span class="text-gray-500 dark:text-gray-400 font-medium">${noRowsMessage}</span>` : "<span></span>"}
             autoGroupColumnDef={autoGroupColumnDef}
             groupDefaultExpanded={groupDefaultExpanded}
             getRowHeight={getRowHeight}
