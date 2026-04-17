@@ -54,8 +54,6 @@ const ContactUsPage = () => {
       setIsFetching(true);
       const response = await apiService.getAllContacts({ limit: 1000 });
       
-      console.log('API Response:', response);
-      
       // Ensure proper data mapping and date handling
       const formattedContacts = response.data.map((contact: any) => {
         return {

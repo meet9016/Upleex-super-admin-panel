@@ -394,7 +394,6 @@ const VendorWalletsPage = () => {
                 {transactions.length > 0 ? (
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {transactions.map((transaction) => {
-                      console.log("🚀 ~ VendorWalletsPage ~ transaction:", transaction)
                       return <div
                         key={transaction._id}
                         className="flex items-center justify-between p-4 bg-gray-50  rounded-lg border border-gray-200 "

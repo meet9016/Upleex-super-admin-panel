@@ -109,7 +109,6 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
 
   const getStatusStyles = (status: string) => {
     const s = String(status || '').toLowerCase();
-    console.log("🚀 ~ getStatusStyles ~ s:", s)
     if (s == 'approved' || s == 'active' || s == 'approval') return "text-green-700 bg-green-50 border-green-200";
     if (s === 'rejected') return "text-rose-700 bg-rose-50 border-rose-200";
     if (s === 'completed') return "text-blue-700 bg-blue-50 border-blue-200";

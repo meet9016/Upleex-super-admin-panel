@@ -92,7 +92,6 @@ export default function FAQPage() {
     try {
       setIsFetching(true);
       const res = await api.get(endPointApi.getAllFAQs);
-      console.log("🚀 ~ fetchFAQs ~ res:", res);
 
       if (res.data?.data) {
         const formattedFaqs = res.data.data.map((faq: any) => ({
@@ -120,7 +119,6 @@ export default function FAQPage() {
       // Using the same endpoint but with search query parameter
       // Adjust the endpoint based on your backend API structure
       const res = await api.get(`${endPointApi.getAllFAQs}?search=${encodeURIComponent(searchTerm)}`);
-      console.log("🚀 ~ searchFAQs ~ res:", res);
 
       if (res.data?.data) {
         const formattedFaqs = res.data.data.map((faq: any) => ({
@@ -229,7 +227,6 @@ export default function FAQPage() {
   };
 
   const handleEdit = (faq: FAQRow) => {
-    console.log("🚀 ~ handleEdit ~ faq:", faq)
     setEditingId(faq.id);
     setValue("question", faq.question);
     setValue("answer", faq.answer);

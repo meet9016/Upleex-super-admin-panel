@@ -36,7 +36,6 @@ export function DataTable<TData>({
   onSelectionChanged,
   loading = false,
 }: DataTableProps<TData>) {
-  console.log("🚀 ~ DataTable ~ rowData:", rowData)
   return (
     <div 
       className={cn("ag-theme-quartz w-full relative", className)} 

@@ -29,6 +29,5 @@ export const clearToken = () => {
 
 export const getUser = () => {
   const user = localStorage.getItem("user_info");
-  console.log("🚀 ~ getUser ~ user:", user)
   return user ? JSON.parse(user) : null;
 };

@@ -151,12 +151,10 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
     {key: 'qr_code_image' , label: 'Upload QR Code', url: cleanUrl(doc?.qr_code_image), type: 'qr', icon: FileText },
     { key: 'cheque_image', label: 'Upload Cheque', url: cleanUrl(doc?.cheque_image), type: 'cheque', icon: FileImage },
   ].filter(img => img.url);
-  console.log("🚀 ~ VendorDetailsModal ~ images:", images)
 
   const contact = data?.ContactDetails || {};
   const identity = data?.Identity || {};
   const bank = data?.Bank || {};
-  console.log("🚀 ~ VendorDetailsModal ~ bank:", bank)
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);

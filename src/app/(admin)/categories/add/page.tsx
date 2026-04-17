@@ -77,10 +77,7 @@ export default function AddCategoryPage() {
 
       if (search) params.search = search;
 
-      console.log("🚀 ~ API Request Params:", params);
-
       const res = await api.get(endPointApi.getCategoryList, { params });
-      console.log("🚀 ~ API Response:", res);
 
       // When setting categories from API response
       if (res?.data?.success && res?.data?.data) {

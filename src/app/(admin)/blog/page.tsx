@@ -224,7 +224,6 @@ export default function BlogPage() {
       if (search) params.search = search;
 
       const res = await api.get(endPointApi.getAllBlogs, { params });
-      console.log("🚀 ~ fetchBlogs ~ raw response:", res.data);
 
       if (res.data?.data) {
         // Transform the data to ensure dates are in DD/MM/YYYY format
@@ -234,7 +233,6 @@ export default function BlogPage() {
           blog_date: formatDateToDDMMYYYY(item.blog_date || item.date || item.createdAt || ''),
         }));
 
-        console.log("🚀 ~ fetchBlogs ~ transformed data:", transformedData);
         setBlogs(transformedData);
         setFilteredBlogs(transformedData);
       }
@@ -330,7 +328,6 @@ export default function BlogPage() {
       formData.append("sort_description", data.sort_description);
       formData.append("long_description", data.long_description);
       formData.append("date", data.date);
-      console.log("📅 Sending date to API:", data.date);
 
       if (editingId) {
         if (data.image && data.image[0] && data.image[0] instanceof File) {
@@ -378,7 +375,6 @@ export default function BlogPage() {
       setIsFetching(true);
       // Fetch full blog details for editing
       const res = await api.get(`${endPointApi.getBlogById}/${blog.id}`);
-      console.log("🚀 ~ handleEdit ~ full blog data:", res.data);
 
       if (res.data?.blog_data) {
         const blogData = res.data.blog_data;
@@ -390,7 +386,6 @@ export default function BlogPage() {
         // Convert the date from whatever format to YYYY-MM-DD for DatePicker
         if (blogData.blog_date) {
           const datePickerDate = convertToDatePickerFormat(blogData.blog_date);
-          console.log("📅 Setting date in form:", datePickerDate);
           setValue("date", datePickerDate);
         }
 

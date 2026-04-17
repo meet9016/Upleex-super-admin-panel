@@ -153,8 +153,6 @@ export default function ListingPlanPurchasesPage() {
         ? `${endPointApi.getAllListingPlans}?${queryString}`
         : endPointApi.getAllListingPlans;
 
-      console.log("Fetching with URL:", url); // For debugging
-
       const res = await api.get(url);
       const list = res?.data?.data || [];
       setRows(list);
