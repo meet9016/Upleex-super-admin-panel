@@ -605,6 +605,8 @@ export default function VendorsPage() {
                                         gridHeight={790}
                                         loading={isLoading}
                                         showCheckboxes={false}
+                                        noRowsMessage="No Vendor found"
+
                                     />
                                     {showDetails && detailsRow && (
                                         <VendorDetailsModal open={showDetails} data={detailsRow} onClose={() => setShowDetails(false)} />

@@ -429,6 +429,7 @@ export default function QuotesTreeTable({
           headerHeight={48}
           overlayNoRowsTemplate="<span></span>"
           
+          
         />
       </div>
     </div>

@@ -513,6 +513,7 @@ const handleConfirmDelete = async () => {
                   enableSearch={false} // Since you have your own search
                   enableFilter={false}
                   gridHeight={680}
+                  noRowsMessage="No FAQ found"
                 />
               {/* )}   */}
             </CardContent>

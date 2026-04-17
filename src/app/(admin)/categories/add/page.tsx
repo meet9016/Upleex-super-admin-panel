@@ -644,6 +644,7 @@ export default function AddCategoryPage() {
                       enableSearch={false}
                       enableFilter={false}
                       gridHeight={600}
+                      noRowsMessage="No Category found"
                     />
                  
                 </CardContent>

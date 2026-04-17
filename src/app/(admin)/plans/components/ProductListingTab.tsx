@@ -364,6 +364,7 @@ export default function ProductListingTab() {
                 enableSearch={false}
                 tableName="Plans"
                 gridHeight={700}
+                 noRowsMessage="No Plan found"
               />
             </CardContent>
           </Card>

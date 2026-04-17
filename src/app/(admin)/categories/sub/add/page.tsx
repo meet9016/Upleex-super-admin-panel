@@ -770,6 +770,7 @@ export default function AddSubCategoryPage() {
                     enableSearch={false}
                     enableFilter={false}
                     gridHeight={600}
+                     noRowsMessage="No Sub Category found"
                   />
                   {/* )} */}
                 </CardContent>

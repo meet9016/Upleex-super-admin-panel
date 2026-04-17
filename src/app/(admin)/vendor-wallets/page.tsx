@@ -327,6 +327,7 @@ const VendorWalletsPage = () => {
           gridHeight={600}
           showCheckboxes={false}
           height={"750px"}
+          noRowsMessage="No Vendors found"
         />
       </div>
 

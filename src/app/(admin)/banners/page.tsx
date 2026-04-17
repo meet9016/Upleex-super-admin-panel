@@ -484,6 +484,7 @@ export default function BannerPage() {
             onSelectionChange={setSelectedRows}
             gridHeight={550}
             showCheckboxes={false}
+            noRowsMessage="No Banner found"
           />
         </CardContent>
       </Card>
