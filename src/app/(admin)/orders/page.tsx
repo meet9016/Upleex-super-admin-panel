@@ -231,19 +231,28 @@ export default function AdminOrdersPage() {
     }
   }, [debouncedSellSearch, sellPaymentFilter, sellOrderFilter, sellVendorFilter, sellProductFilter]);
 
-  useEffect(() => { fetchRentOrders(); }, [fetchRentOrders]);
-  useEffect(() => { fetchSellOrders(); }, [fetchSellOrders]);
+  useEffect(() => {
+    if (activeTab === 'rent') {
+      fetchRentOrders();
+    }
+  }, [fetchRentOrders, activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'sell') {
+      fetchSellOrders();
+    }
+  }, [fetchSellOrders, activeTab]);
 
   // ── Rent Column Defs ───────────────────────────────────────────────────────
-  const rentColDefs: ColDef<any>[]  = [
+  const rentColDefs: ColDef<any>[] = [
     { headerName: 'Vendor', field: 'vendor_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.vendor_name || '—' },
     { headerName: 'User', field: 'user_name', rowGroup: true, hide: true, valueGetter: (p: any) => p.data?.user_name || '—' },
     { headerName: 'Product Name', field: 'product_name', minWidth: 160, flex: 2, cellStyle: { fontWeight: '500', color: '#334155' } },
     { headerName: 'Type', field: 'product_listing_type_name', minWidth: 100, cellStyle: { textTransform: 'capitalize', fontWeight: 'bold' } },
     { headerName: 'Qty', field: 'qty', minWidth: 70, maxWidth: 80, cellStyle: { textAlign: 'center' } },
-    { 
-      headerName: 'Duration', 
-      minWidth: 120, 
+    {
+      headerName: 'Duration',
+      minWidth: 120,
       cellStyle: { textAlign: 'center' },
       valueGetter: (p: any) => {
         const val = p.data?.number_of_days;
