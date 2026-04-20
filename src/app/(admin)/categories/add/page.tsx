@@ -158,13 +158,6 @@ export default function AddCategoryPage() {
         );
       }
     },
-    // {
-    //   field: "subcategories",
-    //   headerName: "Sub Categories",
-    //   minWidth: 130,
-    //   valueGetter: (params) => params.data?.subcategories?.length || 0,
-    //   cellStyle: { textAlign: "center" }
-    // },
 
     {
       field: "created_at",

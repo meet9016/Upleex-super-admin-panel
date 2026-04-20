@@ -152,7 +152,6 @@ export default function AddSubCategoryPage() {
   useEffect(() => {
     if (debouncedSearch) {
       // If you have a backend API that supports searching subcategories
-      // fetchSearchedSubCategories(debouncedSearch);
     } else {
       fetchCategories();
     }
