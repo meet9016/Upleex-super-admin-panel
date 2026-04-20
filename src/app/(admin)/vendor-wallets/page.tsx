@@ -87,7 +87,6 @@ const VendorWalletsPage = () => {
 
       setVendors(walletsWithId);
     } catch (error: any) {
-      console.error('Error fetching vendor wallets:', error);
       toast.error(error?.response?.data?.message || 'Failed to fetch vendor wallets');
     } finally {
       setLoading(false);
@@ -107,7 +106,6 @@ const VendorWalletsPage = () => {
 
       setTransactions(transactionsList);
     } catch (error: any) {
-      console.error('Error fetching transactions:', error);
       toast.error(error?.response?.data?.message || 'Failed to fetch transactions');
       setTransactions([]);
     } finally {
@@ -143,7 +141,6 @@ const VendorWalletsPage = () => {
       
       toast.success("PDF Downloaded successfully");
     } catch (error) {
-      console.error("PDF download error:", error);
       toast.error("Failed to download PDF");
     } finally {
       setDownloading(false);

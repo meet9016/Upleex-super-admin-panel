@@ -66,7 +66,6 @@ export default function LoginPage() {
         toast.error(response.message || "Login failed");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       toast.error(error.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);

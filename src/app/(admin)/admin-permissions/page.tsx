@@ -73,7 +73,6 @@ export default function AdminPermissionsPage() {
       setPages(pagesResponse.data || []);
     } catch (error) {
       toast.error('Failed to load data');
-      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -121,7 +120,6 @@ export default function AdminPermissionsPage() {
       toast.success('Permissions updated successfully');
     } catch (error) {
       toast.error('Failed to update permissions');
-      console.error('Error updating permissions:', error);
     } finally {
       setSaving(false);
     }

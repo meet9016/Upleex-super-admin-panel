@@ -74,7 +74,6 @@ export default function RentalBoostTab() {
 
   const savePlan = async () => {
     const newErrors: { [k: string]: string } = {};
-    // if (!String(form.name || "").trim()) newErrors.name = "Plan name is required";
     if (form.days === "" || Number(form.days) < 1) newErrors.days = "Days must be at least 1";
     if (form.price === "" || Number(form.price) < 0) newErrors.price = "Price must be 0 or more";
 

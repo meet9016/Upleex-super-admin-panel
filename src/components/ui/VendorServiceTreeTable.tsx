@@ -145,7 +145,6 @@ const ActionCellRenderer = (props: ICellRendererParams) => {
       <div className={uniqueId}>
          <div className="relative">
         <SearchableDropdown
-          // key={`${props.data.id}-${String(props.data.approval_status || '').toLowerCase()}`}
           options={[
             { label: "Pending", value: "pending" },
             { label: "Approved", value: "approved" },

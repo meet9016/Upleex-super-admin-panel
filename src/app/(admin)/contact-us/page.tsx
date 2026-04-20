@@ -70,7 +70,6 @@ const ContactUsPage = () => {
       setContacts(formattedContacts);
       setFilteredContacts(formattedContacts);
     } catch (error) {
-      console.error("Error fetching contacts:", error);
       toast.error("Failed to fetch contacts");
     } finally {
       setIsFetching(false);
@@ -102,7 +101,6 @@ const ContactUsPage = () => {
       setContactToDelete(null);
       fetchContacts();
     } catch (error: any) {
-      console.error("Error deleting contact:", error);
       toast.error(error?.response?.data?.message || "Failed to delete contact");
     } finally {
       setIsDeleting(false);
@@ -175,7 +173,6 @@ const ContactUsPage = () => {
         try {
           const date = new Date(params.data.created_at);
           if (isNaN(date.getTime())) {
-            console.warn('Invalid date for contact:', params.data.id, params.data.created_at);
             return 'Invalid Date';
           }
           return date.toLocaleDateString('en-GB', {
@@ -243,7 +240,6 @@ const ContactUsPage = () => {
                     gridRef.current?.api?.deselectAll();
                     await fetchContacts();
                   } catch (error: any) {
-                    console.error("Bulk delete error:", error);
                     toast.error(error?.response?.data?.message || 'Failed to delete selected contacts');
                   }
                 }}

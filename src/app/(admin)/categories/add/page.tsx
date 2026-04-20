@@ -91,7 +91,6 @@ export default function AddCategoryPage() {
         setCategories(res.data.data);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
       toast.error("Failed to fetch categories");
     } finally {
       setIsFetching(false);
@@ -296,7 +295,6 @@ export default function AddCategoryPage() {
         await fetchCategories(debouncedSearch);
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(
         error?.response?.data?.message ||
         (editingId ? 'Failed to update category' : 'Failed to create category')
@@ -349,7 +347,6 @@ export default function AddCategoryPage() {
       setShowDeletePopup(false);
       setCategoryToDelete(null);
     } catch (error: any) {
-      console.error("Error deleting category:", error);
       toast.error(error?.response?.data?.message || "Failed to delete category");
     } finally {
       setIsDeleting(false);
@@ -382,7 +379,6 @@ export default function AddCategoryPage() {
         toast.error(res?.data?.message || 'Bulk delete failed');
       }
     } catch (error: any) {
-      console.error("Bulk delete error:", error);
       toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
     } finally {
       setIsBulkDeleting(false);

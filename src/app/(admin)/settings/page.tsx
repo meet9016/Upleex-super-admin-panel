@@ -29,7 +29,6 @@ export default function SettingsPage() {
       setAdmins(response.data || []);
     } catch (error) {
       toast.error('Failed to load admins');
-      console.error('Error loading admins:', error);
     } finally {
       setLoading(false);
     }

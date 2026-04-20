@@ -186,7 +186,6 @@ export default function VendorDetailsModal({ open, data, onClose }: Props) {
       window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('PDF download error:', error);
       alert('Failed to download PDF');
     } finally {
       setIsDownloading(false);

@@ -187,7 +187,6 @@ export default function AddSubCategoryPage() {
         setSubCategories(allSubCategories);
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
       toast.error('Failed to fetch categories');
     } finally {
       setIsFetching(false);
@@ -238,7 +237,6 @@ export default function AddSubCategoryPage() {
         setPreviewImage(null);
       }
     } catch (error: any) {
-      console.error("Error creating subcategory:", error);
       toast.error(error.response?.data?.message || 'Failed to create sub-category');
     } finally {
       setIsLoading(false);
@@ -294,7 +292,6 @@ export default function AddSubCategoryPage() {
         setPreviewImage(null);
       }
     } catch (error: any) {
-      console.error("Error updating subcategory:", error);
       toast.error(error.response?.data?.message || 'Failed to update sub-category');
     } finally {
       setIsLoading(false);
@@ -333,7 +330,6 @@ export default function AddSubCategoryPage() {
         setSubCategoryToDelete(null);
       }
     } catch (error: any) {
-      console.error("Error deleting subcategory:", error);
       toast.error(error.response?.data?.message || 'Failed to delete sub-category');
     } finally {
       setIsDeleting(false);
@@ -359,7 +355,6 @@ export default function AddSubCategoryPage() {
         toast.error(res?.data?.message || 'Bulk delete failed');
       }
     } catch (error: any) {
-      console.error("Bulk delete error:", error);
       toast.error(error?.response?.data?.message || 'Failed to delete selected sub-categories');
     } finally {
       setIsBulkDeleting(false);

@@ -61,7 +61,6 @@ export default function CreateAdminPage() {
         toast.error(result.message || 'Failed to create admin');
       }
     } catch (error: any) {
-      console.error('Create admin error:', error);
       if (error.message?.includes('already registered')) {
         toast.error('Email or phone number is already registered');
       } else {
