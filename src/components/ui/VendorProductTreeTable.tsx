@@ -99,6 +99,8 @@ interface VendorProductTreeTableProps {
   approving: boolean;
   rejecting?: boolean;
   loading?: boolean;
+  activeTab: 'rent' | 'sell';
+  onTabChange: (tab: 'rent' | 'sell') => void;
 }
 
 // Product Detail Modal Component
@@ -368,6 +370,8 @@ export default function VendorProductTreeTable({
   approving,
   rejecting,
   loading,
+  activeTab,
+  onTabChange,
 }: VendorProductTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -376,16 +380,15 @@ export default function VendorProductTreeTable({
   const [selectedProduct, setSelectedProduct] = useState<TreeDataItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
-
   const processedVendors = useMemo(() => {
     const map: Record<string, any> = {};
-    const filteredVendors: any[] = [];
+    const filtered: any[] = [];
 
     vendors.forEach((vendor) => {
       const v = vendor as any;
       const products = vendor.products || [];
 
+      // Secondary frontend filter as a safety net
       const filteredProducts = products.filter(p => {
         const typeName = (p.product_type_name || '').toLowerCase();
         return typeName === activeTab;
@@ -407,11 +410,11 @@ export default function VendorProductTreeTable({
           products: filteredProducts
         };
 
-        map[v._id] = newVendor;
-        filteredVendors.push(newVendor);
+        map[v._id || v.vendor_id] = newVendor;
+        filtered.push(newVendor);
       }
     });
-    return { map, filteredVendors };
+    return { map, filteredVendors: filtered };
   }, [vendors, activeTab]);
 
   const { map: vendorMap, filteredVendors } = processedVendors;
@@ -612,7 +615,7 @@ export default function VendorProductTreeTable({
           <div className="inline-flex rounded-xl bg-gray-100  p-1 border border-gray-200 shadow-sm min-w-max">
             <button
               onClick={() => {
-                setActiveTab('rent');
+                onTabChange('rent');
                 gridRef.current?.api.deselectAll();
                 setSelectedCount(0);
               }}
@@ -630,7 +633,7 @@ export default function VendorProductTreeTable({
 
             <button
               onClick={() => {
-                setActiveTab('sell');
+                onTabChange('sell');
                 gridRef.current?.api.deselectAll();
                 setSelectedCount(0);
               }}

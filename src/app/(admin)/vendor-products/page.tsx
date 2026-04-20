@@ -35,16 +35,17 @@ export default function VendorProductApprovalPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
   const LIMIT = 10;
 
   useEffect(() => {
     setVendors([]);
     setPage(1);
     setHasMore(true);
-    fetchVendorsWithProducts(1);
-  }, []);
+    fetchVendorsWithProducts(1, activeTab);
+  }, [activeTab]);
 
-  const fetchVendorsWithProducts = async (pageNum: number) => {
+  const fetchVendorsWithProducts = async (pageNum: number, tab: 'rent' | 'sell' = activeTab) => {
     try {
       if (pageNum === 1) {
         setLoading(true);
@@ -52,8 +53,10 @@ export default function VendorProductApprovalPage() {
         setLoadingMore(true);
       }
 
+      const filter_rent_sell = tab === 'rent' ? 1 : 2;
+
       const res = await api.get(endPointApi.getAllVendors, {
-        params: { page: pageNum, limit: LIMIT }
+        params: { page: pageNum, limit: LIMIT, filter_rent_sell }
       });
 
       const vendorList: Vendor[] = res?.data?.data || [];
@@ -65,7 +68,10 @@ export default function VendorProductApprovalPage() {
         vendorList.map(async (vendor: Vendor) => {
           if (!vendor.vendor_id) return { ...vendor, products: [] };
           try {
-            const productRes = await api.get(`${endPointApi.getVendorProducts}/${vendor.vendor_id}`);
+            const filter_rent_sell = tab === 'rent' ? 1 : 2;
+            const productRes = await api.get(`${endPointApi.getVendorProducts}/${vendor.vendor_id}`, {
+              params: { filter_rent_sell }
+            });
             const payload = productRes.data?.data;
             const products = Array.isArray(payload) ? payload : payload?.products || [];
             const counts = Array.isArray(payload) ? null : payload?.counts || null;
@@ -236,7 +242,7 @@ export default function VendorProductApprovalPage() {
       const threshold = document.documentElement.scrollHeight - 200;
 
       if (scrollPosition >= threshold) {
-        fetchVendorsWithProducts(page + 1);
+        fetchVendorsWithProducts(page + 1, activeTab);
       }
     };
 
@@ -260,6 +266,8 @@ export default function VendorProductApprovalPage() {
               onStatusChange={handleStatusChange}
               approving={approving}
               rejecting={rejecting}
+              activeTab={activeTab}
+              onTabChange={(tab) => setActiveTab(tab)}
             />
 
             {/* Loading more indicator */}
