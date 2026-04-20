@@ -9,7 +9,7 @@ import PlanPurchasesTab from "./components/PlanPurchasesTab";
 import RentalBoostTab from "./components/RentalBoostTab";
 import ServiceListingTab from "./components/ServiceListingTab";
 import ServicePriorityTab from "./components/ServicePriorityTab";
-import { TrendingUp, Package, Briefcase } from "lucide-react";
+import { TrendingUp, Package, Briefcase, ChevronDown } from "lucide-react";
 
 
 const PRODUCT_TABS = [
@@ -36,6 +36,7 @@ const PRODUCT_TABS = [
     label: "Plan Purchases",
     icon: CreditCard,
     component: PlanPurchasesTab,
+    hasSubTabs: true,
   },
 ];
 
@@ -57,6 +58,7 @@ const SERVICE_TABS = [
     label: "Plan Purchases",
     icon: CreditCard,
     component: PlanPurchasesTab,
+    hasSubTabs: true,
   },
 ];
 
@@ -86,7 +88,7 @@ export default function PlansPage() {
           <button
             onClick={() => handleScopeChange("product")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all",
+              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer",
               planScope === "product"
                 ? "bg-white text-blue-600 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
@@ -98,7 +100,7 @@ export default function PlansPage() {
           <button
             onClick={() => handleScopeChange("service")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all",
+              "flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer",
               planScope === "service"
                 ? "bg-white text-blue-600 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
@@ -120,7 +122,7 @@ export default function PlansPage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200",
+                "flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer",
                 isActive
                   ? "btn-primary shadow-md"
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
@@ -128,6 +130,7 @@ export default function PlansPage() {
             >
               <Icon size={16} />
               {tab.label}
+              {tab.hasSubTabs && <ChevronDown size={14} className={cn("ml-0.5 opacity-70", isActive ? "text-white" : "text-slate-400")} />}
             </button>
           );
         })}

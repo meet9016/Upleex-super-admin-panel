@@ -13,9 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  LogOut,
   ChevronDown,
-  Shield,
   FileText,
   Loader2,
   ShoppingBag,
@@ -27,6 +25,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/Button";
 import { usePermissions } from "@/contexts/PermissionContext";
+import { FaRegImages } from "react-icons/fa";
+import { IoIosArrowDropdown } from "react-icons/io";
+import { GrPlan } from "react-icons/gr";
+import { RiSecurePaymentLine } from "react-icons/ri";
 
 type MenuItem = {
   name: string;
@@ -49,7 +51,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       { name: "Vendor-services", href: "/vendor-services", icon: BadgeCheck, permission: "products" },
-      { name: "Dropdowns", href: "/dropdowns", icon: Layers, permission: "dropdowns" },
+      { name: "Dropdowns", href: "/dropdowns", icon: IoIosArrowDropdown , permission: "dropdowns" },
       { name: "Quotes", href: "/quotes", icon: FileText, permission: "quotes" },
       { name: "Orders", href: "/orders", icon: ShoppingBag, permission: "orders" },
       {
@@ -65,7 +67,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       {
         name: "Plans",
         href: "/plans",
-        icon: FolderPlus,
+        icon: GrPlan ,
         permission: "orders",
         // subItems: [
         //   { name: "Product listing Plan", href: "/plans", icon: FolderPlus, permission: "orders" },
@@ -75,14 +77,14 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       },
       // { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
       { name: "Vendor Wallet", href: "/vendor-wallets", icon: Loader2, permission: "vendor-wallets" },
-      { name: "Vendor Payments", href: "/vendor-payments", icon: FileText, permission: "vendor-payments" },
+      { name: "Vendor Payments", href: "/vendor-payments", icon: RiSecurePaymentLine , permission: "vendor-payments" },
     ],
   },
   {
     group: "Content",
     items: [
       { name: "Blog", href: "/blog", icon: BookOpen, permission: "blogs" },
-      { name: "Banners", href: "/banners", icon: Layers, permission: "blogs" },
+      { name: "Banners", href: "/banners", icon: FaRegImages , permission: "blogs" },
       { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },
       { name: "Contact Us", href: "/contact-us", icon: Phone, permission: "contact-us" },
     ],
@@ -234,7 +236,17 @@ export function Sidebar({
               !isCollapsed && "ml-auto"
             )}
           >
-            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {isCollapsed ? (
+              <Image
+                src="/favicon.png"
+                alt="Logo"
+                width={24}
+                height={24}
+                className="object-contain"
+              />
+            ) : (
+              <ChevronLeft size={18} />
+            )}
           </Button>
         )}
       </div>

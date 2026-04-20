@@ -374,25 +374,25 @@ export default function PlanPurchasesTab() {
       <div className="flex items-center bg-gray-100/80 rounded-xl p-1 gap-1 w-fit">
         <button
           onClick={() => setActiveSubTab('listing')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'listing'
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'listing'
             ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
             : 'text-gray-500 hover:text-gray-800'
             }`}
         >
-          PRODUCT LISTING PLAN
+          Product Listing Plan
         </button>
         <button
           onClick={() => setActiveSubTab('priority')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'priority'
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'priority'
             ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
             : 'text-gray-500 hover:text-gray-800'
             }`}
         >
-          PRIORITY PLAN
+          Priority Plan
         </button>
         <button
           onClick={() => setActiveSubTab('booster')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${activeSubTab === 'booster'
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'booster'
             ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
             : 'text-gray-500 hover:text-gray-800'
             }`}
