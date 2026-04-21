@@ -52,9 +52,9 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="text-slate-600 hidden md:flex hover:bg-slate-50 rounded-xl">
+        {/* <Button variant="ghost" size="icon" className="text-slate-600 hidden md:flex hover:bg-slate-50 rounded-xl">
           <Globe size={20} />
-        </Button>
+        </Button> */}
         <Button variant="ghost" size="icon" className="relative text-slate-600 hover:bg-slate-50 rounded-xl">
           <Bell size={20} />
           <span className="absolute right-2.5 top-2.5 flex h-2 w-2 rounded-full bg-red-500 border-2 border-white" />

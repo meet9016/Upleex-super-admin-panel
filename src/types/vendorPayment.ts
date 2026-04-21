@@ -6,6 +6,16 @@ export interface VendorPayment {
     total_amount: number;
     user_name: string;
   } | null;
+  quote_id: {
+    _id: string;
+    calculated_price: number;
+    user_id: {
+      name: string;
+      email: string;
+      first_name: string;
+    };
+    status: string;
+  } | null;
   vendor_id: string;
   vendor_amount: number;
   payment_status: 'pending' | 'released' | 'failed' | 'cancelled';

@@ -68,12 +68,13 @@ class ApiService {
   }
 
   // Vendor Payments
-  async getAllVendorPayments(params?: { page?: number; limit?: number; status?: string; vendor_id?: string }): Promise<VendorPaymentResponse> {
+  async getAllVendorPayments(params?: { page?: number; limit?: number; status?: string; vendor_id?: string; type?: string }): Promise<VendorPaymentResponse> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
     if (params?.vendor_id) queryParams.append('vendor_id', params.vendor_id);
+    if (params?.type) queryParams.append('type', params.type);
     
     const endpoint = queryParams.toString() 
       ? `${endPointApi.getAllVendorPayments}?${queryParams.toString()}`
@@ -82,9 +83,13 @@ class ApiService {
     return this.request<VendorPaymentResponse>(endpoint);
   }
 
-  async getVendorPaymentStats(vendorId?: string): Promise<VendorPaymentStatsResponse> {
-    const endpoint = vendorId 
-      ? `${endPointApi.getVendorPaymentStats}?vendor_id=${vendorId}`
+  async getVendorPaymentStats(vendorId?: string, type?: string): Promise<VendorPaymentStatsResponse> {
+    const queryParams = new URLSearchParams();
+    if (vendorId) queryParams.append('vendor_id', vendorId);
+    if (type) queryParams.append('type', type);
+
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.getVendorPaymentStats}?${queryParams.toString()}`
       : endPointApi.getVendorPaymentStats;
     return this.request<VendorPaymentStatsResponse>(endpoint);
   }
@@ -112,6 +117,13 @@ class ApiService {
     return this.request<ReleasePaymentResponse>(endpoint, {
       method: 'PUT',
       body: JSON.stringify({ reason }),
+    });
+  }
+
+  async releaseBulkPayments(paymentIds: string[], notes?: string): Promise<ReleasePaymentResponse> {
+    return this.request<ReleasePaymentResponse>(endPointApi.releaseBulkPayments, {
+      method: 'POST',
+      body: JSON.stringify({ paymentIds, notes }),
     });
   }
 

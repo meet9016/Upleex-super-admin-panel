@@ -130,10 +130,14 @@ interface VendorPaymentTreeTableProps {
   onReleasePayment: (paymentId: string, notes?: string) => void;
   onCancelPayment: (paymentId: string, reason?: string) => void;
   onReleaseScheduledPayments: () => void;
+  onReleaseBulkPayments: () => void;
   onPageChange: (page: number) => void;
   onFilterChange: (filters: { status: string; vendor_id: string }) => void;
   isReleasing?: string | null;
   loading?: boolean;
+  activeTab?: string;
+  showCheckboxes?: boolean;
+  onSelectionChange?: (selectedRows: VendorPaymentTreeData[]) => void;
 }
 
 // Status cell renderer
@@ -175,7 +179,7 @@ const StatusCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
 
 // Action cell renderer
 const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
-  const { onViewDetails, onReleasePayment, onCancelPayment, isReleasing } = props.context;
+  const { onViewDetails, onReleasePayment, onCancelPayment, isReleasing, activeTab } = props.context;
   const data = props.data;
 
   if (!data) return null;
@@ -198,7 +202,7 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
 
     const handleReleaseClick = () => {
       const confirmed = window.confirm(
-        `Are you sure dsyou want to release payment for Order ${data.orderNumber}?\n\n` +
+        `Are you sure you want to release payment for ${activeTab === 'rent' ? 'Quote' : 'Order'} ${data.orderNumber}?\n\n` +
         `Customer: ${data.customerName}\n` +
         `Vendor Amount: ${data.formattedVendorAmount}\n\n` +
         `This action cannot be undone.`
@@ -322,10 +326,14 @@ export default function VendorPaymentTreeTable({
   onReleasePayment,
   onCancelPayment,
   onReleaseScheduledPayments,
+  onReleaseBulkPayments,
   onPageChange,
   onFilterChange,
   isReleasing,
   loading = false,
+  activeTab = 'sell',
+  showCheckboxes = false,
+  onSelectionChange,
 }: VendorPaymentTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [quickFilterText, setQuickFilterText] = useState('');
@@ -360,7 +368,7 @@ export default function VendorPaymentTreeTable({
       minWidth: 150,
     },
     {
-      headerName: "Order Amount",
+      headerName: activeTab === 'rent' ? "Quote Amount" : "Order Amount",
       field: "formattedAmount",
       valueGetter: (params: ValueGetterParams<VendorPaymentTreeData, string>) => {
         return params.data?.type === 'payment' ? params.data.formattedAmount : '';
@@ -441,7 +449,7 @@ export default function VendorPaymentTreeTable({
       maxWidth: 250,
       cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
     }
-  ], []);
+  ], [activeTab, onViewDetails, onReleasePayment, onCancelPayment, isReleasing]);
 
   // Default column definition
   const defaultColDef = useMemo(() => ({
@@ -452,9 +460,30 @@ export default function VendorPaymentTreeTable({
     filter: false,
   }), []);
 
+  // Row selection configuration
+  const rowSelection = useMemo(() => ({
+    mode: "multiRow" as const,
+    checkboxes: true,
+    headerCheckbox: true,
+    enableSelectAll: true,
+    enableSelectionWithoutKeys: true,
+  }), []);
+
+  // Selection column definition
+  const selectionColumnDef = useMemo(() => ({
+    width: 50,
+    maxWidth: 50,
+    suppressHeaderMenuButton: true,
+    suppressHeaderContextMenu: true,
+    pinned: 'left' as const,
+    lockPosition: 'left' as const,
+    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 },
+    headerClass: 'ag-center-aligned-header',
+  }), []);
+
   // Auto group column definition
   const autoGroupColumnDef: ColDef<VendorPaymentTreeData> = useMemo(() => ({
-    headerName: "Vendor / Order",
+    headerName: activeTab === 'rent' ? "Vendor / Quote" : "Vendor / Order",
     field: "name",
     cellRenderer: 'agGroupCellRenderer',
     cellRendererParams: {
@@ -482,7 +511,8 @@ export default function VendorPaymentTreeTable({
     onReleasePayment,
     onCancelPayment,
     isReleasing,
-  }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing]);
+    activeTab,
+  }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing, activeTab]);
 
   // Handle filter changes
 const handleStatusFilterChange = (status: string | string[]) => {
@@ -587,7 +617,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
             placeholder="Search anything..."
             value={quickFilterText}
             onChange={onQuickFilterChanged}
-            className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+            className="w-full pl-10 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
           />
           <Search
             size={16}
@@ -619,7 +649,7 @@ const handleStatusFilterChange = (status: string | string[]) => {
             onFilterChange({ status: '', vendor_id: '' });
             gridRef.current?.api.setGridOption('quickFilterText', '');
           }}
-          className="px-3 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition flex items-center gap-2"
+          className="px-3 py-2.5 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition flex items-center gap-2"
         >
           <Filter size={14} />
           Clear
@@ -627,11 +657,26 @@ const handleStatusFilterChange = (status: string | string[]) => {
 
         {/* PRIMARY ACTION */}
         <button
-          onClick={onReleaseScheduledPayments}
-          className="px-4 py-2 text-sm rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
+          onClick={() => {
+            const selectedNodes = gridRef.current?.api.getSelectedNodes();
+            const paymentIds = selectedNodes
+              ?.filter(node => node.data?.type === 'payment' && node.data?.paymentStatus === 'pending')
+              .map(node => node.data.id) || [];
+            
+            if (paymentIds.length > 0) {
+              onReleaseBulkPayments();
+            } else {
+              onReleaseScheduledPayments();
+            }
+          }}
+          className="px-4 py-2.5 text-sm rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
         >
           <RefreshCw size={14} />
-          Release
+          {(() => {
+            const selectedRows = gridRef.current?.api.getSelectedRows() || [];
+            const pendingPaymentsCount = selectedRows.filter(row => row.type === 'payment' && row.paymentStatus === 'pending').length;
+            return pendingPaymentsCount > 0 ? `Release Selected (${pendingPaymentsCount})` : 'Release Scheduled';
+          })()}
         </button>
 
       </div>
@@ -668,6 +713,14 @@ const handleStatusFilterChange = (status: string | string[]) => {
             rowHeight={45}
             headerHeight={42}
             overlayNoRowsTemplate="<span></span>"
+            rowSelection={showCheckboxes ? rowSelection : undefined}
+            selectionColumnDef={showCheckboxes ? selectionColumnDef : undefined}
+            onSelectionChanged={() => {
+              if (showCheckboxes && onSelectionChange) {
+                const selectedRows = gridRef.current?.api.getSelectedRows() || [];
+                onSelectionChange(selectedRows);
+              }
+            }}
           />
         </div>
       </div>

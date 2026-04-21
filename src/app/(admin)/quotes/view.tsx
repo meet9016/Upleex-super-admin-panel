@@ -25,6 +25,7 @@ import {
     CalendarDays,
     Download,
     Maximize2,
+    CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/utils/axiosInstance';
@@ -234,9 +235,14 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                             <div className="flex items-center gap-3">
                                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20`}>
                                     <StatusIcon size={14} className="text-white" />
-                                    <span className="text-sm font-medium text-white">{statusConfig.label}</span>
+                                    <span className="text-sm font-medium text-white">Status: {statusConfig.label}</span>
                                 </div>
-                                
+                                {data.payment_status && (
+                                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20`}>
+                                        <IndianRupee size={14} className="text-white" />
+                                        <span className="text-sm font-medium text-white">Payment: {data.payment_status.charAt(0).toUpperCase() + data.payment_status.slice(1)}</span>
+                                    </div>
+                                )}
                             </div>
                             <button 
                                 onClick={onClose} 
@@ -378,6 +384,56 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                             </p>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Payment Details Section */}
+                            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                                <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
+                                    Payment Information
+                                </h3>
+                                <div className="grid lg:grid-cols-2 gap-3">
+                                    <DetailCard 
+                                        icon={User} 
+                                        label="Customer Payment" 
+                                        value={data.total_price ? `₹${Number(data.total_price).toLocaleString('en-IN')}` : '—'} 
+                                        gradient="from-blue-500 to-indigo-500"
+                                    />
+                                    <DetailCard 
+                                        icon={Building2} 
+                                        label="Admin Payment" 
+                                        value={data.vendor_amount ? `₹${Number(data.vendor_amount).toLocaleString('en-IN')}` : '—'} 
+                                        gradient="from-emerald-500 to-teal-500"
+                                    />
+                                    <DetailCard 
+                                        icon={CheckCircle} 
+                                        label="Payment Status" 
+                                        value={data.payment_status || 'Pending'} 
+                                        gradient="from-amber-500 to-orange-500"
+                                    />
+                                    <DetailCard 
+                                        icon={FileText} 
+                                        label="Transaction ID" 
+                                        value={data.transaction_id || data.payment_id || '—'} 
+                                        gradient="from-slate-500 to-slate-700"
+                                    />
+                                    <DetailCard 
+                                        icon={CreditCard} 
+                                        label="Payment Method" 
+                                        value={data.payment_method || 'Online'} 
+                                        gradient="from-purple-500 to-pink-500"
+                                    />
+                                    <DetailCard 
+                                        icon={Clock} 
+                                        label="Payment Date" 
+                                        value={data.payment_date ? new Date(data.payment_date).toLocaleDateString('en-IN', { 
+                                            day: 'numeric', 
+                                            month: 'short', 
+                                            year: 'numeric' 
+                                        }) : '—'} 
+                                        gradient="from-orange-500 to-amber-500"
+                                    />
                                 </div>
                             </div>
 

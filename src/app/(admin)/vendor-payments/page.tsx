@@ -9,8 +9,15 @@ import VendorPaymentTreeTable from "./VendorPaymentTreeTable";
 import { apiService } from "@/services/api";
 import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData, VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse, SafeOrderInfo } from "@/types/vendorPayment";
 import PageLoader from "@/components/common/PageLoader";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ShoppingBag, FileText } from "lucide-react";
 
 export default function VendorPaymentsPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+    const activeTab = searchParams.get('type') || 'sell';
+
     const [payments, setPayments] = useState<VendorPayment[]>([]);
     const [stats, setStats] = useState<VendorPaymentStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +34,15 @@ export default function VendorPaymentsPage() {
         status: '',
         vendor_id: ''
     });
+    const [selectedRows, setSelectedRows] = useState<VendorPaymentTreeData[]>([]);
+
+    const handleTabChange = (tab: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('type', tab);
+        params.set('page', '1'); // Reset to first page when changing tabs
+        router.push(`${pathname}?${params.toString()}`);
+        setPagination(prev => ({ ...prev, page: 1 }));
+    };
 
     const fetchVendorPayments = useCallback(async () => {
         setIsLoading(true);
@@ -34,6 +50,7 @@ export default function VendorPaymentsPage() {
             const response: VendorPaymentResponse = await apiService.getAllVendorPayments({
                 page: pagination.page,
                 limit: pagination.limit,
+                type: activeTab,
                 ...filters
             });
             
@@ -60,11 +77,11 @@ export default function VendorPaymentsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters]);
+    }, [pagination.page, pagination.limit, filters, activeTab]);
 
     const fetchPaymentStats = useCallback(async () => {
         try {
-            const response: VendorPaymentStatsResponse = await apiService.getVendorPaymentStats();
+            const response: VendorPaymentStatsResponse = await apiService.getVendorPaymentStats(undefined, activeTab);
             if (response && response.success) {
                 setStats(response.data?.stats || null);
             } else {
@@ -74,7 +91,7 @@ export default function VendorPaymentsPage() {
             setStats(null);
             // Don't show error toast for stats as it's not critical
         }
-    }, []);
+    }, [activeTab]);
 
     useEffect(() => {
         fetchVendorPayments();
@@ -152,6 +169,35 @@ export default function VendorPaymentsPage() {
         }
     };
 
+    const handleReleaseBulkPayments = async () => {
+        const paymentIds = selectedRows
+            .filter(row => row.type === 'payment' && row.paymentStatus === 'pending')
+            .map(row => row.id);
+
+        if (paymentIds.length === 0) {
+            toast.info("No pending payments selected");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await apiService.releaseBulkPayments(paymentIds);
+            if (response && response.success) {
+                toast.success(response.message || `Successfully released ${paymentIds.length} payments`);
+                fetchVendorPayments();
+                fetchPaymentStats();
+                setSelectedRows([]); // Clear selection after release
+            } else {
+                toast.error(response?.message || "Failed to release payments");
+            }
+        } catch (error: any) {
+            console.error("Error in bulk release:", error);
+            toast.error(error.message || "Failed to release payments");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleViewDetails = (payment: VendorPayment) => {
         setSelectedPayment(payment);
         setShowDetailsModal(true);
@@ -174,8 +220,9 @@ export default function VendorPaymentsPage() {
         
         // Group payments by vendor_id
         payments.forEach(payment => {
-            // Skip if payment or order_id is null/undefined
-            if (!payment || !payment.order_id) {
+            // Skip if payment has neither order_id nor quote_id
+            if (!payment || (!payment.order_id && !payment.quote_id)) {
+                console.warn('Skipping payment with missing order_id and quote_id:', payment);
                 return;
             }
             
@@ -210,6 +257,10 @@ export default function VendorPaymentsPage() {
                         order_id: payment.order_id.order_id || 'N/A',
                         user_name: payment.order_id.user_name || 'Unknown Customer',
                         total_amount: payment.order_id.total_amount || 0
+                    } : payment.quote_id ? {
+                        order_id: `Q#${payment.quote_id._id.slice(-6).toUpperCase()}`,
+                        user_name: payment.quote_id.user_id?.name || payment.quote_id.user_id?.first_name || 'Unknown Customer',
+                        total_amount: payment.quote_id.calculated_price || 0
                     } : defaultOrderInfo;
                     
                     const orderId = orderInfo.order_id;
@@ -243,7 +294,33 @@ export default function VendorPaymentsPage() {
     }, [payments]);
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-3 animate-in fade-in duration-500">
+            {/* Tabs Switcher */}
+            <div className="flex items-center p-1 bg-slate-100 rounded-2xl w-fit border border-slate-200">
+                <button
+                    onClick={() => handleTabChange('sell')}
+                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${
+                        activeTab === 'sell'
+                            ? "bg-white text-indigo-600 shadow-md shadow-indigo-100 ring-1 ring-slate-200/50"
+                            : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                    }`}
+                >
+                    <ShoppingBag size={16} className={activeTab === 'sell' ? "text-indigo-600" : "text-slate-400"} />
+                    Sell
+                </button>
+                <button
+                    onClick={() => handleTabChange('rent')}
+                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${
+                        activeTab === 'rent'
+                            ? "bg-white text-indigo-600 shadow-md shadow-indigo-100 ring-1 ring-slate-200/50"
+                            : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                    }`}
+                >
+                    <FileText size={16} className={activeTab === 'rent' ? "text-indigo-600" : "text-slate-400"} />
+                    Rent
+                </button>
+            </div>
+
             <VendorPaymentTreeTable
                 data={transformedData}
                 stats={stats}
@@ -252,10 +329,14 @@ export default function VendorPaymentsPage() {
                 onReleasePayment={handleReleasePayment}
                 onCancelPayment={handleCancelPayment}
                 onReleaseScheduledPayments={handleReleaseScheduledPayments}
+                onReleaseBulkPayments={handleReleaseBulkPayments}
                 onPageChange={handlePageChange}
                 onFilterChange={handleFilterChange}
                 isReleasing={isReleasing}
                 loading={isLoading}
+                activeTab={activeTab}
+                showCheckboxes={true}
+                onSelectionChange={(rows) => setSelectedRows(rows)}
             />
 
             {/* Vendor Payment Details Modal */}

@@ -64,6 +64,7 @@ interface Quote {
   start_date?: string;
   end_date?: string;
   status: string;
+  payment_status?: string;
   month_name?: string;
   createdAt: string;
 }
@@ -84,6 +85,7 @@ interface TreeDataItem {
   price?: number;
   formattedPrice?: string;
   status?: string;
+  payment_status?: string;
   category_name?: string;
   sub_category_name?: string;
   product_type_name?: string;
@@ -101,38 +103,14 @@ interface QuotesTreeTableProps {
   loading?: boolean;
 }
 
+import StatusBadge from "@/components/common/StatusBadge";
+
 // Status cell renderer component
 const StatusCellRenderer = (props: ICellRendererParams) => {
   if (props.data?.type === 'vendor') return null;
-
-  const status = props.value;
-
-  const getStatusStyles = (status: string) => {
-    const s = String(status || '').toLowerCase();
-    if (s == 'approved' || s == 'active' || s == 'approval') return "text-green-700 bg-green-50 border-green-200";
-    if (s === 'rejected') return "text-rose-700 bg-rose-50 border-rose-200";
-    if (s === 'completed') return "text-blue-700 bg-blue-50 border-blue-200";
-    return "text-amber-700 bg-amber-50 border-amber-200";
-  };
-
-  const getStatusLabel = (status: string) => {
-    const s = String(status || '').toLowerCase();
-    if (s === 'approved' || s === 'active' || s === 'approval') return "Approved";
-    if (s === 'rejected') return "Rejected";
-    if (s === 'completed') return "Completed";
-    return "Pending";
-  };
-
-  const styles = getStatusStyles(status);
-  const label = getStatusLabel(status);
-  const Icon = label === "Approved" ? CheckCircle : label === "Rejected" ? XCircle : Clock;
-
   return (
     <div className="flex items-center h-full">
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${styles}`}>
-        {/* <Icon size={12} /> */}
-        {label}
-      </span>
+      <StatusBadge status={props.value || 'pending'} />
     </div>
   );
 };
@@ -244,6 +222,7 @@ export default function QuotesTreeTable({
             price: price,
             formattedPrice: formatPrice(price),
             status: quote.status || 'pending',
+            payment_status: quote.payment_status || 'pending',
             category_name: quote.product_id?.category_name,
             sub_category_name: quote.product_id?.sub_category_name,
             product_type_name: quote.product_id?.product_type_name,
@@ -329,6 +308,12 @@ export default function QuotesTreeTable({
     {
       headerName: "Status",
       field: "status",
+      cellRenderer: StatusCellRenderer,
+      minWidth: 150,
+    },
+    {
+      headerName: "Payment",
+      field: "payment_status",
       cellRenderer: StatusCellRenderer,
       minWidth: 150,
     },
