@@ -64,7 +64,6 @@ export default function DropdownsManagementPage() {
         setData(res.data);
       }
     } catch (error) {
-      console.error("Fetch dropdowns error:", error);
       toast.error("Failed to fetch dropdown data");
     } finally {
       setIsFetching(false);
@@ -102,7 +101,6 @@ export default function DropdownsManagementPage() {
         setData(res.data);
       }
     } catch (error: any) {
-      console.error("Save error:", error);
       toast.error(error?.response?.data?.message || "Failed to save");
     } finally {
       setSubmitting(false);
@@ -139,7 +137,6 @@ export default function DropdownsManagementPage() {
         setData(res.data);
       }
     } catch (error: any) {
-      console.error("Delete error:", error);
       toast.error(error?.response?.data?.message || "Failed to delete");
     } finally {
       setIsDeleting(false);
@@ -164,7 +161,6 @@ export default function DropdownsManagementPage() {
         setData(res.data);
       }
     } catch (error: any) {
-      console.error("Bulk delete error:", error);
       toast.error(error?.response?.data?.message || "Failed to delete selected items");
     } finally {
       setIsDeleting(false);

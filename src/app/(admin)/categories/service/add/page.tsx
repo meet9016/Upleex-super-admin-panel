@@ -87,7 +87,6 @@ export default function AddServiceCategoryPage() {
         setCategories(res.data.data);
       }
     } catch (error) {
-      console.error("Error fetching service categories:", error);
       toast.error("Failed to fetch service categories");
     } finally {
       setIsFetching(false);
@@ -265,7 +264,6 @@ export default function AddServiceCategoryPage() {
         await fetchCategories(debouncedSearch);
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(
         error?.response?.data?.message ||
         (editingId ? 'Failed to update service category' : 'Failed to create service category')
@@ -310,7 +308,6 @@ export default function AddServiceCategoryPage() {
       setShowDeletePopup(false);
       setCategoryToDelete(null);
     } catch (error: any) {
-      console.error("Error deleting service category:", error);
       toast.error(error?.response?.data?.message || "Failed to delete service category");
     } finally {
       setIsDeleting(false);
@@ -339,7 +336,6 @@ export default function AddServiceCategoryPage() {
         toast.error(res?.data?.message || 'Bulk delete failed');
       }
     } catch (error: any) {
-      console.error("Bulk delete error:", error);
       toast.error(error?.response?.data?.message || 'Failed to delete selected categories');
     } finally {
       setIsBulkDeleting(false);

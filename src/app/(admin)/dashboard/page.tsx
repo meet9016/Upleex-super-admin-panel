@@ -69,7 +69,6 @@ export default function DashboardPage() {
         throw new Error("Invalid response format");
       }
     } catch (error) {
-      console.error("Dashboard data fetch error:", error);
       toast.error("Failed to load dashboard data");
       setStats({
         vendors: {

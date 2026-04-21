@@ -92,7 +92,6 @@ export default function VendorsPage() {
         return params;
     };
 
-    console.log(rowData)
     const fetchVendors = useCallback(async (
         searchQuery = '',
         statusQuery = '',
@@ -115,12 +114,10 @@ export default function VendorsPage() {
             const url = queryString ? `${endPointApi.getVendorList}?${queryString}` : endPointApi.getVendorList;
 
             const response = await api.get(url);
-            console.log(response)
             if (response.data.status === 200 || response.data.success) {
                 setRowData(response.data.data || []);
             }
         } catch (error: any) {
-            console.error("Error fetching vendors:", error);
             toast.error("Failed to fetch vendor list");
         } finally {
             setIsLoading(false);
@@ -134,7 +131,6 @@ export default function VendorsPage() {
                 setDropdownStatuses(response.data.getquote_status);
             }
         } catch (error) {
-            console.error("Error fetching dropdowns:", error);
         }
     }, []);
 
@@ -159,13 +155,7 @@ export default function VendorsPage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // if (isLoading && rowData.length === 0) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-[900px]">
-    //             <PageLoader fullScreen={false} />
-    //         </div>
-    //     );
-    // }
+
 
     const handleStatusChange = async (kycId: string, vendorId: string, newStatus: string, rejectionReason?: string) => {
         // Optimistic update
@@ -197,12 +187,11 @@ export default function VendorsPage() {
                 fetchVendors(validSearchText, statusFilter, vendorNameFilter, businessNameFilter, kycProgressFilter, vendorTypeFilter);
             } else {
                 toast.error(response.data.message || "Failed to update status");
-                setRowData(previousData); // Revert on failure
+                setRowData(previousData);
             }
         } catch (error: any) {
-            console.error("Error updating status:", error);
             toast.error(error.response?.data?.message || "Failed to update vendor status");
-            setRowData(previousData); // Revert on error
+            setRowData(previousData); 
         } finally {
             setIsUpdating(null);
         }
@@ -358,7 +347,6 @@ export default function VendorsPage() {
 
                                     // If rejecting, ask for reason
                                     if (next === 'rejected') {
-                                        // const reason = prompt('Please provide a reason for rejection (optional):');
                                         handleStatusChange(kycId, vendorId, next);
                                     } else {
                                         handleStatusChange(kycId, vendorId, next);

@@ -80,7 +80,6 @@ export default function VendorServiceApprovalPage() {
               ...(counts ? { pending_count: counts.pending, approved_count: counts.approved, rejected_count: counts.rejected } : {})
             } as any;
           } catch (error) {
-            console.error(`Failed to fetch services for vendor ${vendor.vendor_id}:`, error);
             return { ...vendor, services: [] };
           }
         })
@@ -105,7 +104,6 @@ export default function VendorServiceApprovalPage() {
       }
       setPage(pageResp);
     } catch (error) {
-      console.error('Failed to fetch vendors:', error);
       toast.error("Failed to fetch vendors");
     } finally {
       if (pageNum === 1) {
@@ -150,7 +148,6 @@ export default function VendorServiceApprovalPage() {
       }
       toast.success(`Service ${status}`);
     } catch (error) {
-      console.error('Failed to update status:', error);
       toast.error("Failed to update status");
       setVendors(previousVendors); // Revert on failure
     } finally {
@@ -186,7 +183,6 @@ export default function VendorServiceApprovalPage() {
       }));
       toast.success(`${serviceIds.length} services approved`);
     } catch (error) {
-      console.error('Failed to bulk approve:', error);
       toast.error("Failed to approve");
     } finally {
       setApproving(false);
@@ -221,7 +217,6 @@ export default function VendorServiceApprovalPage() {
       }));
       toast.success(`${serviceIds.length} services rejected`);
     } catch (error) {
-      console.error('Failed to bulk reject:', error);
       toast.error("Failed to reject");
     } finally {
       setRejecting(false);

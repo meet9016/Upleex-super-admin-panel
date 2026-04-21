@@ -26,7 +26,6 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
       const response = await apiService.getMyPermissions() as any;
       setPermissions(response.data.permissions || []);
     } catch (error) {
-      console.error('Failed to fetch permissions:', error);
       setPermissions([]);
     } finally {
       setLoading(false);

@@ -1,15 +1,4 @@
 "use client";
-const consoleError = console.error;
-console.error = (...args) => {
-  if (
-    typeof args[0] === "string" &&
-    (args[0].includes("AG Grid Enterprise License") ||
-      args[0].includes("License Key Not Found") ||
-      args[0].includes("unlocked for trial"))
-  ) {
-    return;
-  }
-};
 
 import React, { useMemo, useRef, memo, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

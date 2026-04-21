@@ -9,7 +9,6 @@ import ActionButtons from "@/components/common/ActionButtons";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useDropzone } from "react-dropzone";
-// import { format, parse } from "date-fns"; // Install date-fns: npm install date-fns
 import { Editor } from "primereact/editor";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -140,7 +139,6 @@ export default function BlogPage() {
   const formatDateToDDMMYYYY = (dateString: string): string => {
     if (!dateString) return '';
 
-    console.log("Original date from API:", dateString);
 
     try {
       // If it's already in DD/MM/YYYY format
@@ -237,7 +235,6 @@ export default function BlogPage() {
         setFilteredBlogs(transformedData);
       }
     } catch (error) {
-      console.error("Error fetching blogs:", error);
       toast.error("Failed to fetch blogs");
     } finally {
       setIsFetching(false);
@@ -271,7 +268,6 @@ export default function BlogPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error creating blog:", error);
       toast.error(error?.response?.data?.message || 'Failed to create blog');
       return false;
     }
@@ -296,7 +292,6 @@ export default function BlogPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error updating blog:", error);
       toast.error(error?.response?.data?.message || 'Failed to update blog');
       return false;
     }
@@ -313,7 +308,6 @@ export default function BlogPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error deleting blog:", error);
       toast.error(error?.response?.data?.message || 'Failed to delete blog');
       return false;
     }
@@ -363,7 +357,6 @@ export default function BlogPage() {
         await fetchBlogs(debouncedSearch);
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(error?.response?.data?.message || 'Operation failed');
     } finally {
       setIsLoading(false);
@@ -395,7 +388,6 @@ export default function BlogPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
-      console.error("Error fetching blog details:", error);
       toast.error("Failed to fetch blog details");
     } finally {
       setIsFetching(false);
@@ -809,7 +801,6 @@ export default function BlogPage() {
                           toast.error(res?.data?.message || 'Bulk delete failed');
                         }
                       } catch (error: any) {
-                        console.error("Bulk delete error:", error);
                         toast.error(error?.response?.data?.message || 'Failed to delete selected blogs');
                       }
                     }}

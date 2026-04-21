@@ -75,7 +75,6 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                 toast.error(response.data.message || "Failed to update status");
             }
         } catch (error: any) {
-            console.error("Error updating status:", error);
             toast.error(error.response?.data?.message || "Failed to update status");
         } finally {
             setIsUpdating(false);

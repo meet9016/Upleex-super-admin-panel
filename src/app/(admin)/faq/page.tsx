@@ -105,7 +105,6 @@ export default function FAQPage() {
         setFilteredFaqs(formattedFaqs);
       }
     } catch (error) {
-      console.error("Error fetching FAQs:", error);
       toast.error("Failed to fetch FAQs");
     } finally {
       setIsFetching(false);
@@ -131,7 +130,6 @@ export default function FAQPage() {
         setFilteredFaqs(formattedFaqs);
       }
     } catch (error) {
-      console.error("Error searching FAQs:", error);
       toast.error("Failed to search FAQs");
     } finally {
       setIsFetching(false);
@@ -149,7 +147,6 @@ export default function FAQPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error creating FAQ:", error);
       toast.error(error?.response?.data?.message || 'Failed to create FAQ');
       return false;
     }
@@ -169,7 +166,6 @@ export default function FAQPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error updating FAQ:", error);
       toast.error(error?.response?.data?.message || 'Failed to update FAQ');
       return false;
     }
@@ -186,7 +182,6 @@ export default function FAQPage() {
       }
       return false;
     } catch (error: any) {
-      console.error("Error deleting FAQ:", error);
       toast.error(error?.response?.data?.message || 'Failed to delete FAQ');
       return false;
     }
@@ -219,7 +214,6 @@ export default function FAQPage() {
         }
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(error?.response?.data?.message || 'Operation failed');
     } finally {
       setIsLoading(false);
@@ -440,7 +434,6 @@ const handleConfirmDelete = async () => {
             toast.error(res?.data?.message || 'Bulk delete failed');
           }
         } catch (error: any) {
-          console.error("Bulk delete error:", error);
           toast.error(error?.response?.data?.message || 'Failed to delete selected FAQs');
         }
       }}

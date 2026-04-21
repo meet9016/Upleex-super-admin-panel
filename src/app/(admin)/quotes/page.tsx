@@ -39,7 +39,6 @@ export default function QuotesPage() {
                 setHasMore(pageNum < totalPages);
             }
         } catch (error: any) {
-            console.error("Error fetching quotes:", error);
             toast.error("Failed to fetch quotes list");
         } finally {
             setIsLoading(false);

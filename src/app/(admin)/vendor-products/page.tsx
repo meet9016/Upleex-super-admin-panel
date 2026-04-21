@@ -81,7 +81,6 @@ export default function VendorProductApprovalPage() {
               ...(counts ? { pending_count: counts.pending, approved_count: counts.approved, rejected_count: counts.rejected } : {})
             } as any;
           } catch (error) {
-            console.error(`Failed to fetch products for vendor ${vendor.vendor_id}:`, error);
             return { ...vendor, products: [] };
           }
         })
@@ -107,7 +106,6 @@ export default function VendorProductApprovalPage() {
       }
       setPage(pageResp);
     } catch (error) {
-      console.error('Failed to fetch vendors:', error);
       toast.error("Failed to fetch vendors");
     } finally {
       if (pageNum === 1) {
@@ -156,7 +154,6 @@ export default function VendorProductApprovalPage() {
       const message = res?.data?.message || `Product ${status} successfully`;
       toast.success(message);
     } catch (error: any) {
-      console.error('Failed to update status:', error);
       const errorMessage = error?.response?.data?.message || 'Failed to update status';
       toast.error(errorMessage);
       setVendors(previousVendors); // Revert on failure
@@ -191,7 +188,6 @@ export default function VendorProductApprovalPage() {
       }));
       toast.success(`${productIds.length} products approved`);
     } catch (error) {
-      console.error('Failed to bulk approve:', error);
       toast.error("Failed to approve");
     } finally {
       setApproving(false);
@@ -226,7 +222,6 @@ export default function VendorProductApprovalPage() {
       }));
       toast.success(`${productIds.length} products rejected`);
     } catch (error) {
-      console.error('Failed to bulk reject:', error);
       toast.error("Failed to reject");
     } finally {
       setRejecting(false);

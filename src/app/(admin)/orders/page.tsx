@@ -131,7 +131,6 @@ export default function AdminOrdersPage() {
   const [rentPaymentFilter, setRentPaymentFilter] = useState('');
   const [rentVendorFilter, setRentVendorFilter] = useState('');
   const [rentProductFilter, setRentProductFilter] = useState('');
-  // pending (staged inside modal)
   const [pendingRentStatus, setPendingRentStatus] = useState('');
   const [pendingRentPayment, setPendingRentPayment] = useState('');
   const [pendingRentVendor, setPendingRentVendor] = useState('');

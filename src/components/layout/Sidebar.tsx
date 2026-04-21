@@ -69,13 +69,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         href: "/plans",
         icon: GrPlan ,
         permission: "orders",
-        // subItems: [
-        //   { name: "Product listing Plan", href: "/plans", icon: FolderPlus, permission: "orders" },
-        //   { name: "Priority Plan", href: "/priority", icon: FolderPlus, permission: "orders" },
-        //   { name: "Plan Purchases", href: "/plan-purchases", icon: FolderPlus, permission: "orders" },
-        // ],
       },
-      // { name: "Admin Permissions", href: "/admin-permissions", icon: Shield, permission: "admin-permissions" },
       { name: "Vendor Wallet", href: "/vendor-wallets", icon: Loader2, permission: "vendor-wallets" },
       { name: "Vendor Payments", href: "/vendor-payments", icon: RiSecurePaymentLine , permission: "vendor-payments" },
     ],

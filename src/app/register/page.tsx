@@ -49,7 +49,6 @@ export default function RegisterPage() {
                 toast.error(response.data.message || "Registration failed");
             }
         } catch (error: any) {
-            console.error("Registration error:", error);
             toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);

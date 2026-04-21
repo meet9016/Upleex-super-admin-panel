@@ -148,7 +148,6 @@ export default function BannerPage() {
         setBanners(transformedData);
       }
     } catch (error) {
-      console.error("Error fetching banners:", error);
       toast.error("Failed to fetch banners");
     } finally {
       setIsFetching(false);
@@ -218,7 +217,6 @@ export default function BannerPage() {
         await fetchBanners(debouncedSearch);
       }
     } catch (error: any) {
-      console.error("Error:", error);
       toast.error(error?.response?.data?.message || 'Operation failed');
     } finally {
       setIsLoading(false);

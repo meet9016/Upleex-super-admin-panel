@@ -46,12 +46,10 @@ export default function VendorPaymentsPage() {
                     pages: 0
                 });
             } else {
-                console.warn('API response not successful:', response);
                 setPayments([]);
                 toast.error(response?.message || "Failed to fetch vendor payments");
             }
         } catch (error: any) {
-            console.error("Error fetching vendor payments:", error);
             setPayments([]);
             if (error.message.includes('Invalid credentials') || error.message.includes('401')) {
                 toast.error("Authentication failed. Please login again.");
@@ -70,11 +68,9 @@ export default function VendorPaymentsPage() {
             if (response && response.success) {
                 setStats(response.data?.stats || null);
             } else {
-                console.warn('Stats API response not successful:', response);
                 setStats(null);
             }
         } catch (error: any) {
-            console.error("Error fetching payment stats:", error);
             setStats(null);
             // Don't show error toast for stats as it's not critical
         }
@@ -107,7 +103,6 @@ export default function VendorPaymentsPage() {
                 toast.error(response?.message || "Failed to release payment");
             }
         } catch (error: any) {
-            console.error("Error releasing payment:", error);
             toast.error(error.message || "Failed to release payment");
         } finally {
             setIsReleasing(null);
@@ -136,7 +131,6 @@ export default function VendorPaymentsPage() {
                 toast.error(response?.message || "Failed to cancel payment");
             }
         } catch (error: any) {
-            console.error("Error cancelling payment:", error);
             toast.error(error.message || "Failed to cancel payment");
         } finally {
             setIsReleasing(null);
@@ -154,7 +148,6 @@ export default function VendorPaymentsPage() {
                 toast.error(response?.message || "Failed to release scheduled payments");
             }
         } catch (error: any) {
-            console.error("Error releasing scheduled payments:", error);
             toast.error(error.message || "Failed to release scheduled payments");
         }
     };
@@ -183,7 +176,6 @@ export default function VendorPaymentsPage() {
         payments.forEach(payment => {
             // Skip if payment or order_id is null/undefined
             if (!payment || !payment.order_id) {
-                console.warn('Skipping payment with missing order_id:', payment);
                 return;
             }
             
