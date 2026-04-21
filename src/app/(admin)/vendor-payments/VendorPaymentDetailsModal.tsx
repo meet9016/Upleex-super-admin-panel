@@ -25,18 +25,31 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     
     if (!open || !data) return null;
 
-    // Safety check for order_id with proper typing
-    const defaultOrderInfo: SafeOrderInfo = {
+    const isRent = !!data.quote_id;
+    const typeLabel = isRent ? "Rent" : "Sell";
+    const idLabel = isRent ? "Quote ID" : "Order ID";
+    const amountLabel = isRent ? "Rental Amount" : "Order Amount";
+
+    // Safety check for order/quote info
+    let orderInfo: SafeOrderInfo = {
         order_id: 'N/A',
         user_name: 'Unknown Customer',
         total_amount: 0
     };
     
-    const orderInfo: SafeOrderInfo = data.order_id ? {
-        order_id: data.order_id.order_id || 'N/A',
-        user_name: data.order_id.user_name || 'Unknown Customer',
-        total_amount: data.order_id.total_amount || 0
-    } : defaultOrderInfo;
+    if (data.order_id) {
+        orderInfo = {
+            order_id: data.order_id.order_id || 'N/A',
+            user_name: data.order_id.user_name || 'Unknown Customer',
+            total_amount: data.order_id.total_amount || 0
+        };
+    } else if (data.quote_id) {
+        orderInfo = {
+            order_id: `Q#${data.quote_id._id.slice(-6).toUpperCase()}`,
+            user_name: data.quote_id.user_id?.name || data.quote_id.user_id?.first_name || 'Unknown Customer',
+            total_amount: data.quote_id.calculated_price || 0
+        };
+    }
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-IN', {
@@ -98,10 +111,10 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
 
         <div>
           <h2 className="text-xl font-semibold text-gray-50">
-            Payment Details
+            Payment Details <span className="text-sm font-normal opacity-80">({typeLabel})</span>
           </h2>
-          <p className="text-xs Notes & Actions text-gray-100">
-            Order #{orderInfo.order_id}
+          <p className="text-xs text-gray-100 ">
+            {idLabel} : {orderInfo.order_id}
           </p>
         </div>
       </div>
@@ -125,7 +138,7 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
       <div className="grid md:grid-cols-3 gap-5">
         {[{
           icon: Package,
-          label: "Order Amount",
+          label: amountLabel,
           value: formatAmount(orderInfo.total_amount),
           color: "blue"
         },
@@ -168,12 +181,12 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Package size={18} className="text-blue-600" />
-            Order Information
+            {typeLabel} Information
           </h3>
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Order ID</span>
+              <span className="text-gray-500">{idLabel}</span>
               <span className="font-mono text-gray-800">
                 {orderInfo.order_id}
               </span>
@@ -212,8 +225,8 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
           <div className="space-y-4">
 
             {[
-              { label: "Delivered", value: formatDate(data.delivered_at) },
-              { label: "Release Date", value: formatDate(data.release_date) },
+            { label: isRent ? "Completed" : "Delivered", value: formatDate(data.delivered_at) },
+            { label: "Release Date", value: formatDate(data.release_date) },
               data.released_at && {
                 label: "Released At",
                 value: formatDate(data.released_at)
