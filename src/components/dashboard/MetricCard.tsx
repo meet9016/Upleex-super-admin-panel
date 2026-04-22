@@ -32,9 +32,32 @@ export default function MetricCard({
   index,
 }: MetricCardProps) {
   const isOpen = openCardId === id;
+  const [dynamicPosition, setDynamicPosition] = React.useState<"left" | "right">(index % 4 === 3 ? "left" : "right");
+  const [positionReady, setPositionReady] = React.useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  // useLayoutEffect fires before paint — prevents any blink
+  React.useLayoutEffect(() => {
+    if (isOpen && cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const popupWidth = 300;
+
+      if (rect.right + popupWidth > windowWidth && rect.left - popupWidth >= 0) {
+        setDynamicPosition("left");
+      } else if (rect.left - popupWidth < 0 && rect.right + popupWidth <= windowWidth) {
+        setDynamicPosition("right");
+      } else {
+        setDynamicPosition(rect.right + popupWidth > windowWidth ? "left" : "right");
+      }
+      setPositionReady(true);
+    } else {
+      setPositionReady(false);
+    }
+  }, [isOpen]);
 
   return (
-    <div className="relative metric-card-container h-full">
+    <div ref={cardRef} className="relative metric-card-container h-full">
       <Card
         className={`group cursor-pointer border border-slate-100 hover:border-slate-200 hover:shadow-xl transition-all duration-300 overflow-visible h-full ${
           isOpen ? "ring-2 ring-blue-500/20 shadow-md" : ""
@@ -64,12 +87,14 @@ export default function MetricCard({
       </Card>
 
       {isOpen && hoverItems.length > 0 && (
-        <DetailCard
-          items={hoverItems}
-          position={index % 4 === 3 ? "left" : "right"}
-          openSubItem={openSubItem}
-          onSubItemClick={onSubItemClick}
-        />
+        <div className={`transition-opacity duration-150 ${positionReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <DetailCard
+            items={hoverItems}
+            position={dynamicPosition}
+            openSubItem={openSubItem}
+            onSubItemClick={onSubItemClick}
+          />
+        </div>
       )}
     </div>
   );
