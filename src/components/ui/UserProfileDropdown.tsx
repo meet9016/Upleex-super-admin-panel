@@ -30,13 +30,23 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
 
   const handleLogout = async () => {
     try {
+      setIsOpen(false);
+      
+      // Use clearToken utility to clear both localStorage and cookies
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_info');
+        const { clearToken } = await import('@/utils/tokenManager');
+        clearToken();
+        
+        // Show success message
+        toast.success('Logged out successfully');
+        
+        // Force redirect using window.location for reliable logout
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 500);
       }
-      toast.success('Logged out successfully');
-      router.push('/login');
     } catch (error) {
+      console.error('Logout error:', error);
       toast.error('Error logging out');
     }
   };
