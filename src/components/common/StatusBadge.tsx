@@ -32,6 +32,10 @@ const STATUS_MAP: Record<string, { label: string; className: string }> = {
   delivered: { label: "Delivered", className: "text-teal-700 bg-teal-50 border-teal-200" },
   cancelled: { label: "Cancelled", className: "text-red-700 bg-red-50 border-red-200" },
   returned: { label: "Returned", className: "text-orange-700 bg-orange-50 border-orange-200" },
+  // Vendor types
+  vendor: { label: "Vendor", className: "text-blue-700 bg-blue-50 border-blue-200" },
+  service: { label: "Service", className: "text-green-700 bg-green-50 border-green-200" },
+  both: { label: "Both", className: "text-purple-700 bg-purple-50 border-purple-200" },
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

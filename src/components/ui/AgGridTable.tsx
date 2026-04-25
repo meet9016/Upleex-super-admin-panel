@@ -259,7 +259,7 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
             onSelectionChanged={showCheckboxes ? onSelectionChanged : undefined}
             quickFilterText={searchText}
             getRowId={useCallback((params: any) => {
-              return params.data.id || params.data.categories_id || params.data._id;
+              return params.data.id || params.data.vendor_id || params.data.categories_id || params.data._id || `row-${params.node.rowIndex}`;
             }, [])}
             suppressNoRowsOverlay={loading}
             overlayNoRowsTemplate={noRowsMessage ? `<span class="text-gray-500 dark:text-gray-400 font-medium">${noRowsMessage}</span>` : "<span></span>"}

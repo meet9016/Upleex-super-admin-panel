@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Settings, ChevronDown, UserPlus } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, UserPlus, BarChart3 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { usePermissions } from '@/contexts/PermissionContext';
 
@@ -123,6 +123,24 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
                 <div className="text-left">
                   <p className="font-medium">Create Admin</p>
                   <p className="text-xs text-gray-500">Add new admin user</p>
+                </div>
+              </button>
+            )}
+
+            {hasPermission('vendors') && (
+              <button
+                onClick={() => {
+                  router.push('/vendor-reports');
+                  setIsOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <div className="p-1.5 bg-purple-100 rounded-lg">
+                  <BarChart3 size={16} className="text-purple-600" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Vendor Reports</p>
+                  <p className="text-xs text-gray-500">View vendor analytics</p>
                 </div>
               </button>
             )}
