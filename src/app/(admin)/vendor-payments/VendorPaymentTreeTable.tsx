@@ -41,6 +41,8 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { VendorPayment, VendorPaymentStats, VendorPaymentTreeData } from "@/types/vendorPayment";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import PageLoader from "@/components/common/PageLoader";
+import ConfirmModal from "@/components/common/ConfirmModal";
+import PromptModal from "@/components/common/PromptModal";
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -179,7 +181,15 @@ const StatusCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
 
 // Action cell renderer
 const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) => {
-  const { onViewDetails, onReleasePayment, onCancelPayment, isReleasing, activeTab } = props.context;
+  const { 
+    onViewDetails, 
+    onReleasePayment, 
+    onCancelPayment, 
+    isReleasing, 
+    activeTab,
+    onReleaseClick,
+    onCancelClick
+  } = props.context;
   const data = props.data;
 
   if (!data) return null;
@@ -200,42 +210,6 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
     const canRelease = data.paymentStatus === 'pending';
     const canCancel = data.paymentStatus === 'pending';
 
-    const handleReleaseClick = () => {
-      const confirmed = window.confirm(
-        `Are you sure you want to release payment for ${activeTab === 'rent' ? 'Quote' : 'Order'} ${data.orderNumber}?\n\n` +
-        `Customer: ${data.customerName}\n` +
-        `Vendor Amount: ${data.formattedVendorAmount}\n\n` +
-        `This action cannot be undone.`
-      );
-      
-      if (confirmed) {
-        const notes = window.prompt('Enter release notes (optional):');
-        onReleasePayment(data.id, notes || undefined);
-      }
-    };
-
-    const handleCancelClick = () => {
-      const reason = window.prompt(
-        `Please enter the reason for cancelling payment for Order ${data.orderNumber}:\n\n` +
-        `Customer: ${data.customerName}\n` +
-        `Vendor Amount: ${data.formattedVendorAmount}`
-      );
-      
-      if (reason && reason.trim()) {
-        const confirmed = window.confirm(
-          `Are you sure you want to cancel this payment?\n\n` +
-          `Reason: ${reason}\n\n` +
-          `This action cannot be undone.`
-        );
-        
-        if (confirmed) {
-          onCancelPayment(data.id, reason.trim());
-        }
-      } else if (reason !== null) {
-        alert('Cancellation reason is required.');
-      }
-    };
-
     return (
       <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-left gap-2 h-full w-full">
         <button
@@ -247,7 +221,7 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
         </button>
         {canRelease && (
           <button
-            onClick={handleReleaseClick}
+            onClick={() => onReleaseClick(data)}
             disabled={isReleasing === data.id}
             className="px-3 py-2 text-xs font-medium rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
             title="Release Payment"
@@ -262,7 +236,7 @@ const ActionCellRenderer = (props: ICellRendererParams<VendorPaymentTreeData>) =
         )}
         {canCancel && (
           <button
-            onClick={handleCancelClick}
+            onClick={() => onCancelClick(data)}
             disabled={isReleasing === data.id}
             className="px-3 py-2 text-xs font-medium rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
             title="Cancel Payment"
@@ -340,6 +314,12 @@ export default function VendorPaymentTreeTable({
   const [statusFilter, setStatusFilter] = useState('');
   const [vendorFilter, setVendorFilter] = useState('');
 
+  // Modal states for replacing window.confirm and window.prompt
+  const [releaseConfirmModal, setReleaseConfirmModal] = useState({ open: false, paymentId: '', orderNumber: '', customerName: '', amount: '', tab: '' });
+  const [notesPromptModal, setNotesPromptModal] = useState({ open: false, paymentId: '' });
+  const [cancelReasonModal, setCancelReasonModal] = useState({ open: false, paymentId: '', orderNumber: '', customerName: '', amount: '' });
+  const [cancelConfirmModal, setCancelConfirmModal] = useState({ open: false, paymentId: '', reason: '' });
+
   // Format amount function
   const formatAmount = (amount: number): string => {
     return `₹${amount.toLocaleString('en-IN')}`;
@@ -355,6 +335,64 @@ export default function VendorPaymentTreeTable({
     setQuickFilterText(event.target.value);
     gridRef.current?.api.setGridOption('quickFilterText', event.target.value);
   }, []);
+
+  // Handle release payment click - opens confirm modal
+  const handleReleaseClick = useCallback((paymentData: VendorPaymentTreeData) => {
+    setReleaseConfirmModal({
+      open: true,
+      paymentId: paymentData.id,
+      orderNumber: paymentData.orderNumber || '',
+      customerName: paymentData.customerName || '',
+      amount: paymentData.formattedVendorAmount || '',
+      tab: activeTab,
+    });
+  }, [activeTab]);
+
+  // Handle release confirm - opens notes prompt modal
+  const handleReleaseConfirm = useCallback(() => {
+    setReleaseConfirmModal(prev => ({ ...prev, open: false }));
+    setNotesPromptModal({
+      open: true,
+      paymentId: releaseConfirmModal.paymentId,
+    });
+  }, [releaseConfirmModal.paymentId]);
+
+  // Handle notes submit - calls the actual release
+  const handleNotesSubmit = useCallback((notes: string) => {
+    onReleasePayment(releaseConfirmModal.paymentId, notes || undefined);
+    setNotesPromptModal({ open: false, paymentId: '' });
+  }, [releaseConfirmModal.paymentId, onReleasePayment]);
+
+  // Handle cancel payment click - opens reason prompt modal
+  const handleCancelClick = useCallback((paymentData: VendorPaymentTreeData) => {
+    setCancelReasonModal({
+      open: true,
+      paymentId: paymentData.id,
+      orderNumber: paymentData.orderNumber || '',
+      customerName: paymentData.customerName || '',
+      amount: paymentData.formattedVendorAmount || '',
+    });
+  }, []);
+
+  // Handle reason submit - opens confirm modal
+  const handleReasonSubmit = useCallback((reason: string) => {
+    if (!reason.trim()) {
+      alert('Cancellation reason is required.');
+      return;
+    }
+    setCancelReasonModal(prev => ({ ...prev, open: false }));
+    setCancelConfirmModal({
+      open: true,
+      paymentId: cancelReasonModal.paymentId,
+      reason: reason.trim(),
+    });
+  }, [cancelReasonModal.paymentId]);
+
+  // Handle cancel confirm - calls the actual cancel
+  const handleCancelConfirm = useCallback(() => {
+    onCancelPayment(cancelConfirmModal.paymentId, cancelConfirmModal.reason);
+    setCancelConfirmModal({ open: false, paymentId: '', reason: '' });
+  }, [cancelConfirmModal.paymentId, cancelConfirmModal.reason, onCancelPayment]);
 
   // Column definitions
   const columnDefs: ColDef<VendorPaymentTreeData>[] = useMemo(() => [
@@ -512,7 +550,9 @@ export default function VendorPaymentTreeTable({
     onCancelPayment,
     isReleasing,
     activeTab,
-  }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing, activeTab]);
+    onReleaseClick: handleReleaseClick,
+    onCancelClick: handleCancelClick,
+  }), [onViewDetails, onReleasePayment, onCancelPayment, isReleasing, activeTab, handleReleaseClick, handleCancelClick]);
 
   // Handle filter changes
 const handleStatusFilterChange = (status: string | string[]) => {
@@ -726,6 +766,56 @@ const handleStatusFilterChange = (status: string | string[]) => {
       </div>
     </CardContent>
   </Card>
+
+  {/* Release Payment Confirmation Modal */}
+  <ConfirmModal
+    open={releaseConfirmModal.open}
+    title={`Release ${releaseConfirmModal.tab === 'rent' ? 'Quote' : 'Order'} Payment?`}
+    description={`Are you sure you want to release payment for ${releaseConfirmModal.tab === 'rent' ? 'Quote' : 'Order'} ${releaseConfirmModal.orderNumber}?\n\nCustomer: ${releaseConfirmModal.customerName}\nVendor Amount: ${releaseConfirmModal.amount}\n\nThis action cannot be undone.`}
+    confirmText="Release"
+    cancelText="Cancel"
+    onCancel={() => setReleaseConfirmModal({ open: false, paymentId: '', orderNumber: '', customerName: '', amount: '', tab: '' })}
+    onConfirm={handleReleaseConfirm}
+  />
+
+  {/* Release Notes Prompt Modal */}
+  <PromptModal
+    open={notesPromptModal.open}
+    title="Release Notes"
+    description="Add any notes for this payment release (optional)"
+    placeholder="Enter release notes..."
+    confirmText="Release"
+    cancelText="Cancel"
+    multiline={true}
+    onCancel={() => setNotesPromptModal({ open: false, paymentId: '' })}
+    onConfirm={handleNotesSubmit}
+  />
+
+  {/* Cancel Payment Reason Prompt Modal */}
+  <PromptModal
+    open={cancelReasonModal.open}
+    title="Cancel Payment"
+    description={`Please enter the reason for cancelling payment for Order ${cancelReasonModal.orderNumber}:\n\nCustomer: ${cancelReasonModal.customerName}\nVendor Amount: ${cancelReasonModal.amount}`}
+    placeholder="Enter cancellation reason..."
+    confirmText="Next"
+    cancelText="Cancel"
+    required={true}
+    multiline={true}
+    onCancel={() => setCancelReasonModal({ open: false, paymentId: '', orderNumber: '', customerName: '', amount: '' })}
+    onConfirm={handleReasonSubmit}
+  />
+
+  {/* Cancel Payment Confirmation Modal */}
+  <ConfirmModal
+    open={cancelConfirmModal.open}
+    title="Confirm Payment Cancellation"
+    description={`Are you sure you want to cancel this payment?\n\nReason: ${cancelConfirmModal.reason}\n\nThis action cannot be undone.`}
+    confirmText="Yes, Cancel Payment"
+    cancelText="Go Back"
+    isDangerous={true}
+    onCancel={() => setCancelConfirmModal({ open: false, paymentId: '', reason: '' })}
+    onConfirm={handleCancelConfirm}
+  />
 </div>
   );
 }

@@ -5,6 +5,8 @@ import { X, Calendar, DollarSign, Package, User, CreditCard, Hash, Loader2 } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { VendorPayment, SafeOrderInfo } from "@/types/vendorPayment";
+import ConfirmModal from "@/components/common/ConfirmModal";
+import PromptModal from "@/components/common/PromptModal";
 
 interface VendorPaymentDetailsModalProps {
     open: boolean;
@@ -22,6 +24,7 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     isReleasing = false
 }) => {
     const [notes, setNotes] = useState('');
+    const [releaseConfirmOpen, setReleaseConfirmOpen] = useState(false);
     
     if (!open || !data) return null;
 
@@ -85,22 +88,21 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
         return data.payment_status === 'pending' && new Date() >= new Date(data.release_date);
     };
 
-    const handleReleasePayment = () => {
-        const confirmed = window.confirm(
-            `Are you sure you want to release payment for Order ${orderInfo.order_id}?\n\n` +
-            `Customer: ${orderInfo.user_name}\n` +
-            `Vendor Amount: ${formatAmount(data.vendor_amount)}\n\n` +
-            `This action cannot be undone.`
-        );
-        
-        if (confirmed && onReleasePayment) {
+    const handleReleaseClick = () => {
+        setReleaseConfirmOpen(true);
+    };
+
+    const handleReleaseConfirm = () => {
+        if (onReleasePayment) {
             onReleasePayment(data._id, notes.trim() || undefined);
         }
+        setReleaseConfirmOpen(false);
     };
 
     return (
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div className="bg-white/90 backdrop-blur-xl rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200">
+      <>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200">
 
     {/* HEADER */}
     <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-800 to-gray-700">
@@ -296,7 +298,7 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
 
         {canReleasePayment() && (
           <Button
-            onClick={handleReleasePayment}
+            onClick={handleReleaseClick}
             disabled={isReleasing}
             className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-xl shadow-md hover:shadow-lg"
           >
@@ -315,9 +317,20 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
         )}
       </div>
     </div>
+        </div>
+      </div>
 
-  </div>
-</div>
+      {/* Release Payment Confirmation Modal */}
+      <ConfirmModal
+        open={releaseConfirmOpen}
+        title="Release Payment?"
+        description={`Are you sure you want to release payment for Order ${orderInfo.order_id}?\n\nCustomer: ${orderInfo.user_name}\nVendor Amount: ${formatAmount(data.vendor_amount)}\n\nThis action cannot be undone.`}
+        confirmText="Release"
+        cancelText="Cancel"
+        onCancel={() => setReleaseConfirmOpen(false)}
+        onConfirm={handleReleaseConfirm}
+      />
+      </>
     );
 };
 
