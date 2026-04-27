@@ -60,6 +60,7 @@ interface Product {
   vendor_name?: string;
   product_type_name?: string;
   product_type_id?: string;
+  deposit_amount?: number;
 }
 
 interface Vendor {
@@ -89,6 +90,7 @@ interface TreeDataItem {
   product_main_image?: string;
   description?: string;
   vendor_name?: string;
+  deposit_amount?: number;
 }
 
 interface VendorProductTreeTableProps {
@@ -106,7 +108,7 @@ interface VendorProductTreeTableProps {
 // Product Detail Modal Component
 const ProductDetailModal = ({ product, isOpen, onClose }: { product: TreeDataItem | null; isOpen: boolean; onClose: () => void }) => {
   if (!isOpen || !product) return null;
-
+console.log("product",product);
   const InfoCard = ({ icon: Icon, label, value, isPrice = false }: any) => (
     <div className="flex items-start space-x-3 p-4 bg-gray-50/80 rounded-xl hover:bg-gray-100 hover:shadow-sm transition-all duration-200 border border-gray-100">
       <div className="flex-shrink-0 mt-0.5">
@@ -186,6 +188,7 @@ const ProductDetailModal = ({ product, isOpen, onClose }: { product: TreeDataIte
               <InfoCard icon={FileText} label="Status" value={<StatusBadge status={product.approval_status || 'pending'} />} />
               <InfoCard icon={Calendar} label="Created Date" value={product.createdAt ? new Date(product.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'} />
               <InfoCard icon={Box} label="Price" value={product.price} isPrice={true} />
+              <InfoCard icon={Box} label="Deposit Amount" value={product.deposit_amount} isPrice={true} />
             </div>
 
             {/* Description Section */}
@@ -447,6 +450,7 @@ export default function VendorProductTreeTable({
           description: product.description,
           vendor_name: product.vendor_name || vendor.business_name,
           path: [...vendorPath, product.id || product._id || ""],
+          deposit_amount: product.deposit_amount,
         })),
       };
     });
