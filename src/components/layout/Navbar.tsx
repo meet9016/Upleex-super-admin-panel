@@ -36,6 +36,12 @@ const getTypeColor = (type: string) => {
   return "bg-gray-100 text-gray-600";
 };
 
+const getProductTypeBadgeColor = (productType: string) => {
+  if (productType === "Rent") return "bg-amber-100 text-amber-700";
+  if (productType === "Sell") return "bg-emerald-100 text-emerald-700";
+  return "bg-slate-100 text-slate-700";
+};
+
 const getRedirectPath = (type: string) => {
   if (type === "new_vendor") return "/vendors";
   if (type === "product_request") return "/vendor-products";
@@ -95,7 +101,15 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
   useEffect(() => {
     fetchNotifications();
-    return () => {};
+
+    const handleNewAdminNotif = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener('new_admin_notification', handleNewAdminNotif);
+    return () => {
+      window.removeEventListener('new_admin_notification', handleNewAdminNotif);
+    };
   }, [fetchNotifications]);
 
   // Jab dropdown open ho tab fresh fetch karo
@@ -185,6 +199,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                 ) : (
                   notifications.slice(0, 15).map((notif) => {
                     const id = notif._id || (notif as any).id;
+                    const productType = notif.data?.productType;
                     return (
                       <button
                         key={id}
@@ -195,10 +210,24 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                           <Bell size={14} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-semibold truncate ${!notif.is_read ? "text-slate-900" : "text-slate-700"}`}>
-                            {notif.title}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notif.body}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p 
+                              title={notif.title}
+                              className={`text-sm font-semibold truncate ${!notif.is_read ? "text-slate-900" : "text-slate-700"}`}>
+                              {notif.title}
+                            </p>
+                            {productType && (
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${getProductTypeBadgeColor(productType)}`}>
+                                {productType}
+                              </span>
+                            )}
+                          </div>
+                          <p 
+                            title={notif.body?.replace(/<[^>]*>?/gm, '')}
+                            className="text-xs text-slate-500 mt-0.5 line-clamp-2" dangerouslySetInnerHTML={{ __html: notif.body }} />
+                          {notif.data?.vendorName && (
+                            <p className="text-[11px] text-slate-400 mt-1">Vendor: {notif.data.vendorName}</p>
+                          )}
                           <p className="text-[11px] text-slate-400 mt-1">{formatDate(notif.createdAt)}</p>
                         </div>
                         {!notif.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />}
