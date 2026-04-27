@@ -165,6 +165,132 @@ class ApiService {
       body: JSON.stringify({ ids }),
     });
   }
+
+  // Vendor Reports
+  async getVendorReport(params?: {
+    vendor_type?: string;
+    date_range?: string;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+    status?: string;
+    min_products?: string;
+    max_products?: string;
+    min_orders?: string;
+    max_orders?: string;
+    min_revenue?: string;
+    max_revenue?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.vendor_type) queryParams.append('vendor_type', params.vendor_type);
+    if (params?.date_range) queryParams.append('date_range', params.date_range);
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.min_products) queryParams.append('min_products', params.min_products);
+    if (params?.max_products) queryParams.append('max_products', params.max_products);
+    if (params?.min_orders) queryParams.append('min_orders', params.min_orders);
+    if (params?.max_orders) queryParams.append('max_orders', params.max_orders);
+    if (params?.min_revenue) queryParams.append('min_revenue', params.min_revenue);
+    if (params?.max_revenue) queryParams.append('max_revenue', params.max_revenue);
+    
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.getVendorReport}?${queryParams.toString()}`
+      : endPointApi.getVendorReport;
+    
+    return this.request(endpoint);
+  }
+
+  async exportVendorReportExcel(params?: {
+    vendor_type?: string;
+    date_range?: string;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.vendor_type) queryParams.append('vendor_type', params.vendor_type);
+    if (params?.date_range) queryParams.append('date_range', params.date_range);
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.exportVendorReportExcel}?${queryParams.toString()}`
+      : endPointApi.exportVendorReportExcel;
+    
+    const url = `${API_BASE_URL}/${endpoint}`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to export vendor report');
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `vendor_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async exportVendorReportPDF(params?: {
+    vendor_type?: string;
+    date_range?: string;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+    status?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.vendor_type) queryParams.append('vendor_type', params.vendor_type);
+    if (params?.date_range) queryParams.append('date_range', params.date_range);
+    if (params?.start_date) queryParams.append('start_date', params.start_date);
+    if (params?.end_date) queryParams.append('end_date', params.end_date);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const endpoint = queryParams.toString() 
+      ? `${endPointApi.exportVendorReportPDF}?${queryParams.toString()}`
+      : endPointApi.exportVendorReportPDF;
+    
+    const url = `${API_BASE_URL}/${endpoint}`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to export vendor report');
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `vendor_report_${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  }
 }
 
 export const apiService = new ApiService();

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SocketHandler from "@/components/common/SocketHandler";
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
+        <SocketHandler />
         {children}
         <ToastContainer
           position="top-right"
