@@ -35,7 +35,7 @@ export const useSocket = (adminId: string | undefined, type: 'admin' = 'admin') 
     console.log(`Connecting to Socket server: ${SOCKET_URL} for admin ${adminId}`);
     
     socketRef.current = io(SOCKET_URL, {
-      // path : '/api/socket.io',
+      path : '/api/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
