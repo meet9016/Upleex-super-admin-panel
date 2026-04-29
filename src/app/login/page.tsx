@@ -59,7 +59,7 @@ export default function LoginPage() {
         // Save token and user info
         saveToken(response.data.token);
         localStorage.setItem("user_info", JSON.stringify(response.data.admin));
-        
+        window.dispatchEvent(new Event('adminLoggedIn'));
         toast.success("Login successful! Welcome back.");
         router.push("/dashboard");
       } else {

@@ -36,8 +36,7 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
       if (typeof window !== 'undefined') {
         const { clearToken } = await import('@/utils/tokenManager');
         clearToken();
-        
-        // Show success message
+        window.dispatchEvent(new Event('adminLoggedOut'));
         toast.success('Logged out successfully');
         
         // Force redirect using window.location for reliable logout
