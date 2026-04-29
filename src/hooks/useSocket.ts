@@ -38,7 +38,10 @@ export const useSocket = (adminId: string | undefined, type: 'admin' = 'admin') 
       path : '/api/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
+      timeout: 20000,
       withCredentials: true,
     });
 
