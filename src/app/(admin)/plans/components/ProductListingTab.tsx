@@ -328,15 +328,30 @@ export default function ProductListingTab() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Mark as Popular Plan</label>
-                <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <Checkbox
-                    checked={!!form.popular}
-                    onCheckedChange={(checked) => setForm({ ...form, popular: checked })}
-                    className="border-yellow-300 text-yellow-500"
-                  />
-                  <span className="text-sm text-slate-700 font-medium">⭐ Show as popular plan</span>
+              <div className="grid grid-cols-2 gap-4 items-end">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">Status</label>
+                  <div className="mt-1">
+                    <SearchableDropdown
+                      options={statusOptions}
+                      value={form.status ?? 'active'}
+                      placeholder="Select Status"
+                      onChange={(val) =>
+                        setForm({ ...form, status: Array.isArray(val) ? val[0] : val })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center h-[42px] mb-0.5">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={!!form.popular}
+                      onCheckedChange={(checked) => setForm({ ...form, popular: checked })}
+                      className="border-slate-300"
+                    />
+                    <span className="text-sm text-slate-700 font-medium">⭐ Popular Plan</span>
+                  </div>
                 </div>
               </div>
 
@@ -378,21 +393,7 @@ export default function ProductListingTab() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold text-slate-700">
-                  Status
-                </label>
-                <div className="mt-1">
-                  <SearchableDropdown
-                    options={statusOptions}
-                    value={form.status ?? 'active'}
-                    placeholder="Select Status"
-                    onChange={(val) =>
-                      setForm({ ...form, status: Array.isArray(val) ? val[0] : val })
-                    }
-                  />
-                </div>
-              </div>
+
 
               <div className="flex gap-3 pt-2">
                 <Button onClick={savePlan} className="flex-1 btn-primary">

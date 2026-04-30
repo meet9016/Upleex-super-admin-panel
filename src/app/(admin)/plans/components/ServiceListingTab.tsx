@@ -279,6 +279,7 @@ export default function ServiceListingTab() {
                 <p className="text-[10px] text-slate-400 mt-1">Enter 0 for unlimited services</p>
                 {errors.max_services ? (<p className="mt-1 text-xs text-red-600">{errors.max_services}</p>) : null}
               </div>
+              <div className="grid grid-cols-2 gap-4 items-end">
               <div>
                 <label className="text-sm font-semibold text-slate-700">Status</label>
                 <div className="mt-1">
@@ -290,15 +291,16 @@ export default function ServiceListingTab() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Mark as Popular Plan</label>
-                <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <Checkbox
-                    checked={!!form.is_popular}
-                    onCheckedChange={(checked) => setForm({ ...form, is_popular: checked })}
-                    className="border-yellow-300 text-yellow-500"
-                  />
-                  <span className="text-sm text-slate-700 font-medium">⭐ Show as popular plan</span>
+
+                <div className="flex items-center h-[42px] mb-0.5">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={!!form.is_popular}
+                      onCheckedChange={(checked) => setForm({ ...form, is_popular: checked })}
+                      className="border-slate-300"
+                    />
+                    <span className="text-sm text-slate-700 font-medium">⭐ Popular Plan</span>
+                  </div>
                 </div>
               </div>
 
