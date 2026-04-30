@@ -397,7 +397,8 @@ export default function ProductListingTab() {
 
               <div className="flex gap-3 pt-2">
                 <Button onClick={savePlan} className="flex-1 btn-primary">
-                  {editingId ? "Update Plan" : "+ Create Plan"}
+                  <Plus className="mr-2 h-4 w-4" />
+                  {editingId ? "Update Plan" : "Create Plan"}
                 </Button> 
                 <Button variant="outline" className="flex-1" onClick={resetForm}>
                   Cancel

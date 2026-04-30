@@ -229,16 +229,16 @@ export default function RentalBoostTab() {
               </div>
 
               <div className="grid grid-cols-2 gap-4 items-end">
-              <div>
-                <label className="text-sm font-semibold text-slate-700">Status</label>
-                <div className="mt-1">
-                  <SearchableDropdown
-                    options={statusOptions}
-                    value={form.status}
-                    onChange={(val) => setForm({ ...form, status: val as string })}
-                  />
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">Status</label>
+                  <div className="mt-1">
+                    <SearchableDropdown
+                      options={statusOptions}
+                      value={form.status}
+                      onChange={(val) => setForm({ ...form, status: val as string })}
+                    />
+                  </div>
                 </div>
-              </div>
 
                 <div className="flex items-center h-[42px] mb-0.5">
                   <div className="flex items-center gap-2">
@@ -292,6 +292,7 @@ export default function RentalBoostTab() {
 
               <div className="flex gap-3 pt-2">
                 <Button onClick={savePlan} className="flex-1 btn-primary">
+                  <Plus className="mr-2 h-4 w-4" />
                   {editingId ? "Update Plan" : "Create Plan"}
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={resetForm}>
