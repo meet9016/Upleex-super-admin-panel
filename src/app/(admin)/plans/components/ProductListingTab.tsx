@@ -7,7 +7,7 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import ActionButtons from "@/components/common/ActionButtons";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -25,6 +25,7 @@ type Plan = {
   amount: number | '';
   status?: string;
   popular?: boolean;
+  features?: string[];
 };
 
 export default function ProductListingTab() {
@@ -44,6 +45,7 @@ export default function ProductListingTab() {
     amount: 0,
     status: "active",
     popular: false,
+    features: [""],
   });
   const statusOptions = [
     { label: "Active", value: "active" },
@@ -81,6 +83,7 @@ export default function ProductListingTab() {
       amount: 0,
       status: "active",
       popular: false,
+      features: [""],
     });
   };
 
@@ -100,6 +103,7 @@ export default function ProductListingTab() {
         amount: Number(form.amount),
         status: form.status || "active",
         popular: !!form.popular,
+        features: form.features || [],
       };
       if (editingId) {
         const res = await api.put(`${endPointApi.updatePlan}/${editingId}`, payload);
@@ -124,9 +128,25 @@ export default function ProductListingTab() {
       amount: p.amount,
       status: p.status || "active",
       popular: !!p.popular,
+      features: p.features || [],
     });
     setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const addFeatureField = () => {
+    setForm({ ...form, features: [...(form.features || []), ""] });
+  };
+
+  const updateFeatureField = (index: number, value: string) => {
+    const updatedFeatures = [...(form.features || [])];
+    updatedFeatures[index] = value;
+    setForm({ ...form, features: updatedFeatures });
+  };
+
+  const removeFeatureField = (index: number) => {
+    const updatedFeatures = (form.features || []).filter((_, i) => i !== index);
+    setForm({ ...form, features: updatedFeatures });
   };
 
   const handleDeleteClick = (plan: Plan) => {
@@ -208,7 +228,17 @@ export default function ProductListingTab() {
       minWidth: 100,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
     },
-    { field: "popular", headerName: "Popular", minWidth: 100, valueFormatter: (p) => p.value ? '⭐ Yes' : 'No' },
+    {
+      field: "popular",
+      headerName: "Popular",
+      minWidth: 100,
+      cellRenderer: (params: any) => (
+        <div className="flex items-center justify-center h-full">
+          {params.value ? <span className="text-sm">⭐ Yes</span> : <span className="text-slate-300">No</span>}
+        </div>
+      ),
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
+    },
     {
       headerName: "Action",
       width: 100,
@@ -299,14 +329,52 @@ export default function ProductListingTab() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-700">Mark as Popular</label>
+                <label className="text-sm font-semibold text-slate-700">Mark as Popular Plan</label>
                 <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <Checkbox
                     checked={!!form.popular}
                     onCheckedChange={(checked) => setForm({ ...form, popular: checked })}
                     className="border-yellow-300 text-yellow-500"
                   />
-                  <span className="text-sm text-slate-700">⭐ Mark as popular</span>
+                  <span className="text-sm text-slate-700 font-medium">⭐ Show as popular plan</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Plan Features
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addFeatureField}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-white btn-primary font-semibold shadow-sm transition hover:scale-105"
+                  >
+                    <Plus size={12} /> Add Feature
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                  {(form.features || []).map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 rounded-lg px-3 py-2 border border-slate-300 bg-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+                        placeholder={`Feature ${index + 1}`}
+                        value={feature}
+                        onChange={(e) => updateFeatureField(index, e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeFeatureField(index)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  {(form.features || []).length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2 italic">No features added yet</p>
+                  )}
                 </div>
               </div>
 

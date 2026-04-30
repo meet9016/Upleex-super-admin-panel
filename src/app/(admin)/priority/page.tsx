@@ -445,7 +445,7 @@ export default function PriorityPlansPage() {
                     checked={!!form.is_popular}
                     onChange={(e) => setForm({ ...form, is_popular: e.target.checked })}
                   />
-                  <span className="text-sm text-slate-700">⭐ Show as popular plan (only one can be popular)</span>
+                  <span className="text-sm text-slate-700">⭐ Show as popular plan</span>
                 </div>
               </div>
 

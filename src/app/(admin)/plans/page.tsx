@@ -43,7 +43,7 @@ const PRODUCT_TABS = [
 const SERVICE_TABS = [
   {
     key: "service-listing",
-    label: "Service Listing Plan",
+    label: "Service Listing Duration Plan",
     icon: FolderPlus,
     component: ServiceListingTab,
   },

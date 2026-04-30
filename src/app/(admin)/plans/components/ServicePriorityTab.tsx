@@ -7,11 +7,12 @@ import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/Button";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import ActionButtons from "@/components/common/ActionButtons";
 import StatusBadge from "@/components/common/StatusBadge";
 import SearchableDropdown from "@/components/ui/SearchableDropdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 type ServicePPlan = {
   _id?: string;
@@ -19,6 +20,8 @@ type ServicePPlan = {
   yearly_price: number | '';
   addon_price: number | '';
   status?: string;
+  is_popular?: boolean;
+  features?: string[];
 };
 
 export default function ServicePriorityTab() {
@@ -32,6 +35,8 @@ export default function ServicePriorityTab() {
     yearly_price: 3999,
     addon_price: 129,
     status: "active",
+    is_popular: false,
+    features: [""],
   });
 
   const statusOptions = [
@@ -63,6 +68,8 @@ export default function ServicePriorityTab() {
       yearly_price: 3999,
       addon_price: 129,
       status: "active",
+      is_popular: false,
+      features: [""],
     });
     setErrors({});
   };
@@ -104,9 +111,26 @@ export default function ServicePriorityTab() {
       yearly_price: p.yearly_price,
       addon_price: p.addon_price,
       status: p.status || "active",
+      is_popular: !!p.is_popular,
+      features: p.features || [],
     });
     setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const addFeatureField = () => {
+    setForm({ ...form, features: [...(form.features || []), ""] });
+  };
+
+  const updateFeatureField = (index: number, value: string) => {
+    const updatedFeatures = [...(form.features || [])];
+    updatedFeatures[index] = value;
+    setForm({ ...form, features: updatedFeatures });
+  };
+
+  const removeFeatureField = (index: number) => {
+    const updatedFeatures = (form.features || []).filter((_, i) => i !== index);
+    setForm({ ...form, features: updatedFeatures });
   };
 
   const deleteOne = async (plan: ServicePPlan) => {
@@ -146,6 +170,17 @@ export default function ServicePriorityTab() {
       headerName: "Status",
       minWidth: 120,
       cellRenderer: (params: any) => <StatusBadge status={params.value} />,
+    },
+    {
+      field: "is_popular",
+      headerName: "Popular",
+      minWidth: 100,
+      cellRenderer: (params: any) => (
+        <div className="flex items-center justify-center h-full">
+          {params.value ? <span className="text-sm">⭐ Yes</span> : <span className="text-slate-300">No</span>}
+        </div>
+      ),
+      cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
     },
     {
       headerName: "Action",
@@ -214,6 +249,56 @@ export default function ServicePriorityTab() {
                     placeholder="Select Status"
                     onChange={(val) => setForm({ ...form, status: val as string })}
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-slate-700">Mark as Popular Plan</label>
+                <div className="flex items-center gap-2 mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <Checkbox
+                    checked={!!form.is_popular}
+                    onCheckedChange={(checked) => setForm({ ...form, is_popular: checked })}
+                    className="border-yellow-300 text-yellow-500"
+                  />
+                  <span className="text-sm text-slate-700 font-medium">⭐ Show as popular plan</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Plan Features
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addFeatureField}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-white btn-primary font-semibold shadow-sm transition hover:scale-105"
+                  >
+                    <Plus size={12} /> Add Feature
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                  {(form.features || []).map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 rounded-lg px-3 py-2 border border-slate-300 bg-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+                        placeholder={`Feature ${index + 1}`}
+                        value={feature}
+                        onChange={(e) => updateFeatureField(index, e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeFeatureField(index)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  {(form.features || []).length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-2 italic">No features added yet</p>
+                  )}
                 </div>
               </div>
 
