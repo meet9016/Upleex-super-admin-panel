@@ -365,7 +365,7 @@ export default function DropdownsManagementPage() {
                 onSelectionChange={(selected) => setSelectedRows(selected)}
                 gridHeight={580}
                 enableSearch={false}
-                noRowsMessage="No Data found"
+                noRowsMessage="No data found"
               />
             </CardContent>
           </Card>

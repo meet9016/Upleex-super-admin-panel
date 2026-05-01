@@ -2,7 +2,7 @@ import endPointApi from '@/utils/endPointApi';
 import type { VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse } from '@/types/vendorPayment';
 import type { ContactResponse, ContactUpdateResponse } from '@/types/contact';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3688/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 class ApiService {
   private getAuthHeaders() {

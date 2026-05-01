@@ -316,7 +316,7 @@ export default function RentalBoostTab() {
                 onSelectionChange={(sel: any[]) => setSelected(sel as RPlan[])}
                 tableName="Rental Boost Plans"
                 gridHeight={630}
-                noRowsMessage="No Plan found"
+                noRowsMessage="No rental boost plan found"
               />
             </CardContent>
           </Card>

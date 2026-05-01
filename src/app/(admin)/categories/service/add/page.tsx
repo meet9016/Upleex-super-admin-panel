@@ -547,7 +547,7 @@ export default function AddServiceCategoryPage() {
                     enableSearch={false}
                     enableFilter={false}
                     gridHeight={600}
-                     noRowsMessage="No Service Category found"
+                     noRowsMessage="No service category found"
                   />
 
                 </CardContent>
