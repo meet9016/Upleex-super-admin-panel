@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3688';
+const SOCKET_PATH = process.env.NEXT_PUBLIC_SOCKET_PATH || '/api/socket.io';
 
 export const useSocket = (adminId: string | undefined, type: 'admin' = 'admin') => {
   const socketRef = useRef<Socket | null>(null);
@@ -35,8 +36,8 @@ export const useSocket = (adminId: string | undefined, type: 'admin' = 'admin') 
     console.log(`Connecting to Socket server: ${SOCKET_URL} for admin ${adminId}`);
     
     socketRef.current = io(SOCKET_URL, {
-      path : '/api/socket.io',
-      transports: ['websocket', 'polling'],
+      path: SOCKET_PATH,
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
