@@ -21,7 +21,7 @@ interface AdminNotification {
   data?: any;
 }
 
-const API_BASE = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3688/api/v1/").replace(/\/$/, '') + '/';
+const API_BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') + '/';
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);

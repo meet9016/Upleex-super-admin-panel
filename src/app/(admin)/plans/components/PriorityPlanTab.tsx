@@ -541,7 +541,7 @@ export default function PriorityPlanTab() {
                 onSelectionChange={(sel: any[]) => setSelected(sel as PPlan[])}
                 tableName="Priority Plans"
                 gridHeight={700}
-                noRowsMessage="No Plan found"
+                noRowsMessage="No priority plan found"
               />
             </CardContent>
           </Card>

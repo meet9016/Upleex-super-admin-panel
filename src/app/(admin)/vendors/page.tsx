@@ -593,7 +593,7 @@ export default function VendorsPage() {
                                         gridHeight={790}
                                         loading={isLoading}
                                         showCheckboxes={false}
-                                        noRowsMessage="No Vendor found"
+                                        noRowsMessage="No vendors found"
 
                                     />
                                     {showDetails && detailsRow && (

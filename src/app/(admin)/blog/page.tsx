@@ -870,7 +870,7 @@ export default function BlogPage() {
                   enableSearch={false}
                   enableFilter={false}
                   gridHeight={700}
-                  noRowsMessage="No Blog found"
+                  noRowsMessage="No blog found"
                 />
               {/* )} */}
             </CardContent>
