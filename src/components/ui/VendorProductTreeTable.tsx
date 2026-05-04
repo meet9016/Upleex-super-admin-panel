@@ -91,6 +91,7 @@ interface TreeDataItem {
   description?: string;
   vendor_name?: string;
   deposit_amount?: number;
+  pricing_type?: string;
 }
 
 interface VendorProductTreeTableProps {
@@ -189,6 +190,15 @@ console.log("product",product);
               <InfoCard icon={Calendar} label="Created Date" value={product.createdAt ? new Date(product.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'} />
               <InfoCard icon={Box} label="Price" value={product.price} isPrice={true} />
               <InfoCard icon={Box} label="Deposit Amount" value={product.deposit_amount} isPrice={true} />
+              <InfoCard icon={Tag} label="Pricing Type" value={
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+                  (product as any).pricing_type === 'paid'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {(product as any).pricing_type === 'paid' ? '✓ Paid' : 'Free'}
+                </span>
+              } />
             </div>
 
             {/* Description Section */}
@@ -451,6 +461,7 @@ export default function VendorProductTreeTable({
           vendor_name: product.vendor_name || vendor.business_name,
           path: [...vendorPath, product.id || product._id || ""],
           deposit_amount: product.deposit_amount,
+          pricing_type: (product as any).pricing_type,
         })),
       };
     });
