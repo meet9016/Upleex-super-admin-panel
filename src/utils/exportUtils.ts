@@ -106,3 +106,9 @@ export const exportWalletTransactionsToExcel = (filters?: Record<string, any>) =
 
 export const exportWalletTransactionsToPDF = (filters?: Record<string, any>) =>
   exportData({ endpoint: (endPointApi as any).exportWalletTransactionsPDF, format: 'pdf', prefix: 'wallet_transactions', filters });
+
+export const exportVendorReportToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportVendorReportExcel, format: 'xlsx', prefix: 'vendor_report', filters });
+
+export const exportVendorReportToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportVendorReportPDF, format: 'pdf', prefix: 'vendor_report', filters });

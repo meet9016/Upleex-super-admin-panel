@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import AgGridTable from '@/components/ui/AgGridTable';
 import PageLoader from '@/components/common/PageLoader';
 import StatusBadge from '@/components/common/StatusBadge';
+import { exportVendorReportToExcel, exportVendorReportToPDF } from '@/utils/exportUtils';
 
 interface VendorReportData {
   vendor_id: string;
@@ -25,7 +26,7 @@ interface VendorReportData {
   services: { total: number; active: number; approved: number };
   orders: { total: number; revenue: number };
   quotes: { total: number; revenue: number };
-  revenue: { total: number; from_orders: number; from_quotes: number };
+  revenue: { total: number; from_orders: number; from_quotes: number; total_sell_value: number; total_rent_value: number };
   wallet: { balance: number; total_credited: number; total_debited: number };
 }
 
@@ -186,34 +187,23 @@ export default function VendorReportsPage() {
   const handleExportExcel = async () => {
     setExcelLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      if (vendorTypeFilter) params.set('vendor_type', vendorTypeFilter);
-      if (dateRangeFilter) params.set('date_range', dateRangeFilter);
-      if (startDateFilter) params.set('start_date', startDateFilter);
-      if (endDateFilter) params.set('end_date', endDateFilter);
-      if (minRevenueFilter) params.set('min_revenue', minRevenueFilter);
-      if (maxRevenueFilter) params.set('max_revenue', maxRevenueFilter);
+      const filters = {
+        search: search || undefined,
+        vendor_type: vendorTypeFilter || undefined,
+        date_range: dateRangeFilter || undefined,
+        start_date: startDateFilter || undefined,
+        end_date: endDateFilter || undefined,
+        min_revenue: minRevenueFilter || undefined,
+        max_revenue: maxRevenueFilter || undefined,
+      };
 
-      const res = await api.get(`${endPointApi.exportVendorReportExcel}?${params}`, { responseType: 'blob' });
-      
-      if (res.data.size === 0) {
-        toast.error('No data found to export with current filters');
-        return;
+      const res = await exportVendorReportToExcel(filters);
+      if (res.success) {
+        toast.success(res.message);
+        setShowActionsMenu(false);
       }
-      
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `vendor-report-${new Date().getTime()}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success('Excel exported successfully');
-      setShowActionsMenu(false);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to export Excel');
+      toast.error(err.message || 'Failed to export Excel');
     } finally {
       setExcelLoading(false);
     }
@@ -222,34 +212,23 @@ export default function VendorReportsPage() {
   const handleExportPDF = async () => {
     setPdfLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      if (vendorTypeFilter) params.set('vendor_type', vendorTypeFilter);
-      if (dateRangeFilter) params.set('date_range', dateRangeFilter);
-      if (startDateFilter) params.set('start_date', startDateFilter);
-      if (endDateFilter) params.set('end_date', endDateFilter);
-      if (minRevenueFilter) params.set('min_revenue', minRevenueFilter);
-      if (maxRevenueFilter) params.set('max_revenue', maxRevenueFilter);
+      const filters = {
+        search: search || undefined,
+        vendor_type: vendorTypeFilter || undefined,
+        date_range: dateRangeFilter || undefined,
+        start_date: startDateFilter || undefined,
+        end_date: endDateFilter || undefined,
+        min_revenue: minRevenueFilter || undefined,
+        max_revenue: maxRevenueFilter || undefined,
+      };
 
-      const res = await api.get(`${endPointApi.exportVendorReportPDF}?${params}`, { responseType: 'blob' });
-      
-      if (res.data.size === 0) {
-        toast.error('No data found to export with current filters');
-        return;
+      const res = await exportVendorReportToPDF(filters);
+      if (res.success) {
+        toast.success(res.message);
+        setShowActionsMenu(false);
       }
-      
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `vendor-report-${new Date().getTime()}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success('PDF exported successfully');
-      setShowActionsMenu(false);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to export PDF');
+      toast.error(err.message || 'Failed to export PDF');
     } finally {
       setPdfLoading(false);
     }
@@ -264,8 +243,10 @@ export default function VendorReportsPage() {
     { headerName: 'Services', field: 'services.total', minWidth: 100, cellStyle: { textAlign: 'center', fontWeight: 'bold' } },
     { headerName: 'Sell', field: 'orders.total', minWidth: 100, cellStyle: { textAlign: 'center', fontWeight: 'bold' } },
     { headerName: 'Sell Revenue', field: 'orders.revenue', cellRenderer: AmountRenderer, minWidth: 140 },
+    { headerName: 'Total Sell Value', field: 'revenue.total_sell_value', cellRenderer: AmountRenderer, minWidth: 160 },
     { headerName: 'Rent', field: 'quotes.total', minWidth: 100, cellStyle: { textAlign: 'center', fontWeight: 'bold' } },
     { headerName: 'Rent Revenue', field: 'quotes.revenue', cellRenderer: AmountRenderer, minWidth: 140 },
+    { headerName: 'Total Rent Value', field: 'revenue.total_rent_value', cellRenderer: AmountRenderer, minWidth: 160 },
     { headerName: 'Total Revenue', field: 'revenue.total', cellRenderer: AmountRenderer, minWidth: 150 },
     { headerName: 'Wallet Balance', field: 'wallet.balance', cellRenderer: AmountRenderer, minWidth: 150 },
     { headerName: 'Registered', field: 'registered_date', valueFormatter: (p: any) => fmtDate(p.value), minWidth: 130 },
