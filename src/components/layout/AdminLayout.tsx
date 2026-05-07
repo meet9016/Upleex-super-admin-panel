@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,19 @@ interface AdminLayoutProps {
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.replace("/login");
+    } else {
+      setIsAuthed(true);
+    }
+  }, [router]);
+
+  if (!isAuthed) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
