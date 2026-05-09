@@ -1,4 +1,5 @@
 import endPointApi from '@/utils/endPointApi';
+import { clearToken } from '@/utils/tokenManager';
 import type { VendorPaymentResponse, VendorPaymentStatsResponse, ReleasePaymentResponse } from '@/types/vendorPayment';
 import type { ContactResponse, ContactUpdateResponse } from '@/types/contact';
 
@@ -25,6 +26,13 @@ class ApiService {
     const response = await fetch(url, config);
     
     if (!response.ok) {
+      if (response.status === 401) {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          clearToken();
+          localStorage.clear();
+          window.location.replace('/login');
+        }
+      }
       const error = await response.json().catch(() => ({ message: 'Network error' }));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
