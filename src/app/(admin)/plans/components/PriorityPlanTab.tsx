@@ -16,6 +16,7 @@ import PageLoader from "@/components/common/PageLoader";
 import { Checkbox } from "@/components/ui/Checkbox";
 
 
+
 type PPlan = {
   _id?: string;
   name: string;
@@ -31,7 +32,6 @@ type PPlan = {
   extra_product_price_monthly?: number | '';
   unlimited_amount_yearly?: number | '';
   extra_product_price_yearly?: number | '';
-  free_listing?: boolean;
   features?: string[];
 };
 
@@ -57,7 +57,6 @@ export default function PriorityPlanTab() {
     extra_product_price_monthly: 0,
     unlimited_amount_yearly: 0,
     extra_product_price_yearly: 0,
-    free_listing: false,
     features: [""],
   });
 
@@ -157,7 +156,6 @@ export default function PriorityPlanTab() {
       extra_product_price_monthly: p.extra_product_price_monthly || 0,
       unlimited_amount_yearly: p.unlimited_amount_yearly || 0,
       extra_product_price_yearly: p.extra_product_price_yearly || 0,
-      free_listing: !!p.free_listing,
       features: p.features && p.features.length ? p.features : [""],
     });
     setSelectedPlanType(p.name.toLowerCase());
@@ -460,7 +458,7 @@ export default function PriorityPlanTab() {
                   </div>
                 </div>
 
-                <div className="flex items-center h-[42px] mb-0.5 gap-4">
+                <div className="flex items-center h-[42px] mb-0.5">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={!!form.is_popular}
@@ -469,17 +467,6 @@ export default function PriorityPlanTab() {
                     />
                     <span className="text-sm text-slate-700 font-medium">
                       ⭐ Popular Plan
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={!!form.free_listing}
-                      onCheckedChange={(checked) => setForm({ ...form, free_listing: !!checked })}
-                      className="border-slate-300"
-                    />
-                    <span className="text-sm text-slate-700 font-medium">
-                      🆓 Free Listing
                     </span>
                   </div>
                 </div>
@@ -563,10 +550,10 @@ export default function PriorityPlanTab() {
                 </div>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                   {(form.features || []).map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={index} className="relative flex items-center group">
                       <input
                         type="text"
-                        className="flex-1 rounded-lg px-3 py-2 border border-slate-300 bg-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+                        className="flex-1 rounded-lg px-3 py-2 pr-10 border border-slate-300 bg-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
                         placeholder={`Feature ${index + 1}`}
                         value={feature}
                         onChange={(e) => updateFeatureField(index, e.target.value)}
@@ -574,9 +561,9 @@ export default function PriorityPlanTab() {
                       <button
                         type="button"
                         onClick={() => removeFeatureField(index)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="absolute right-2 p-1.5 text-red-400 hover:text-red-600 transition-colors"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   ))}
