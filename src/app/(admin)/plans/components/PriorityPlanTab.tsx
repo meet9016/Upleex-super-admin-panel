@@ -27,6 +27,11 @@ type PPlan = {
   addon_available_for_yearly?: boolean;
   addon_price_per_year?: number;
   addon_max_slots?: number;
+  unlimited_amount_monthly?: number | '';
+  extra_product_price_monthly?: number | '';
+  unlimited_amount_yearly?: number | '';
+  extra_product_price_yearly?: number | '';
+  free_listing?: boolean;
   features?: string[];
 };
 
@@ -48,6 +53,11 @@ export default function PriorityPlanTab() {
     addon_available_for_yearly: true,
     addon_price_per_year: 0,
     addon_max_slots: 0,
+    unlimited_amount_monthly: 0,
+    extra_product_price_monthly: 0,
+    unlimited_amount_yearly: 0,
+    extra_product_price_yearly: 0,
+    free_listing: false,
     features: [""],
   });
 
@@ -92,6 +102,10 @@ export default function PriorityPlanTab() {
       addon_available_for_yearly: true,
       addon_price_per_year: 0,
       addon_max_slots: 0,
+      unlimited_amount_monthly: 0,
+      extra_product_price_monthly: 0,
+      unlimited_amount_yearly: 0,
+      extra_product_price_yearly: 0,
       features: [""],
     });
     setErrors({});
@@ -139,7 +153,12 @@ export default function PriorityPlanTab() {
       addon_available_for_yearly: p.addon_available_for_yearly,
       addon_price_per_year: p.addon_price_per_year,
       addon_max_slots: p.addon_max_slots,
-      features: p.features || [],
+      unlimited_amount_monthly: p.unlimited_amount_monthly || 0,
+      extra_product_price_monthly: p.extra_product_price_monthly || 0,
+      unlimited_amount_yearly: p.unlimited_amount_yearly || 0,
+      extra_product_price_yearly: p.extra_product_price_yearly || 0,
+      free_listing: !!p.free_listing,
+      features: p.features && p.features.length ? p.features : [""],
     });
     setSelectedPlanType(p.name.toLowerCase());
     setErrors({});
@@ -237,6 +256,30 @@ export default function PriorityPlanTab() {
       headerName: "Annual Addon",
       minWidth: 120,
       cellRenderer: (params: any) => params.value ? "Available" : "No",
+    },
+    {
+      field: "unlimited_amount_monthly",
+      headerName: "Unlimited (M)",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value || 0}`,
+    },
+    {
+      field: "extra_product_price_monthly",
+      headerName: "Extra Prod (M)",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value || 0}`,
+    },
+    {
+      field: "unlimited_amount_yearly",
+      headerName: "Unlimited (Y)",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value || 0}`,
+    },
+    {
+      field: "extra_product_price_yearly",
+      headerName: "Extra Prod (Y)",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value || 0}`,
     },
     {
       headerName: "Action",
@@ -417,7 +460,7 @@ export default function PriorityPlanTab() {
                   </div>
                 </div>
 
-                <div className="flex items-center h-[42px] mb-0.5">
+                <div className="flex items-center h-[42px] mb-0.5 gap-4">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={!!form.is_popular}
@@ -428,42 +471,79 @@ export default function PriorityPlanTab() {
                       ⭐ Popular Plan
                     </span>
                   </div>
+
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={!!form.free_listing}
+                      onCheckedChange={(checked) => setForm({ ...form, free_listing: !!checked })}
+                      className="border-slate-300"
+                    />
+                    <span className="text-sm text-slate-700 font-medium">
+                      🆓 Free Listing
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
-                <label className="text-sm font-bold text-indigo-700">
-                  Annual Benefit (Duration Add-on)
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-600">
-                      Price per Year (₹)
-                    </label>
-                    <input
-                      type="number"
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={form.addon_price_per_year}
-                      onChange={(e) =>
-                        setForm({ ...form, addon_price_per_year: Number(e.target.value || 0) })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-600">
-                      Max Product Slots
-                    </label>
-                    <input
-                      type="number"
-                      className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      value={form.addon_max_slots}
-                      onChange={(e) =>
-                        setForm({ ...form, addon_max_slots: Number(e.target.value || 0) })
-                      }
-                    />
+              {selectedPlanType === 'premium' && (
+                <div className="space-y-4 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                  <h4 className="text-sm font-bold text-amber-700 flex items-center gap-2">
+                    Premium Extras (Extra Product & Unlimited)
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Monthly Extras */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Monthly Options</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-semibold text-slate-600">Extra Prod Price (M)</label>
+                          <input
+                            type="number"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            value={form.extra_product_price_monthly}
+                            onChange={(e) => setForm({ ...form, extra_product_price_monthly: Number(e.target.value || 0) })}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-slate-600">Unlimited Amt (M)</label>
+                          <input
+                            type="number"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            value={form.unlimited_amount_monthly}
+                            onChange={(e) => setForm({ ...form, unlimited_amount_monthly: Number(e.target.value || 0) })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Yearly Extras */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Yearly Options</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-semibold text-slate-600">Extra Prod Price (Y)</label>
+                          <input
+                            type="number"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            value={form.extra_product_price_yearly}
+                            onChange={(e) => setForm({ ...form, extra_product_price_yearly: Number(e.target.value || 0) })}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-slate-600">Unlimited Amt (Y)</label>
+                          <input
+                            type="number"
+                            className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            value={form.unlimited_amount_yearly}
+                            onChange={(e) => setForm({ ...form, unlimited_amount_yearly: Number(e.target.value || 0) })}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
 
 
@@ -515,7 +595,8 @@ export default function PriorityPlanTab() {
                   Cancel
                 </Button>
               </div>
-            </CardContent>
+            {/* </div> */}
+          </CardContent>
           </Card>
         </div>
 

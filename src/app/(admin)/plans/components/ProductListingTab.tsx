@@ -23,6 +23,8 @@ type Plan = {
   months: number | '';
   max_products: number | '';
   amount: number | '';
+  unlimited_amount?: number | '';
+  extra_product_price?: number | '';
   status?: string;
   popular?: boolean;
   features?: string[];
@@ -43,6 +45,8 @@ export default function ProductListingTab() {
     months: 1,
     max_products: 1,
     amount: 0,
+    unlimited_amount: 0,
+    extra_product_price: 0,
     status: "active",
     popular: false,
     features: [""],
@@ -81,6 +85,8 @@ export default function ProductListingTab() {
       months: 1,
       max_products: 1,
       amount: 0,
+      unlimited_amount: 0,
+      extra_product_price: 0,
       status: "active",
       popular: false,
       features: [""],
@@ -101,6 +107,8 @@ export default function ProductListingTab() {
         months: Number(form.months),
         max_products: Number(form.max_products),
         amount: Number(form.amount),
+        unlimited_amount: Number(form.unlimited_amount || 0),
+        extra_product_price: Number(form.extra_product_price || 0),
         status: form.status || "active",
         popular: !!form.popular,
         features: form.features || [],
@@ -126,6 +134,8 @@ export default function ProductListingTab() {
       months: p.months,
       max_products: p.max_products,
       amount: p.amount,
+      unlimited_amount: p.unlimited_amount || 0,
+      extra_product_price: p.extra_product_price || 0,
       status: p.status || "active",
       popular: !!p.popular,
       features: p.features || [],
@@ -221,6 +231,18 @@ export default function ProductListingTab() {
       headerName: "Amount",
       minWidth: 100,
       valueFormatter: (p) => `₹${p.value}`,
+    },
+    {
+      field: "unlimited_amount",
+      headerName: "Unlimited Amt",
+      minWidth: 120,
+      valueFormatter: (p) => `₹${p.value || 0}`,
+    },
+    {
+      field: "extra_product_price",
+      headerName: "Extra Prod Price",
+      minWidth: 130,
+      valueFormatter: (p) => `₹${p.value || 0}`,
     },
     {
       field: "status",
@@ -327,6 +349,30 @@ export default function ProductListingTab() {
                     onChange={(e) => setForm({ ...form, amount: e.target.value === '' ? '' : Number(e.target.value) })}
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Unlimited <span className="text-gray-400 text-[10px]">(Amt)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="mt-1 w-full rounded-lg px-3 py-2 border border-slate-200"
+                    value={form.unlimited_amount}
+                    onChange={(e) => setForm({ ...form, unlimited_amount: e.target.value === '' ? '' : Number(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">
+                    Extra Prod <span className="text-gray-400 text-[10px]">(Price)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="mt-1 w-full rounded-lg px-3 py-2 border border-slate-200"
+                    value={form.extra_product_price}
+                    onChange={(e) => setForm({ ...form, extra_product_price: e.target.value === '' ? '' : Number(e.target.value) })}
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4 items-end">
                 <div>
@@ -342,15 +388,14 @@ export default function ProductListingTab() {
                     />
                   </div>
                 </div>
-
                 <div className="flex items-center h-[42px] mb-0.5">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={!!form.popular}
-                      onCheckedChange={(checked) => setForm({ ...form, popular: checked })}
+                      onCheckedChange={(checked) => setForm({ ...form, popular: !!checked })}
                       className="border-slate-300"
                     />
-                    <span className="text-sm text-slate-700 font-medium">⭐ Popular Plan</span>
+                    <span className="text-sm text-slate-700 font-medium">⭐ Popular</span>
                   </div>
                 </div>
               </div>
