@@ -393,6 +393,26 @@ export default function VendorProductTreeTable({
   const [selectedProduct, setSelectedProduct] = useState<TreeDataItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const rentCount = useMemo(() => {
+    let count = 0;
+    vendors.forEach((vendor) => {
+      (vendor.products || []).forEach(p => {
+        if ((p.product_type_name || '').toLowerCase() === 'rent') count++;
+      });
+    });
+    return count;
+  }, [vendors]);
+
+  const sellCount = useMemo(() => {
+    let count = 0;
+    vendors.forEach((vendor) => {
+      (vendor.products || []).forEach(p => {
+        if ((p.product_type_name || '').toLowerCase() === 'sell') count++;
+      });
+    });
+    return count;
+  }, [vendors]);
+
   const processedVendors = useMemo(() => {
     const map: Record<string, any> = {};
     const filtered: any[] = [];
@@ -642,8 +662,8 @@ export default function VendorProductTreeTable({
               <svg className={`w-3.5 h-3.5 ${activeTab === 'rent' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="hidden sm:inline">Rent</span>
-              <span className="sm:hidden">R</span>
+              <span className="hidden sm:inline">Rent ({rentCount})</span>
+              <span className="sm:hidden">R ({rentCount})</span>
             </button>
 
             <button
@@ -660,8 +680,8 @@ export default function VendorProductTreeTable({
               <svg className={`w-3.5 h-3.5 ${activeTab === 'sell' ? 'text-orange-600' : 'text-gray-400 group-hover:text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span className="hidden sm:inline">Sell</span>
-              <span className="sm:hidden">S</span>
+              <span className="hidden sm:inline">Sell ({sellCount})</span>
+              <span className="sm:hidden">S ({sellCount})</span>
             </button>
           </div>
         </div>
