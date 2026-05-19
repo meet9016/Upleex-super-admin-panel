@@ -27,8 +27,15 @@ const blogSchema = z.object({
   sort_description: z.string().min(10, "Short description is required"),
   long_description: z.string().min(20, "Long description must be at least 20 characters"),
   date: z.string().min(1, "Publish Date is required"),
-  image: z.any().refine((files) => files && files.length > 0, "Image is required"),
-
+  image: z.any().refine(
+    (val) => {
+      if (val === 'existing') return true;
+      if (val && val[0] instanceof File) return true;
+      if (val instanceof File) return true;
+      return false;
+    },
+    { message: "Image is required" }
+  ),
 });
 
 type BlogFormValues = z.infer<typeof blogSchema>;
@@ -52,6 +59,42 @@ function useDebounce<T>(value: T, delay: number = 500): T {
   }, [value, delay]);
   return debouncedValue;
 }
+
+// Compress image using Canvas API (skip SVG/GIF)
+const compressImage = (file: File, maxSizeKB = 1024, quality = 0.85): Promise<File> => {
+  return new Promise((resolve) => {
+    if (file.type === 'image/svg+xml' || file.type === 'image/gif') { resolve(file); return; }
+    if (file.size <= maxSizeKB * 1024) { resolve(file); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        const MAX_DIM = 1920;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) { height = Math.round((height * MAX_DIM) / width); width = MAX_DIM; }
+          else { width = Math.round((width * MAX_DIM) / height); height = MAX_DIM; }
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(new File([blob], file.name, { type: file.type, lastModified: Date.now() }));
+            else resolve(file);
+          },
+          file.type === 'image/png' ? 'image/png' : 'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+};
 
 export default function BlogPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -90,12 +133,17 @@ export default function BlogPage() {
   const watchImage = watch('image');
 
   const onDrop = React.useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[], rejectedFiles: any[]) => {
+      if (rejectedFiles.length > 0) {
+        const err = rejectedFiles[0]?.errors?.[0];
+        if (err?.code === 'file-too-large') toast.error('File is too large. Maximum size is 10MB.');
+        else if (err?.code === 'file-invalid-type') toast.error('Invalid file type. Please upload SVG, PNG, JPG, JPEG, or WEBP.');
+        return;
+      }
       if (acceptedFiles.length > 0) {
-        setValue('image', acceptedFiles, { shouldValidate: true });
-        const file = acceptedFiles[0];
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewImage(objectUrl);
+        const file = await compressImage(acceptedFiles[0], 1024, 0.85);
+        setValue('image', [file], { shouldValidate: true });
+        setPreviewImage(URL.createObjectURL(file));
       }
     },
     [setValue]
@@ -104,9 +152,14 @@ export default function BlogPage() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg', '.webp'],
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/svg+xml': ['.svg'],
+      'image/webp': ['.webp'],
+      'image/gif': ['.gif'],
     },
     maxFiles: 1,
+    maxSize: 10 * 1024 * 1024,
   });
 
   // Image preview
@@ -709,7 +762,7 @@ export default function BlogPage() {
                               Click or drag image to upload
                             </p>
                             <p className="text-xs text-slate-500">
-                              SVG, PNG, JPG (max. 5MB)
+                              SVG, PNG, JPG (max. 10MB)
                             </p>
                           </div>
                         )}

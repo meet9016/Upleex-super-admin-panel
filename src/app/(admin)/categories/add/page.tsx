@@ -24,7 +24,16 @@ import PageLoader from "@/components/common/PageLoader";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Category name is required"),
-  image: z.any().refine((files) => files && files.length > 0, "Image is required"),
+  image: z.any().refine(
+    (val) => {
+      // Allow if it's 'existing' (edit mode with no new file), or has a file, or has files array
+      if (val === 'existing') return true;
+      if (val && val[0] instanceof File) return true;
+      if (val instanceof File) return true;
+      return false;
+    },
+    { message: "Image is required" }
+  ),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -49,6 +58,61 @@ function useDebounce<T>(value: T, delay: number = 500): T {
   }, [value, delay]);
   return debouncedValue;
 }
+
+// Compress image using Canvas API (skip for SVG and GIF)
+const compressImage = (file: File, maxSizeKB = 1024, quality = 0.85): Promise<File> => {
+  return new Promise((resolve) => {
+    // Skip compression for SVG and GIF - they don't benefit from canvas compression
+    if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+      resolve(file);
+      return;
+    }
+    // If file is already small enough, skip compression
+    if (file.size <= maxSizeKB * 1024) {
+      resolve(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        // Downscale if very large (max 1920px wide)
+        const MAX_DIM = 1920;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, { type: file.type, lastModified: Date.now() });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          file.type === 'image/png' ? 'image/png' : 'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+};
 
 export default function AddCategoryPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -204,10 +268,23 @@ export default function AddCategoryPage() {
   const watchImage = watch('image');
 
   const onDrop = React.useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[], rejectedFiles: any[]) => {
+      // Handle rejected files (too large or wrong type)
+      if (rejectedFiles.length > 0) {
+        const err = rejectedFiles[0]?.errors?.[0];
+        if (err?.code === 'file-too-large') {
+          toast.error('File is too large. Maximum size is 10MB.');
+        } else if (err?.code === 'file-invalid-type') {
+          toast.error('Invalid file type. Please upload SVG, PNG, JPG, JPEG, or WEBP.');
+        }
+        return;
+      }
       if (acceptedFiles.length > 0) {
-        setValue('image', acceptedFiles, { shouldValidate: true });
-        const file = acceptedFiles[0];
+        const rawFile = acceptedFiles[0];
+        // Compress if image > 1MB (skip SVG/GIF)
+        const file = await compressImage(rawFile, 1024, 0.85);
+        const compressedFiles = [file];
+        setValue('image', compressedFiles, { shouldValidate: true });
         const objectUrl = URL.createObjectURL(file);
         setPreviewImage(objectUrl);
       }
@@ -218,9 +295,14 @@ export default function AddCategoryPage() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.png', '.jpg', '.gif', '.svg', '.webp'],
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/svg+xml': ['.svg'],
+      'image/webp': ['.webp'],
+      'image/gif': ['.gif'],
     },
     maxFiles: 1,
+    maxSize: 10 * 1024 * 1024, // 10MB limit
   });
 
   useEffect(() => {
@@ -507,7 +589,7 @@ export default function AddCategoryPage() {
                                   Click or drag image to upload
                                 </p>
                                 <p className="text-[11px] text-slate-500">
-                                  SVG, PNG, JPG or GIF (max. 5MB)
+                                  SVG, PNG, JPG, JPEG or WEBP (max. 10MB)
                                 </p>
                               </div>
                             )}
