@@ -68,6 +68,8 @@ export interface EndPointApi {
     updateListingPlan: string;
     deleteListingPlan: string;
     getListingPlanOptions: string;
+    exportAllPlansExcel: string;
+    exportAllPlansPDF: string;
 
     // Dynamic Plans (Definitions)
     getAllPlans: string;
@@ -86,18 +88,24 @@ export interface EndPointApi {
     updatePriorityPlan: string;
     deletePriorityPlan: string;
     getAllPriorityPurchases: string;
+    exportPriorityPurchasesExcel: string;
+    exportPriorityPurchasesPDF: string;
     // Service Priority Plans
     getAllServicePriorityPlans: string;
     createServicePriorityPlan: string;
     updateServicePriorityPlan: string;
     deleteServicePriorityPlan: string;
     getAllServicePriorityPurchases: string;
+    exportServicePriorityPurchasesExcel: string;
+    exportServicePriorityPurchasesPDF: string;
     // Rental Boost Plans
     getAllRentalBoostPlans: string;
     createRentalBoostPlan: string;
     updateRentalBoostPlan: string;
     deleteRentalBoostPlan: string;
     getAllRentalBoostPurchases: string;
+    exportRentalBoostPurchasesExcel: string;
+    exportRentalBoostPurchasesPDF: string;
 
 
     // Vendor Products Approval
@@ -236,6 +244,8 @@ const endPointApi: EndPointApi = {
     updateListingPlan: 'listing-plans/update',
     deleteListingPlan: 'listing-plans/delete',
     getListingPlanOptions: 'listing-plans/options',
+    exportAllPlansExcel: 'export/all-plan-purchases/excel',
+    exportAllPlansPDF: 'export/all-plan-purchases/pdf',
 
     // Dynamic Plans (Definitions)
     getAllPlans: 'plans/getall',
@@ -254,18 +264,24 @@ const endPointApi: EndPointApi = {
     updatePriorityPlan: 'priority-plans/update',
     deletePriorityPlan: 'priority-plans/delete',
     getAllPriorityPurchases: 'priority-plans/purchases/getall',
+    exportPriorityPurchasesExcel: 'export/priority-purchases/excel',
+    exportPriorityPurchasesPDF: 'export/priority-purchases/pdf',
     // Service Priority Plans
     getAllServicePriorityPlans: 'service-priority-plans/getall',
     createServicePriorityPlan: 'service-priority-plans/create',
     updateServicePriorityPlan: 'service-priority-plans/update',
     deleteServicePriorityPlan: 'service-priority-plans/delete',
     getAllServicePriorityPurchases: 'service-priority-purchases/getall',
+    exportServicePriorityPurchasesExcel: 'export/service-priority-purchases/excel',
+    exportServicePriorityPurchasesPDF: 'export/service-priority-purchases/pdf',
     // Rental Boost Plans
     getAllRentalBoostPlans: 'rental-boost-plans/getall',
     createRentalBoostPlan: 'rental-boost-plans/create',
     updateRentalBoostPlan: 'rental-boost-plans/update',
     deleteRentalBoostPlan: 'rental-boost-plans/delete',
     getAllRentalBoostPurchases: 'rental-boost-plans/purchases/getall',
+    exportRentalBoostPurchasesExcel: 'export/rental-boost-purchases/excel',
+    exportRentalBoostPurchasesPDF: 'export/rental-boost-purchases/pdf',
 
 
     // Vendor Products Approval
