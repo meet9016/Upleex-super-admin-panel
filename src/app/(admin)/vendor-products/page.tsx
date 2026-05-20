@@ -36,7 +36,7 @@ export default function VendorProductApprovalPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
-  const LIMIT = 10;
+  const LIMIT = 20;
 
   useEffect(() => {
     setVendors([]);
@@ -274,6 +274,19 @@ export default function VendorProductApprovalPage() {
                 </div>
               </div>
             )}
+
+            {/* Load more button fallback */}
+            {/* {hasMore && !loading && !loadingMore && vendors.length > 0 && (
+              <div className="flex justify-center items-center py-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => fetchVendorsWithProducts(page + 1, activeTab)}
+                  className="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                  Load More Vendors
+                </button>
+              </div>
+            )} */}
 
       </div>
     </div>

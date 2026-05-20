@@ -39,7 +39,7 @@ export default function VendorServiceApprovalPage() {
   const [approvableCount, setApprovableCount] = useState(0);
   const [rejectableCount, setRejectableCount] = useState(0);
   const gridRef = useRef(null);
-  const LIMIT = 10;
+  const LIMIT = 20;
 
   useEffect(() => {
     setVendors([]);
@@ -259,6 +259,19 @@ export default function VendorServiceApprovalPage() {
                 </div>
               </div>
             )}
+
+            {/* Load more button fallback */}
+            {/* {hasMore && !loading && !loadingMore && vendors.length > 0 && (
+              <div className="flex justify-center items-center py-6 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => fetchVendorsWithServices(page + 1)}
+                  className="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                  Load More Vendors
+                </button>
+              </div>
+            )} */}
 
             {/* {!hasMore && vendors.length > 0 && (
               <div className="flex justify-center py-8 border-t border-gray-100 bg-gray-50/30">
