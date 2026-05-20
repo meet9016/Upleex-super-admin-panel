@@ -70,6 +70,9 @@ export interface EndPointApi {
     getListingPlanOptions: string;
     exportAllPlansExcel: string;
     exportAllPlansPDF: string;
+    getAllListingPurchases: string;
+    exportListingPurchasesExcel: string;
+    exportListingPurchasesPDF: string;
 
     // Dynamic Plans (Definitions)
     getAllPlans: string;
@@ -82,6 +85,9 @@ export interface EndPointApi {
     createServicePlan: string;
     updateServicePlan: string;
     deleteServicePlan: string;
+    getAllServiceListingPurchases: string;
+    exportServiceListingPurchasesExcel: string;
+    exportServiceListingPurchasesPDF: string;
     // Priority Plans
     getAllPriorityPlans: string;
     createPriorityPlan: string;
@@ -246,6 +252,9 @@ const endPointApi: EndPointApi = {
     getListingPlanOptions: 'listing-plans/options',
     exportAllPlansExcel: 'export/all-plan-purchases/excel',
     exportAllPlansPDF: 'export/all-plan-purchases/pdf',
+    getAllListingPurchases: 'listing-plans/purchases/getall',
+    exportListingPurchasesExcel: 'export/listing-purchases/excel',
+    exportListingPurchasesPDF: 'export/listing-purchases/pdf',
 
     // Dynamic Plans (Definitions)
     getAllPlans: 'plans/getall',
@@ -258,6 +267,9 @@ const endPointApi: EndPointApi = {
     createServicePlan: 'service-plans/create',
     updateServicePlan: 'service-plans/update',
     deleteServicePlan: 'service-plans/delete',
+    getAllServiceListingPurchases: 'service-listing-plans/purchases/getall',
+    exportServiceListingPurchasesExcel: 'export/service-listing-purchases/excel',
+    exportServiceListingPurchasesPDF: 'export/service-listing-purchases/pdf',
     // Priority Plans
     getAllPriorityPlans: 'priority-plans/getall',
     createPriorityPlan: 'priority-plans/create',

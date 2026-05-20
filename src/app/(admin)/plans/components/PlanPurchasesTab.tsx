@@ -16,7 +16,16 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import { CiFilter } from "react-icons/ci";
 import { MdClose, MdSearch } from "react-icons/md";
 import PageLoader from "@/components/common/PageLoader";
-import { exportAllPlansToExcel, exportAllPlansToPDF } from "@/utils/exportUtils";
+import { 
+  exportAllPlansToExcel, 
+  exportAllPlansToPDF,
+  exportListingPurchasesToExcel,
+  exportListingPurchasesToPDF,
+  exportPriorityPurchasesToExcel,
+  exportPriorityPurchasesToPDF,
+  exportRentalBoostPurchasesToExcel,
+  exportRentalBoostPurchasesToPDF
+} from "@/utils/exportUtils";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FileJson, FileText } from "lucide-react";
 
@@ -56,8 +65,10 @@ export default function PlanPurchasesTab() {
   const [excelLoading, setExcelLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [showAllPlansMenu, setShowAllPlansMenu] = useState(false);
   const gridRef = useRef<any>(null);
   const actionsMenuRef = React.useRef<HTMLDivElement>(null);
+  const allPlansMenuRef = React.useRef<HTMLDivElement>(null);
 
   // Search and filter states
   const [searchText, setSearchText] = useState("");
@@ -195,6 +206,9 @@ export default function PlanPurchasesTab() {
       if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
         setShowActionsMenu(false);
       }
+      if (allPlansMenuRef.current && !allPlansMenuRef.current.contains(event.target as Node)) {
+        setShowAllPlansMenu(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -281,8 +295,23 @@ export default function PlanPurchasesTab() {
     try {
       setExcelLoading(true);
       const params = getCurrentParams();
-      await exportAllPlansToExcel(params);
-      toast.success('All plan purchases exported to Excel successfully!');
+      
+      let exportFunc = exportAllPlansToExcel;
+      let successMsg = 'All plan purchases exported to Excel successfully!';
+      
+      if (activeSubTab === 'listing') {
+        exportFunc = exportListingPurchasesToExcel;
+        successMsg = 'Product listing plan purchases exported to Excel successfully!';
+      } else if (activeSubTab === 'priority') {
+        exportFunc = exportPriorityPurchasesToExcel;
+        successMsg = 'Priority plan purchases exported to Excel successfully!';
+      } else if (activeSubTab === 'booster') {
+        exportFunc = exportRentalBoostPurchasesToExcel;
+        successMsg = 'Rental boost plan purchases exported to Excel successfully!';
+      }
+      
+      await exportFunc(params);
+      toast.success(successMsg);
       setShowActionsMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to Excel');
@@ -295,9 +324,50 @@ export default function PlanPurchasesTab() {
     try {
       setPdfLoading(true);
       const params = getCurrentParams();
-      await exportAllPlansToPDF(params);
-      toast.success('All plan purchases exported to PDF successfully!');
+      
+      let exportFunc = exportAllPlansToPDF;
+      let successMsg = 'All plan purchases exported to PDF successfully!';
+      
+      if (activeSubTab === 'listing') {
+        exportFunc = exportListingPurchasesToPDF;
+        successMsg = 'Product listing plan purchases exported to PDF successfully!';
+      } else if (activeSubTab === 'priority') {
+        exportFunc = exportPriorityPurchasesToPDF;
+        successMsg = 'Priority plan purchases exported to PDF successfully!';
+      } else if (activeSubTab === 'booster') {
+        exportFunc = exportRentalBoostPurchasesToPDF;
+        successMsg = 'Rental boost plan purchases exported to PDF successfully!';
+      }
+      
+      await exportFunc(params);
+      toast.success(successMsg);
       setShowActionsMenu(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export to PDF');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleExportAllPlansExcel = async () => {
+    try {
+      setExcelLoading(true);
+      await exportAllPlansToExcel();
+      toast.success('All plan purchases exported to Excel successfully!');
+      setShowAllPlansMenu(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export to Excel');
+    } finally {
+      setExcelLoading(false);
+    }
+  };
+
+  const handleExportAllPlansPDF = async () => {
+    try {
+      setPdfLoading(true);
+      await exportAllPlansToPDF();
+      toast.success('All plan purchases exported to PDF successfully!');
+      setShowAllPlansMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to PDF');
     } finally {
@@ -468,6 +538,43 @@ export default function PlanPurchasesTab() {
         >
           Rental Boost Plan
         </button>
+
+        {/* All Plans Export Menu */}
+        <div className="relative ml-2" ref={allPlansMenuRef}>
+          <button
+            onClick={() => setShowAllPlansMenu((v) => !v)}
+            className="w-10 h-10 flex items-center justify-center bg-white text-gray-500 border border-gray-300 rounded-xl hover:shadow-md hover:text-gray-600 transition-all duration-300"
+            title="Export all plans options"
+          >
+            <BsThreeDotsVertical size={18} />
+          </button>
+
+          {showAllPlansMenu && (
+            <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl w-64 z-50 border border-gray-200 overflow-hidden">
+              <div className="py-1">
+                <button
+                  onClick={handleExportAllPlansExcel}
+                  disabled={excelLoading || pdfLoading}
+                  className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-50"
+                >
+                  <FileJson className="text-lg text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
+                  <span>Export All Plans to Excel</span>
+                  {excelLoading && <Loader2 className="ml-auto text-emerald-600 w-3.5 h-3.5 animate-spin" />}
+                </button>
+
+                <button
+                  onClick={handleExportAllPlansPDF}
+                  disabled={excelLoading || pdfLoading}
+                  className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-rose-500 hover:bg-rose-50 transition-all duration-200 disabled:opacity-50"
+                >
+                  <FileText className="text-lg text-rose-600 group-hover:scale-110 transition-transform duration-200" />
+                  <span>Export All Plans to PDF</span>
+                  {pdfLoading && <Loader2 className="ml-auto text-rose-600 w-3.5 h-3.5 animate-spin" />}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <Card className="border-slate-200">
@@ -493,6 +600,7 @@ export default function PlanPurchasesTab() {
                 variant="destructive"
                 disabled={!selected.length}
                 onClick={deleteSelected}
+                className="text-sm"
               >
                 Delete Selected ({selected.length})
               </Button>

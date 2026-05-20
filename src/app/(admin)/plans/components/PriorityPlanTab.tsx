@@ -596,6 +596,7 @@ export default function PriorityPlanTab() {
                 variant="destructive"
                 disabled={!selected.length || loading}
                 onClick={deleteSelected}
+                    className="text-sm"
               >
                 Delete Selected ({selected.length})
               </Button>

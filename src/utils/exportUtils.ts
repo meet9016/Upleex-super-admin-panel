@@ -118,3 +118,33 @@ export const exportAllPlansToExcel = (filters?: Record<string, any>) =>
 
 export const exportAllPlansToPDF = (filters?: Record<string, any>) =>
   exportData({ endpoint: (endPointApi as any).exportAllPlansPDF, format: 'pdf', prefix: 'all_plans', filters });
+
+export const exportListingPurchasesToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportListingPurchasesExcel, format: 'xlsx', prefix: 'listing_purchases', filters });
+
+export const exportListingPurchasesToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportListingPurchasesPDF, format: 'pdf', prefix: 'listing_purchases', filters });
+
+export const exportPriorityPurchasesToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportPriorityPurchasesExcel, format: 'xlsx', prefix: 'priority_purchases', filters });
+
+export const exportPriorityPurchasesToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportPriorityPurchasesPDF, format: 'pdf', prefix: 'priority_purchases', filters });
+
+export const exportRentalBoostPurchasesToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportRentalBoostPurchasesExcel, format: 'xlsx', prefix: 'rental_boost_purchases', filters });
+
+export const exportRentalBoostPurchasesToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportRentalBoostPurchasesPDF, format: 'pdf', prefix: 'rental_boost_purchases', filters });
+
+export const exportServiceListingPurchasesToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportServiceListingPurchasesExcel, format: 'xlsx', prefix: 'service_listing_purchases', filters });
+
+export const exportServiceListingPurchasesToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportServiceListingPurchasesPDF, format: 'pdf', prefix: 'service_listing_purchases', filters });
+
+export const exportServicePriorityPurchasesToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportServicePriorityPurchasesExcel, format: 'xlsx', prefix: 'service_priority_purchases', filters });
+
+export const exportServicePriorityPurchasesToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportServicePriorityPurchasesPDF, format: 'pdf', prefix: 'service_priority_purchases', filters });

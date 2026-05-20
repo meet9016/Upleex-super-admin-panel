@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FolderPlus, Zap, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProductListingTab from "./components/ProductListingTab";
@@ -113,7 +113,7 @@ export default function PlansPage() {
       </div>
 
       {/* Pill Style Tabs */}
-      <div className="flex flex-wrap gap-2 pb-2">
+      <div className="flex flex-wrap items-center gap-2 pb-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -134,6 +134,7 @@ export default function PlansPage() {
             </button>
           );
         })}
+
       </div>
 
       <div className="mt-4">
