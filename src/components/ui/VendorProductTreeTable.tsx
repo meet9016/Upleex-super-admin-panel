@@ -104,6 +104,7 @@ interface VendorProductTreeTableProps {
   loading?: boolean;
   activeTab: 'rent' | 'sell';
   onTabChange: (tab: 'rent' | 'sell') => void;
+  overallCounts: { rent: number; sell: number };
 }
 
 // Product Detail Modal Component
@@ -385,6 +386,7 @@ export default function VendorProductTreeTable({
   loading,
   activeTab,
   onTabChange,
+  overallCounts,
 }: VendorProductTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -393,25 +395,8 @@ export default function VendorProductTreeTable({
   const [selectedProduct, setSelectedProduct] = useState<TreeDataItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const rentCount = useMemo(() => {
-    let count = 0;
-    vendors.forEach((vendor) => {
-      (vendor.products || []).forEach(p => {
-        if ((p.product_type_name || '').toLowerCase() === 'rent') count++;
-      });
-    });
-    return count;
-  }, [vendors]);
-
-  const sellCount = useMemo(() => {
-    let count = 0;
-    vendors.forEach((vendor) => {
-      (vendor.products || []).forEach(p => {
-        if ((p.product_type_name || '').toLowerCase() === 'sell') count++;
-      });
-    });
-    return count;
-  }, [vendors]);
+  const rentCount = overallCounts.rent;
+  const sellCount = overallCounts.sell;
 
   const processedVendors = useMemo(() => {
     const map: Record<string, any> = {};

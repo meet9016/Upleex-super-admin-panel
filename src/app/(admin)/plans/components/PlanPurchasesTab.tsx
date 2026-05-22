@@ -64,6 +64,8 @@ export default function PlanPurchasesTab() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [excelLoading, setExcelLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [allPlansExcelLoading, setAllPlansExcelLoading] = useState(false);
+  const [allPlansPdfLoading, setAllPlansPdfLoading] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [showAllPlansMenu, setShowAllPlansMenu] = useState(false);
   const gridRef = useRef<any>(null);
@@ -351,27 +353,27 @@ export default function PlanPurchasesTab() {
 
   const handleExportAllPlansExcel = async () => {
     try {
-      setExcelLoading(true);
+      setAllPlansExcelLoading(true);
       await exportAllPlansToExcel();
       toast.success('All plan purchases exported to Excel successfully!');
       setShowAllPlansMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to Excel');
     } finally {
-      setExcelLoading(false);
+      setAllPlansExcelLoading(false);
     }
   };
 
   const handleExportAllPlansPDF = async () => {
     try {
-      setPdfLoading(true);
+      setAllPlansPdfLoading(true);
       await exportAllPlansToPDF();
       toast.success('All plan purchases exported to PDF successfully!');
       setShowAllPlansMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to PDF');
     } finally {
-      setPdfLoading(false);
+      setAllPlansPdfLoading(false);
     }
   };
 
@@ -554,22 +556,22 @@ export default function PlanPurchasesTab() {
               <div className="py-1">
                 <button
                   onClick={handleExportAllPlansExcel}
-                  disabled={excelLoading || pdfLoading}
+                  disabled={allPlansExcelLoading || allPlansPdfLoading}
                   className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-50"
                 >
                   <FileJson className="text-lg text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
                   <span>Export All Plans to Excel</span>
-                  {excelLoading && <Loader2 className="ml-auto text-emerald-600 w-3.5 h-3.5 animate-spin" />}
+                  {allPlansExcelLoading && <Loader2 className="ml-auto text-emerald-600 w-3.5 h-3.5 animate-spin" />}
                 </button>
 
                 <button
                   onClick={handleExportAllPlansPDF}
-                  disabled={excelLoading || pdfLoading}
+                  disabled={allPlansExcelLoading || allPlansPdfLoading}
                   className="group w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium text-gray-700 border-l-4 border-transparent hover:border-rose-500 hover:bg-rose-50 transition-all duration-200 disabled:opacity-50"
                 >
                   <FileText className="text-lg text-rose-600 group-hover:scale-110 transition-transform duration-200" />
                   <span>Export All Plans to PDF</span>
-                  {pdfLoading && <Loader2 className="ml-auto text-rose-600 w-3.5 h-3.5 animate-spin" />}
+                  {allPlansPdfLoading && <Loader2 className="ml-auto text-rose-600 w-3.5 h-3.5 animate-spin" />}
                 </button>
               </div>
             </div>

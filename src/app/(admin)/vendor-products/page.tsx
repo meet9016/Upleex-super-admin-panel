@@ -36,6 +36,7 @@ export default function VendorProductApprovalPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
+  const [overallCounts, setOverallCounts] = useState({ rent: 0, sell: 0 });
   const LIMIT = 20;
 
   useEffect(() => {
@@ -62,29 +63,26 @@ export default function VendorProductApprovalPage() {
       const vendorList: Vendor[] = res?.data?.data || [];
       const totalPagesResp = res?.data?.totalPages;
       const pageResp = res?.data?.page || pageNum;
+      
+      // Set overall counts from API
+      if (res?.data?.overallCounts) {
+        setOverallCounts(res.data.overallCounts);
+      }
 
-      // Fetch products for each vendor of this page
-      const vendorsWithProducts = await Promise.all(
-        vendorList.map(async (vendor: Vendor) => {
-          if (!vendor.vendor_id) return { ...vendor, products: [] };
-          try {
-            const filter_rent_sell = tab === 'rent' ? 1 : 2;
-            const productRes = await api.get(`${endPointApi.getVendorProducts}/${vendor.vendor_id}`, {
-              params: { filter_rent_sell }
-            });
-            const payload = productRes.data?.data;
-            const products = Array.isArray(payload) ? payload : payload?.products || [];
-            const counts = Array.isArray(payload) ? null : payload?.counts || null;
-            return {
-              ...vendor,
-              products,
-              ...(counts ? { pending_count: counts.pending, approved_count: counts.approved, rejected_count: counts.rejected } : {})
-            } as any;
-          } catch (error) {
-            return { ...vendor, products: [] };
-          }
-        })
-      );
+      // Map vendors from API response to our Vendor interface
+      const vendorsWithProducts = vendorList.map((vendor: any) => {
+        return {
+          ...vendor,
+          products: vendor.products || [],
+          pending_count: vendor.counts?.pending,
+          approved_count: vendor.counts?.approved,
+          rejected_count: vendor.counts?.rejected
+        } as any;
+      });
+
+      vendorsWithProducts.forEach((v, i) => {
+        console.log(`  Vendor ${i + 1} (${v.vendor_id}):`, (v.products || []).length, 'products');
+      });
 
       setVendors(prev => {
         if (pageNum === 1) return vendorsWithProducts;
@@ -263,6 +261,7 @@ export default function VendorProductApprovalPage() {
               rejecting={rejecting}
               activeTab={activeTab}
               onTabChange={(tab) => setActiveTab(tab)}
+              overallCounts={overallCounts}
             />
 
             {/* Loading more indicator */}
