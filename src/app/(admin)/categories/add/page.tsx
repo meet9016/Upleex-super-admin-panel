@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Loader2, X, Edit } from "lucide-react";
+import { Plus, Loader2, X, Edit, Minus } from "lucide-react";
 import ActionButtons from "@/components/common/ActionButtons";
 import { MdSearch } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -38,6 +38,59 @@ const categorySchema = z.object({
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
 
+interface CategorySeoBullet {
+  label: string;
+  text: string;
+  plain?: boolean;
+}
+
+interface CategorySeoSection {
+  heading: string;
+  heading_level: "h2" | "h3";
+  bullets: CategorySeoBullet[];
+}
+
+interface CategorySeoFaq {
+  question: string;
+  answer: string;
+}
+
+interface CategorySeoContent {
+  meta_title: string;
+  meta_description: string;
+  core_keyword: string;
+  secondary_keywords: string;
+  image_alt: string;
+  image_title: string;
+  anchor_tags: string[];
+  faqs: CategorySeoFaq[];
+  hero_title: string;
+  hero_text: string;
+  intro_heading: string;
+  intro_paragraphs: string[];
+  sections: CategorySeoSection[];
+  main_text: string;
+  sub_text: string;
+}
+
+const emptySeoSection = (): CategorySeoSection => ({
+  heading: "",
+  heading_level: "h2",
+  bullets: [{ label: "", text: "", plain: false }],
+});
+
+const emptyLabeledBullet = (): CategorySeoBullet => ({
+  label: "",
+  text: "",
+  plain: false,
+});
+
+const emptyPlainBullet = (): CategorySeoBullet => ({
+  label: "",
+  text: "",
+  plain: true,
+});
+
 interface CategoryRow {
   _id: string;
   id?: string;
@@ -48,7 +101,93 @@ interface CategoryRow {
   status?: string;
   created_at?: string;
   updated_at?: string;
+  seo_content?: CategorySeoContent;
 }
+
+const createEmptySeoContent = (): CategorySeoContent => ({
+  meta_title: "",
+  meta_description: "",
+  core_keyword: "",
+  secondary_keywords: "",
+  image_alt: "",
+  image_title: "",
+  anchor_tags: [],
+  faqs: [{ question: "", answer: "" }],
+  hero_title: "",
+  hero_text: "",
+  intro_heading: "",
+  intro_paragraphs: [""],
+  sections: [emptySeoSection()],
+  main_text: "",
+  sub_text: "",
+});
+
+const normalizeSeoContent = (seo?: CategorySeoContent | any | null): CategorySeoContent => {
+  if (!seo) return createEmptySeoContent();
+
+  const introParagraphs = Array.isArray(seo.intro_paragraphs) && seo.intro_paragraphs.length > 0
+    ? seo.intro_paragraphs.map((p: string) => String(p || ""))
+    : seo.intro_text
+      ? [String(seo.intro_text)]
+      : [""];
+
+  const sections =
+    Array.isArray(seo.sections) && seo.sections.length > 0
+      ? seo.sections.map((section: any) => {
+          const heading = section.heading || section.h2 || "";
+          const heading_level = section.heading_level === "h3" ? "h3" : "h2";
+
+          let bullets: CategorySeoBullet[] = [];
+          if (Array.isArray(section.bullets) && section.bullets.length > 0) {
+            bullets = section.bullets.map((b: any) => {
+              const label = b.label || "";
+              const text = b.text || "";
+              const plain = Boolean(b.plain) || (!label.trim() && Boolean(text.trim()));
+              return { label: plain ? "" : label, text, plain };
+            });
+          } else if (Array.isArray(section.paragraphs)) {
+            bullets = section.paragraphs.map((line: string) => {
+              const content = String(line || "").trim().replace(/^[●•\-*]\s+/, "");
+              const colon = content.indexOf(":");
+              if (colon > 0) {
+                return {
+                  label: content.slice(0, colon).replace(/\*\*/g, "").trim(),
+                  text: content.slice(colon + 1).trim(),
+                };
+              }
+              return { label: "", text: content, plain: true };
+            });
+          }
+
+          if (bullets.length === 0) bullets = [emptyLabeledBullet()];
+
+          return { heading, heading_level, bullets };
+        })
+      : [emptySeoSection()];
+
+  return {
+    meta_title: seo.meta_title || "",
+    meta_description: seo.meta_description || "",
+    core_keyword: seo.core_keyword || "",
+    secondary_keywords: seo.secondary_keywords || "",
+    image_alt: seo.image_alt || "",
+    image_title: seo.image_title || "",
+    anchor_tags: Array.isArray(seo.anchor_tags) ? seo.anchor_tags : [],
+    faqs: Array.isArray(seo.faqs) && seo.faqs.length > 0
+      ? seo.faqs.map((f: any) => ({
+          question: f.question || "",
+          answer: f.answer || "",
+        }))
+      : [{ question: "", answer: "" }],
+    hero_title: seo.hero_title || "",
+    hero_text: seo.hero_text || "",
+    intro_heading: seo.intro_heading || "",
+    intro_paragraphs: introParagraphs,
+    sections,
+    main_text: seo.main_text || "",
+    sub_text: seo.sub_text || "",
+  };
+};
 
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -130,6 +269,7 @@ export default function AddCategoryPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CategoryRow[]>([]);
+  const [seoContent, setSeoContent] = useState<CategorySeoContent>(createEmptySeoContent);
   const gridRef = useRef<any>(null);
   const debouncedSearch = useDebounce(searchText, 600);
 
@@ -329,6 +469,30 @@ export default function AddCategoryPage() {
         formData.append("image", data.image[0]);
       }
 
+      const cleanedSeo: CategorySeoContent = {
+        ...seoContent,
+        faqs: seoContent.faqs
+          .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+          .filter((f) => f.question || f.answer),
+        intro_paragraphs: seoContent.intro_paragraphs
+          .map((p) => p.trim())
+          .filter(Boolean),
+        sections: seoContent.sections
+          .map((section) => ({
+            ...section,
+            heading: section.heading.trim(),
+            bullets: section.bullets
+              .map((b) => ({
+                label: b.plain ? "" : b.label.trim(),
+                text: b.text.trim(),
+                plain: Boolean(b.plain),
+              }))
+              .filter((b) => b.label || b.text),
+          }))
+          .filter((section) => section.heading || section.bullets.length > 0),
+      };
+      formData.append("seo_content", JSON.stringify(cleanedSeo));
+
       let res;
       if (editingId) {
         res = await api.put(
@@ -367,6 +531,7 @@ export default function AddCategoryPage() {
           image: undefined
         });
         setPreviewImage(null);
+        setSeoContent(createEmptySeoContent());
         await fetchCategories(debouncedSearch);
       }
     } catch (error: any) {
@@ -384,6 +549,7 @@ export default function AddCategoryPage() {
     setEditingId(String(id));
     setValue('name', category.categories_name || '');
     setValue('image', 'existing');
+    setSeoContent(normalizeSeoContent(category.seo_content));
     clearErrors();
     setPreviewImage(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -468,10 +634,148 @@ export default function AddCategoryPage() {
   const handleCancelEdit = () => {
     setEditingId(null);
     setPreviewImage(null);
+    setSeoContent(createEmptySeoContent());
     reset({
       name: "",
       image: undefined
     });
+  };
+
+  const updateSeoField = (
+    field: keyof Omit<CategorySeoContent, "sections" | "intro_paragraphs" | "faqs" | "anchor_tags">,
+    value: string
+  ) => {
+    setSeoContent((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const addSeoFaq = () => {
+    setSeoContent((prev) => ({
+      ...prev,
+      faqs: [...prev.faqs, { question: "", answer: "" }],
+    }));
+  };
+
+  const removeSeoFaq = (index: number) => {
+    setSeoContent((prev) => {
+      if (prev.faqs.length <= 1) return prev;
+      return { ...prev, faqs: prev.faqs.filter((_, i) => i !== index) };
+    });
+  };
+
+  const updateSeoFaq = (index: number, field: "question" | "answer", value: string) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      faqs: prev.faqs.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)),
+    }));
+  };
+
+  const addIntroParagraph = () => {
+    setSeoContent((prev) => ({
+      ...prev,
+      intro_paragraphs: [...prev.intro_paragraphs, ""],
+    }));
+  };
+
+  const removeIntroParagraph = (index: number) => {
+    setSeoContent((prev) => {
+      if (prev.intro_paragraphs.length <= 1) return prev;
+      return {
+        ...prev,
+        intro_paragraphs: prev.intro_paragraphs.filter((_, i) => i !== index),
+      };
+    });
+  };
+
+  const updateIntroParagraph = (index: number, value: string) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      intro_paragraphs: prev.intro_paragraphs.map((p, i) => (i === index ? value : p)),
+    }));
+  };
+
+  const addSeoSection = (level: "h2" | "h3" = "h2") => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: [...prev.sections, { ...emptySeoSection(), heading_level: level }],
+    }));
+  };
+
+  const removeSeoSection = (sectionIndex: number) => {
+    setSeoContent((prev) => {
+      if (prev.sections.length <= 1) return prev;
+      return {
+        ...prev,
+        sections: prev.sections.filter((_, index) => index !== sectionIndex),
+      };
+    });
+  };
+
+  const updateSeoSectionHeading = (sectionIndex: number, value: string) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, index) =>
+        index === sectionIndex ? { ...section, heading: value } : section
+      ),
+    }));
+  };
+
+  const updateSeoSectionLevel = (sectionIndex: number, level: "h2" | "h3") => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, index) =>
+        index === sectionIndex ? { ...section, heading_level: level } : section
+      ),
+    }));
+  };
+
+  const addSeoBullet = (sectionIndex: number, plain = false) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, index) =>
+        index === sectionIndex
+          ? {
+              ...section,
+              bullets: [
+                ...section.bullets,
+                plain ? emptyPlainBullet() : emptyLabeledBullet(),
+              ],
+            }
+          : section
+      ),
+    }));
+  };
+
+  const removeSeoBullet = (sectionIndex: number, bulletIndex: number) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, index) => {
+        if (index !== sectionIndex || section.bullets.length <= 1) return section;
+        return {
+          ...section,
+          bullets: section.bullets.filter((_, bIndex) => bIndex !== bulletIndex),
+        };
+      }),
+    }));
+  };
+
+  const updateSeoBullet = (
+    sectionIndex: number,
+    bulletIndex: number,
+    field: "label" | "text",
+    value: string
+  ) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, index) => {
+        if (index !== sectionIndex) return section;
+        return {
+          ...section,
+          bullets: section.bullets.map((bullet, bIndex) =>
+            bIndex === bulletIndex ? { ...bullet, [field]: value } : bullet
+          ),
+        };
+      }),
+    }));
   };
 
   const handleClearSearch = () => {
@@ -605,6 +909,356 @@ export default function AddCategoryPage() {
                           ? 'Upload a new image to replace the existing one'
                           : 'Upload an image for the category (JPEG, PNG, etc.)'}
                       </p>
+                    </div>
+
+                    <div className="space-y-3 border-t border-slate-100 pt-3">
+                      <p className="text-xs font-bold text-slate-800">Category SEO Content</p>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Meta Title</label>
+                        <Input
+                          value={seoContent.meta_title}
+                          onChange={(e) => updateSeoField("meta_title", e.target.value)}
+                          placeholder="Home Appliances Rental in Surat | Rent Online - Upleex"
+                          className="h-9 bg-slate-50 border-slate-100 text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Meta Description</label>
+                        <textarea
+                          value={seoContent.meta_description}
+                          onChange={(e) => updateSeoField("meta_description", e.target.value)}
+                          placeholder="Get premium home appliances rental in Surat..."
+                          rows={2}
+                          className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Core Keyword</label>
+                          <Input
+                            value={seoContent.core_keyword}
+                            onChange={(e) => updateSeoField("core_keyword", e.target.value)}
+                            placeholder="home appliances rental"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Secondary Keywords</label>
+                          <textarea
+                            value={seoContent.secondary_keywords}
+                            onChange={(e) => updateSeoField("secondary_keywords", e.target.value)}
+                            placeholder="rent to own home appliances..."
+                            rows={2}
+                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Image Alt Tag</label>
+                          <Input
+                            value={seoContent.image_alt}
+                            onChange={(e) => updateSeoField("image_alt", e.target.value)}
+                            placeholder="Home Appliances Rental in Surat - Upleex"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Image Title</label>
+                          <Input
+                            value={seoContent.image_title}
+                            onChange={(e) => updateSeoField("image_title", e.target.value)}
+                            placeholder="Home Appliances Rental"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Hero Title (H1)</label>
+                        <Input
+                          value={seoContent.hero_title}
+                          onChange={(e) => updateSeoField("hero_title", e.target.value)}
+                          placeholder="Stay Active with Affordable Sports Equipment Rental"
+                          className="h-9 bg-slate-50 border-slate-100 text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Hero Text</label>
+                        <textarea
+                          value={seoContent.hero_text}
+                          onChange={(e) => updateSeoField("hero_text", e.target.value)}
+                          placeholder="Fitness gear is expensive. Start your journey without spending too much."
+                          rows={2}
+                          className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Intro Heading</label>
+                        <Input
+                          value={seoContent.intro_heading}
+                          onChange={(e) => updateSeoField("intro_heading", e.target.value)}
+                          placeholder="Introducing Upleex: Fitness That Fits Your Life"
+                          className="h-9 bg-slate-50 border-slate-100 text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-slate-700">Intro Text</label>
+                          <button
+                            type="button"
+                            onClick={addIntroParagraph}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Add paragraph
+                          </button>
+                        </div>
+                        {seoContent.intro_paragraphs.map((paragraph, index) => (
+                          <div key={index} className="flex gap-2 items-start">
+                            <textarea
+                              value={paragraph}
+                              onChange={(e) => updateIntroParagraph(index, e.target.value)}
+                              placeholder="Intro paragraph text"
+                              rows={2}
+                              className="flex-1 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            {seoContent.intro_paragraphs.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeIntroParagraph(index)}
+                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-md mt-1"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <label className="text-xs font-semibold text-slate-700">Content Sections</label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => addSeoSection("h2")}
+                              className="inline-flex items-center gap-1  text-xs font-semibold text-primary"
+                            >
+                              <Plus className="h-3.5 w-3.5" /> Add H2
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => addSeoSection("h3")}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600"
+                            >
+                              <Plus className="h-3.5 w-3.5" /> Add H3
+                            </button>
+                          </div>
+                        </div>
+
+                        {seoContent.sections.map((section, sectionIndex) => (
+                          <div
+                            key={sectionIndex}
+                            className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 space-y-2"
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1 space-y-2">
+                               <div className="flex gap-2">
+  <select
+    value={section.heading_level}
+    onChange={(e) =>
+      updateSeoSectionLevel(
+        sectionIndex,
+        e.target.value as "h2" | "h3"
+      )
+    }
+    className="h-9 w-20 rounded-lg border border-slate-100 bg-white px-2 text-xs font-semibold text-slate-700"
+  >
+    <option value="h2">H2</option>
+    <option value="h3">H3</option>
+  </select>
+
+  <Input
+    value={section.heading}
+    onChange={(e) =>
+      updateSeoSectionHeading(sectionIndex, e.target.value)
+    }
+    placeholder={
+      section.heading_level === "h3"
+        ? "Use Cases:"
+        : "We Provide Affordable Sports Equipment Rental..."
+    }
+    className="h-9 flex-1 bg-white border-slate-100 text-sm"
+  />
+</div>
+                              </div>
+                              {seoContent.sections.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeSeoSection(sectionIndex)}
+                                  className="p-1.5 rounded-md text-red-500 hover:bg-red-50"
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="space-y-2 pl-1 border-l-2 border-slate-200">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="text-[11px] font-semibold text-slate-600">Bullet points</span>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => addSeoBullet(sectionIndex, false)}
+                                      className="inline-flex items-center justify-center gap-1 rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                    Add
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => addSeoBullet(sectionIndex, true)}
+                                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                      Text Only
+                                    </button>
+                                  </div>
+                              </div>
+                              {section.bullets.map((bullet, bulletIndex) => (
+                                <div key={bulletIndex} className="flex gap-2 items-start">
+                                  <div className="flex-1 grid grid-cols-1 gap-1.5">
+                                    {bullet.plain ? (
+                                      <Input
+                                        value={bullet.text}
+                                        onChange={(e) =>
+                                          updateSeoBullet(
+                                            sectionIndex,
+                                            bulletIndex,
+                                            "text",
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder=""
+                                        className="h-8 bg-white border-slate-100 text-xs"
+                                      />
+                                    ) : (
+                                      <>
+                                        <Input
+                                          value={bullet.label}
+                                          onChange={(e) =>
+                                            updateSeoBullet(
+                                              sectionIndex,
+                                              bulletIndex,
+                                              "label",
+                                              e.target.value
+                                            )
+                                          }
+                                          placeholder="Label "
+                                          className="h-8 bg-white border-slate-100 text-xs"
+                                        />
+                                        <Input
+                                          value={bullet.text}
+                                          onChange={(e) =>
+                                            updateSeoBullet(
+                                              sectionIndex,
+                                              bulletIndex,
+                                              "text",
+                                              e.target.value
+                                            )
+                                          }
+                                          placeholder="Description"
+                                          className="h-8 bg-white border-slate-100 text-xs"
+                                        />
+                                      </>
+                                    )}
+                                  
+                                  </div>
+                                  {section.bullets.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeSeoBullet(sectionIndex, bulletIndex)}
+                                      className="p-1 text-red-500 hover:bg-red-50 rounded-md mt-1"
+                                    >
+                                      <Minus className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2 border-t border-slate-100 pt-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-800">FAQ (SEO)</p>
+                          <button
+                            type="button"
+                            onClick={addSeoFaq}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Add FAQ
+                          </button>
+                        </div>
+                        {seoContent.faqs.map((faq, faqIndex) => (
+                          <div key={faqIndex} className="rounded-lg border border-slate-100 bg-slate-50/60 p-2 space-y-2">
+                            <Input
+                              value={faq.question}
+                              onChange={(e) => updateSeoFaq(faqIndex, "question", e.target.value)}
+                              placeholder="FAQ question"
+                              className="h-8 bg-white border-slate-100 text-xs"
+                            />
+                            <textarea
+                              value={faq.answer}
+                              onChange={(e) => updateSeoFaq(faqIndex, "answer", e.target.value)}
+                              placeholder="FAQ answer (optional)"
+                              rows={2}
+                              className="w-full rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs"
+                            />
+                            {seoContent.faqs.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSeoFaq(faqIndex)}
+                                className="text-xs text-red-500 hover:underline"
+                              >
+                                Remove FAQ
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2 border-t border-slate-100 pt-2">
+                        <p className="text-xs font-bold text-slate-800">CTA</p>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Main Text</label>
+                          <Input
+                            value={seoContent.main_text}
+                            onChange={(e) => updateSeoField("main_text", e.target.value)}
+                            placeholder="Stay Fit Today with Upleex Rentals."
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Sub Text</label>
+                          <textarea
+                            value={seoContent.sub_text}
+                            onChange={(e) => updateSeoField("sub_text", e.target.value)}
+                            placeholder="Find fitness gear near you and start your journey now."
+                            rows={2}
+                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex gap-2 pt-1">
