@@ -915,69 +915,6 @@ export default function AddCategoryPage() {
                     <div className="space-y-3 border-t border-slate-100 pt-3">
                       <p className="text-xs font-bold text-slate-800">Category SEO Content</p>
 
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-700">Meta Title</label>
-                        <Input
-                          value={seoContent.meta_title}
-                          onChange={(e) => updateSeoField("meta_title", e.target.value)}
-                          placeholder="Home Appliances Rental in Surat | Rent Online - Upleex"
-                          className="h-9 bg-slate-50 border-slate-100 text-sm"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-700">Meta Description</label>
-                        <textarea
-                          value={seoContent.meta_description}
-                          onChange={(e) => updateSeoField("meta_description", e.target.value)}
-                          placeholder="Get premium home appliances rental in Surat..."
-                          rows={2}
-                          className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-700">Core Keyword</label>
-                          <Input
-                            value={seoContent.core_keyword}
-                            onChange={(e) => updateSeoField("core_keyword", e.target.value)}
-                            placeholder="home appliances rental"
-                            className="h-9 bg-slate-50 border-slate-100 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-700">Secondary Keywords</label>
-                          <textarea
-                            value={seoContent.secondary_keywords}
-                            onChange={(e) => updateSeoField("secondary_keywords", e.target.value)}
-                            placeholder="rent to own home appliances..."
-                            rows={2}
-                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-700">Image Alt Tag</label>
-                          <Input
-                            value={seoContent.image_alt}
-                            onChange={(e) => updateSeoField("image_alt", e.target.value)}
-                            placeholder="Home Appliances Rental in Surat - Upleex"
-                            className="h-9 bg-slate-50 border-slate-100 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-700">Image Title</label>
-                          <Input
-                            value={seoContent.image_title}
-                            onChange={(e) => updateSeoField("image_title", e.target.value)}
-                            placeholder="Home Appliances Rental"
-                            className="h-9 bg-slate-50 border-slate-100 text-sm"
-                          />
-                        </div>
-                      </div>
 
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-700">Hero Title (H1)</label>
@@ -1199,44 +1136,6 @@ export default function AddCategoryPage() {
                         ))}
                       </div>
 
-                      <div className="space-y-2 border-t border-slate-100 pt-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-slate-800">FAQ (SEO)</p>
-                          <button
-                            type="button"
-                            onClick={addSeoFaq}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
-                          >
-                            <Plus className="h-3.5 w-3.5" /> Add FAQ
-                          </button>
-                        </div>
-                        {seoContent.faqs.map((faq, faqIndex) => (
-                          <div key={faqIndex} className="rounded-lg border border-slate-100 bg-slate-50/60 p-2 space-y-2">
-                            <Input
-                              value={faq.question}
-                              onChange={(e) => updateSeoFaq(faqIndex, "question", e.target.value)}
-                              placeholder="FAQ question"
-                              className="h-8 bg-white border-slate-100 text-xs"
-                            />
-                            <textarea
-                              value={faq.answer}
-                              onChange={(e) => updateSeoFaq(faqIndex, "answer", e.target.value)}
-                              placeholder="FAQ answer (optional)"
-                              rows={2}
-                              className="w-full rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs"
-                            />
-                            {seoContent.faqs.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeSeoFaq(faqIndex)}
-                                className="text-xs text-red-500 hover:underline"
-                              >
-                                Remove FAQ
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
 
                       <div className="space-y-2 border-t border-slate-100 pt-2">
                         <p className="text-xs font-bold text-slate-800">CTA</p>
