@@ -11,6 +11,8 @@ export interface EndPointApi {
     getAvailablePages: string;
     assignPermissions: string;
     getMyPermissions: string;
+    uploadMetadataCsv: string;
+    getMetadataJson: string;
 
     // Vendor Management
     getVendorList: string;
@@ -192,6 +194,8 @@ const endPointApi: EndPointApi = {
     getAvailablePages: 'admin/available-pages',
     assignPermissions: 'admin/assign-permissions',
     getMyPermissions: 'admin/my-permissions',
+    uploadMetadataCsv: 'admin/metadata/upload-csv',
+    getMetadataJson: 'admin/metadata/json',
 
     // Vendor Management
     getVendorList: 'vendor-kyc',

@@ -6,11 +6,11 @@ import type { ContactResponse, ContactUpdateResponse } from '@/types/contact';
 const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 class ApiService {
-  private getAuthHeaders() {
+  private getAuthHeaders(skipJsonContentType = false) {
     // Check if we're in browser environment
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     return {
-      'Content-Type': 'application/json',
+      ...(skipJsonContentType ? {} : { 'Content-Type': 'application/json' }),
       ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
@@ -25,6 +25,29 @@ class ApiService {
 
     const response = await fetch(url, config);
     
+    if (!response.ok) {
+      if (response.status === 401) {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          clearToken();
+          localStorage.clear();
+          window.location.replace('/login');
+        }
+      }
+      const error = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  private async requestFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const url = `${API_BASE_URL}/${endpoint}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getAuthHeaders(true),
+      body: formData,
+    });
+
     if (!response.ok) {
       if (response.status === 401) {
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
@@ -73,6 +96,16 @@ class ApiService {
 
   async getMyPermissions() {
     return this.request(endPointApi.getMyPermissions);
+  }
+
+  async uploadMetadataCsv(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.requestFormData(endPointApi.uploadMetadataCsv, formData);
+  }
+
+  async getMetadataJson() {
+    return this.request(endPointApi.getMetadataJson);
   }
 
   // Vendor Payments

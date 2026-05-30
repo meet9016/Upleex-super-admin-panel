@@ -18,7 +18,8 @@ import {
   Loader2,
   ShoppingBag,
   Phone,
-  BadgeCheck
+  BadgeCheck,
+  FileUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -77,6 +78,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
   {
     group: "Content",
     items: [
+      { name: "Metadata", href: "/metadata", icon: FileUp, permission: "metadata" },
       { name: "Blog", href: "/blog", icon: BookOpen, permission: "blogs" },
       { name: "Banners", href: "/banners", icon: FaRegImages , permission: "blogs" },
       { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },

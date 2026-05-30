@@ -50,7 +50,20 @@ interface CategorySeoSection {
   bullets: CategorySeoBullet[];
 }
 
+interface CategorySeoFaq {
+  question: string;
+  answer: string;
+}
+
 interface CategorySeoContent {
+  meta_title: string;
+  meta_description: string;
+  core_keyword: string;
+  secondary_keywords: string;
+  image_alt: string;
+  image_title: string;
+  anchor_tags: string[];
+  faqs: CategorySeoFaq[];
   hero_title: string;
   hero_text: string;
   intro_heading: string;
@@ -92,6 +105,14 @@ interface CategoryRow {
 }
 
 const createEmptySeoContent = (): CategorySeoContent => ({
+  meta_title: "",
+  meta_description: "",
+  core_keyword: "",
+  secondary_keywords: "",
+  image_alt: "",
+  image_title: "",
+  anchor_tags: [],
+  faqs: [{ question: "", answer: "" }],
   hero_title: "",
   hero_text: "",
   intro_heading: "",
@@ -145,6 +166,19 @@ const normalizeSeoContent = (seo?: CategorySeoContent | any | null): CategorySeo
       : [emptySeoSection()];
 
   return {
+    meta_title: seo.meta_title || "",
+    meta_description: seo.meta_description || "",
+    core_keyword: seo.core_keyword || "",
+    secondary_keywords: seo.secondary_keywords || "",
+    image_alt: seo.image_alt || "",
+    image_title: seo.image_title || "",
+    anchor_tags: Array.isArray(seo.anchor_tags) ? seo.anchor_tags : [],
+    faqs: Array.isArray(seo.faqs) && seo.faqs.length > 0
+      ? seo.faqs.map((f: any) => ({
+          question: f.question || "",
+          answer: f.answer || "",
+        }))
+      : [{ question: "", answer: "" }],
     hero_title: seo.hero_title || "",
     hero_text: seo.hero_text || "",
     intro_heading: seo.intro_heading || "",
@@ -437,6 +471,9 @@ export default function AddCategoryPage() {
 
       const cleanedSeo: CategorySeoContent = {
         ...seoContent,
+        faqs: seoContent.faqs
+          .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+          .filter((f) => f.question || f.answer),
         intro_paragraphs: seoContent.intro_paragraphs
           .map((p) => p.trim())
           .filter(Boolean),
@@ -606,10 +643,31 @@ export default function AddCategoryPage() {
   };
 
   const updateSeoField = (
-    field: keyof Omit<CategorySeoContent, "sections" | "intro_paragraphs">,
+    field: keyof Omit<CategorySeoContent, "sections" | "intro_paragraphs" | "faqs" | "anchor_tags">,
     value: string
   ) => {
     setSeoContent((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const addSeoFaq = () => {
+    setSeoContent((prev) => ({
+      ...prev,
+      faqs: [...prev.faqs, { question: "", answer: "" }],
+    }));
+  };
+
+  const removeSeoFaq = (index: number) => {
+    setSeoContent((prev) => {
+      if (prev.faqs.length <= 1) return prev;
+      return { ...prev, faqs: prev.faqs.filter((_, i) => i !== index) };
+    });
+  };
+
+  const updateSeoFaq = (index: number, field: "question" | "answer", value: string) => {
+    setSeoContent((prev) => ({
+      ...prev,
+      faqs: prev.faqs.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)),
+    }));
   };
 
   const addIntroParagraph = () => {
@@ -858,6 +916,70 @@ export default function AddCategoryPage() {
                       <p className="text-xs font-bold text-slate-800">Category SEO Content</p>
 
                       <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Meta Title</label>
+                        <Input
+                          value={seoContent.meta_title}
+                          onChange={(e) => updateSeoField("meta_title", e.target.value)}
+                          placeholder="Home Appliances Rental in Surat | Rent Online - Upleex"
+                          className="h-9 bg-slate-50 border-slate-100 text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700">Meta Description</label>
+                        <textarea
+                          value={seoContent.meta_description}
+                          onChange={(e) => updateSeoField("meta_description", e.target.value)}
+                          placeholder="Get premium home appliances rental in Surat..."
+                          rows={2}
+                          className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Core Keyword</label>
+                          <Input
+                            value={seoContent.core_keyword}
+                            onChange={(e) => updateSeoField("core_keyword", e.target.value)}
+                            placeholder="home appliances rental"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Secondary Keywords</label>
+                          <textarea
+                            value={seoContent.secondary_keywords}
+                            onChange={(e) => updateSeoField("secondary_keywords", e.target.value)}
+                            placeholder="rent to own home appliances..."
+                            rows={2}
+                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Image Alt Tag</label>
+                          <Input
+                            value={seoContent.image_alt}
+                            onChange={(e) => updateSeoField("image_alt", e.target.value)}
+                            placeholder="Home Appliances Rental in Surat - Upleex"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-700">Image Title</label>
+                          <Input
+                            value={seoContent.image_title}
+                            onChange={(e) => updateSeoField("image_title", e.target.value)}
+                            placeholder="Home Appliances Rental"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-700">Hero Title (H1)</label>
                         <Input
                           value={seoContent.hero_title}
@@ -1073,6 +1195,45 @@ export default function AddCategoryPage() {
                                 </div>
                               ))}
                             </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-2 border-t border-slate-100 pt-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-800">FAQ (SEO)</p>
+                          <button
+                            type="button"
+                            onClick={addSeoFaq}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Add FAQ
+                          </button>
+                        </div>
+                        {seoContent.faqs.map((faq, faqIndex) => (
+                          <div key={faqIndex} className="rounded-lg border border-slate-100 bg-slate-50/60 p-2 space-y-2">
+                            <Input
+                              value={faq.question}
+                              onChange={(e) => updateSeoFaq(faqIndex, "question", e.target.value)}
+                              placeholder="FAQ question"
+                              className="h-8 bg-white border-slate-100 text-xs"
+                            />
+                            <textarea
+                              value={faq.answer}
+                              onChange={(e) => updateSeoFaq(faqIndex, "answer", e.target.value)}
+                              placeholder="FAQ answer (optional)"
+                              rows={2}
+                              className="w-full rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs"
+                            />
+                            {seoContent.faqs.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSeoFaq(faqIndex)}
+                                className="text-xs text-red-500 hover:underline"
+                              >
+                                Remove FAQ
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
