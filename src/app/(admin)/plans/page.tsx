@@ -9,7 +9,8 @@ import PlanPurchasesTab from "./components/PlanPurchasesTab";
 import RentalBoostTab from "./components/RentalBoostTab";
 import ServiceListingTab from "./components/ServiceListingTab";
 import ServicePriorityTab from "./components/ServicePriorityTab";
-import { TrendingUp, Package, Briefcase, ChevronDown } from "lucide-react";
+import GeneralPlanTab from "./components/GeneralPlanTab";
+import { TrendingUp, Package, Briefcase, ChevronDown, List } from "lucide-react";
 
 
 const PRODUCT_TABS = [
@@ -30,6 +31,12 @@ const PRODUCT_TABS = [
     label: "Rental Boost",
     icon: TrendingUp,
     component: RentalBoostTab,
+  },
+  {
+    key: "general",
+    label: "General Plan",
+    icon: List,
+    component: GeneralPlanTab,
   },
   {
     key: "purchases",
@@ -145,6 +152,9 @@ export default function PlansPage() {
             </div>
             <div className={cn(activeTab === "priority" ? "block" : "hidden")}>
               <PriorityPlanTab />
+            </div>
+            <div className={cn(activeTab === "general" ? "block" : "hidden")}>
+              <GeneralPlanTab />
             </div>
             <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
               <PlanPurchasesTab />

@@ -115,6 +115,12 @@ export interface EndPointApi {
     exportRentalBoostPurchasesExcel: string;
     exportRentalBoostPurchasesPDF: string;
 
+    // General Plans
+    getAllGeneralPlans: string;
+    createGeneralPlan: string;
+    updateGeneralPlan: string;
+    deleteGeneralPlan: string;
+
 
     // Vendor Products Approval
     getAllVendors: string;
@@ -298,6 +304,12 @@ const endPointApi: EndPointApi = {
     getAllRentalBoostPurchases: 'rental-boost-plans/purchases/getall',
     exportRentalBoostPurchasesExcel: 'export/rental-boost-purchases/excel',
     exportRentalBoostPurchasesPDF: 'export/rental-boost-purchases/pdf',
+    
+    // General Plans
+    getAllGeneralPlans: 'general-plans/getall',
+    createGeneralPlan: 'general-plans/create',
+    updateGeneralPlan: 'general-plans/update',
+    deleteGeneralPlan: 'general-plans/delete',
 
 
     // Vendor Products Approval
