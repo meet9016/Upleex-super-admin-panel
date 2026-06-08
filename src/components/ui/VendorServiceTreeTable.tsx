@@ -408,9 +408,7 @@ export default function VendorServiceTreeTable({
       <div className="mb-6 flex items-center justify-between">
 
         {/* Left side - Heading */}
-        <h1 className="text-3xl font-bold text-gray-900">
-          Service Approval
-        </h1>
+
 
         {/* Right side - Buttons */}
         {selectedCount > 0 && (

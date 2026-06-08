@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import VendorServiceTreeTable from "@/components/ui/VendorServiceTreeTable";
 import PageLoader from "@/components/common/PageLoader";
 
@@ -38,17 +38,26 @@ export default function VendorServiceApprovalPage() {
   const [selectedCount, setSelectedCount] = useState(0);
   const [approvableCount, setApprovableCount] = useState(0);
   const [rejectableCount, setRejectableCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const gridRef = useRef(null);
   const LIMIT = 20;
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   useEffect(() => {
     setVendors([]);
     setPage(1);
     setHasMore(true);
-    fetchVendorsWithServices(1);
-  }, []);
+    fetchVendorsWithServices(1, debouncedSearch);
+  }, [debouncedSearch]);
 
-  const fetchVendorsWithServices = async (pageNum: number) => {
+  const fetchVendorsWithServices = async (pageNum: number, search: string = debouncedSearch) => {
     try {
       if (pageNum === 1) {
         setLoading(true);
@@ -58,7 +67,7 @@ export default function VendorServiceApprovalPage() {
 
       // Reusing products' vendors list or a new endpoint if available
       const res = await api.get(endPointApi.getAllServiceVendors, {
-        params: { page: pageNum, limit: LIMIT }
+        params: { page: pageNum, limit: LIMIT, search }
       });
 
       const vendorList: Vendor[] = res?.data?.data || [];
@@ -239,6 +248,19 @@ export default function VendorServiceApprovalPage() {
 
   return (
     <div className="p-1">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-3xl font-bold text-gray-900">Service Approval</h1>
+        <div className="relative w-full sm:w-72">
+          <input
+            type="text"
+            placeholder="Search vendor or business name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        </div>
+      </div>
       <div className="bg-white rounded-lg min-h-[400px]">
         <VendorServiceTreeTable
           vendors={vendors}

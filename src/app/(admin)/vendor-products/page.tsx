@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
 import { toast } from "react-toastify";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import VendorProductTreeTable from "@/components/ui/VendorProductTreeTable";
 import PageLoader from "@/components/common/PageLoader";
 
@@ -37,16 +37,25 @@ export default function VendorProductApprovalPage() {
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<'rent' | 'sell'>('rent');
   const [overallCounts, setOverallCounts] = useState({ rent: 0, sell: 0 });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const LIMIT = 20;
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   useEffect(() => {
     setVendors([]);
     setPage(1);
     setHasMore(true);
-    fetchVendorsWithProducts(1, activeTab);
-  }, [activeTab]);
+    fetchVendorsWithProducts(1, activeTab, debouncedSearch);
+  }, [activeTab, debouncedSearch]);
 
-  const fetchVendorsWithProducts = async (pageNum: number, tab: 'rent' | 'sell' = activeTab) => {
+  const fetchVendorsWithProducts = async (pageNum: number, tab: 'rent' | 'sell' = activeTab, search: string = debouncedSearch) => {
     try {
       if (pageNum === 1) {
         setLoading(true);
@@ -57,7 +66,7 @@ export default function VendorProductApprovalPage() {
       const filter_rent_sell = tab === 'rent' ? 1 : 2;
 
       const res = await api.get(endPointApi.getAllVendors, {
-        params: { page: pageNum, limit: LIMIT, filter_rent_sell }
+        params: { page: pageNum, limit: LIMIT, filter_rent_sell, search }
       });
 
       const vendorList: Vendor[] = res?.data?.data || [];
@@ -245,9 +254,20 @@ export default function VendorProductApprovalPage() {
 
   return (
     <div className="p-1">
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-bold text-gray-900">Product Approval</h1>
-
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            className="block w-full sm:w-80 pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white shadow-sm"
+            placeholder="Search vendor or business name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-lg">
