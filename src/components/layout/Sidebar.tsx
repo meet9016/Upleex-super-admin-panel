@@ -83,6 +83,14 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Banners", href: "/banners", icon: FaRegImages , permission: "blogs" },
       { name: "FAQs", href: "/faq", icon: HelpCircle, permission: "faqs" },
       { name: "Contact Us", href: "/contact-us", icon: Phone, permission: "contact-us" },
+      {
+        name: "Dynamic Component",
+        icon: FileText,
+        subItems: [
+          { name: "About", href: "/dynamic-component/about", icon: FileText },
+          { name: "Partner", href: "/dynamic-component/partner", icon: FileText },
+        ],
+      },
     ],
   },
 ];

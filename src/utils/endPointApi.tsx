@@ -185,6 +185,10 @@ export interface EndPointApi {
     getVendorReport: string;
     exportVendorReportExcel: string;
     exportVendorReportPDF: string;
+
+    // Dynamic Pages
+    getDynamicPageBySlug: string;
+    upsertDynamicPage: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -375,6 +379,10 @@ const endPointApi: EndPointApi = {
     getVendorReport: 'admin/vendor-report',
     exportVendorReportExcel: 'export/vendor-report/excel',
     exportVendorReportPDF: 'export/vendor-report/pdf',
+
+    // Dynamic Pages
+    getDynamicPageBySlug: 'dynamic-pages/:slug',
+    upsertDynamicPage: 'dynamic-pages',
 };
 
 export default endPointApi;
