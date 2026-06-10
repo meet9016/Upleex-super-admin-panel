@@ -54,7 +54,7 @@ type Purchase = {
 };
 
 export default function PlanPurchasesTab() {
-  const [activeSubTab, setActiveSubTab] = useState<'listing' | 'priority' | 'booster'>('listing');
+  const [activeSubTab, setActiveSubTab] = useState<'listing' | 'priority' | 'booster' | 'general'>('listing');
   const [rows, setRows] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Purchase[]>([]);
@@ -162,6 +162,8 @@ export default function PlanPurchasesTab() {
         url = endPointApi.getAllPriorityPurchases;
       } else if (activeSubTab === 'booster') {
         url = endPointApi.getAllRentalBoostPurchases;
+      } else if (activeSubTab === 'general') {
+        url = endPointApi.getAllGeneralPlanPurchases;
       }
 
       const res = await api.get(queryString ? `${url}?${queryString}` : url);
@@ -310,6 +312,10 @@ export default function PlanPurchasesTab() {
       } else if (activeSubTab === 'booster') {
         exportFunc = exportRentalBoostPurchasesToExcel;
         successMsg = 'Rental boost plan purchases exported to Excel successfully!';
+      } else if (activeSubTab === 'general') {
+        // Fallback to all plans if no specific export
+        exportFunc = exportAllPlansToExcel;
+        successMsg = 'All plan purchases exported to Excel successfully!';
       }
       
       await exportFunc(params);
@@ -339,6 +345,9 @@ export default function PlanPurchasesTab() {
       } else if (activeSubTab === 'booster') {
         exportFunc = exportRentalBoostPurchasesToPDF;
         successMsg = 'Rental boost plan purchases exported to PDF successfully!';
+      } else if (activeSubTab === 'general') {
+        exportFunc = exportAllPlansToPDF;
+        successMsg = 'All plan purchases exported to PDF successfully!';
       }
       
       await exportFunc(params);
@@ -539,6 +548,15 @@ export default function PlanPurchasesTab() {
             }`}
         >
           Rental Boost Plan
+        </button>
+        <button
+          onClick={() => setActiveSubTab('general')}
+          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'general'
+            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+            : 'text-gray-500 hover:text-gray-800'
+            }`}
+        >
+          General Plan
         </button>
 
         {/* All Plans Export Menu */}

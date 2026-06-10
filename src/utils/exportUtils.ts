@@ -113,6 +113,12 @@ export const exportVendorReportToExcel = (filters?: Record<string, any>) =>
 export const exportVendorReportToPDF = (filters?: Record<string, any>) =>
   exportData({ endpoint: (endPointApi as any).exportVendorReportPDF, format: 'pdf', prefix: 'vendor_report', filters });
 
+export const exportVendorPlansReportToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportVendorPlansReportExcel, format: 'xlsx', prefix: 'vendor_plans_report', filters });
+
+export const exportVendorPlansReportToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportVendorPlansReportPDF, format: 'pdf', prefix: 'vendor_plans_report', filters });
+
 export const exportAllPlansToExcel = (filters?: Record<string, any>) =>
   exportData({ endpoint: (endPointApi as any).exportAllPlansExcel, format: 'xlsx', prefix: 'all_plans', filters });
 

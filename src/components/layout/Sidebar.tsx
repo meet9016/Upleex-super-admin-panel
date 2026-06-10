@@ -52,6 +52,8 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       { name: "Vendor-services", href: "/vendor-services", icon: BadgeCheck, permission: "products" },
+      { name: "Vendor Reports", href: "/vendor-reports", icon: FileText, permission: "vendors" },
+      { name: "Vendor Plans Reports", href: "/vendor-plans-reports", icon: FileText, permission: "vendors" },
       { name: "Dropdowns", href: "/dropdowns", icon: IoIosArrowDropdown , permission: "dropdowns" },
       { name: "Quotes", href: "/quotes", icon: FileText, permission: "quotes" },
       { name: "Orders", href: "/orders", icon: ShoppingBag, permission: "orders" },

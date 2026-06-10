@@ -112,6 +112,7 @@ export interface EndPointApi {
     updateRentalBoostPlan: string;
     deleteRentalBoostPlan: string;
     getAllRentalBoostPurchases: string;
+    getAllGeneralPlanPurchases: string;
     exportRentalBoostPurchasesExcel: string;
     exportRentalBoostPurchasesPDF: string;
 
@@ -185,6 +186,9 @@ export interface EndPointApi {
     getVendorReport: string;
     exportVendorReportExcel: string;
     exportVendorReportPDF: string;
+    getVendorPlansReport: string;
+    exportVendorPlansReportExcel: string;
+    exportVendorPlansReportPDF: string;
 
     // Dynamic Pages
     getDynamicPageBySlug: string;
@@ -306,6 +310,7 @@ const endPointApi: EndPointApi = {
     updateRentalBoostPlan: 'rental-boost-plans/update',
     deleteRentalBoostPlan: 'rental-boost-plans/delete',
     getAllRentalBoostPurchases: 'rental-boost-plans/purchases/getall',
+    getAllGeneralPlanPurchases: 'general-plans/getall-purchases',
     exportRentalBoostPurchasesExcel: 'export/rental-boost-purchases/excel',
     exportRentalBoostPurchasesPDF: 'export/rental-boost-purchases/pdf',
     
@@ -379,6 +384,9 @@ const endPointApi: EndPointApi = {
     getVendorReport: 'admin/vendor-report',
     exportVendorReportExcel: 'export/vendor-report/excel',
     exportVendorReportPDF: 'export/vendor-report/pdf',
+    getVendorPlansReport: 'admin/vendor-plans-report',
+    exportVendorPlansReportExcel: 'export/vendor-plans-report/excel',
+    exportVendorPlansReportPDF: 'export/vendor-plans-report/pdf',
 
     // Dynamic Pages
     getDynamicPageBySlug: 'dynamic-pages/:slug',

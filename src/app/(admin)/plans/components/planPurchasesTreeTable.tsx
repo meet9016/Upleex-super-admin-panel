@@ -71,7 +71,7 @@ interface PlanPurchasesTreeTableProps {
   data: any[];
   onDelete: (purchase: any) => void;
   loading?: boolean;
-  type: 'listing' | 'priority' | 'booster';
+  type: 'listing' | 'priority' | 'booster' | 'general';
 }
 
 // Custom group cell renderer
