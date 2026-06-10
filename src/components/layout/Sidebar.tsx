@@ -86,9 +86,10 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
       {
         name: "Dynamic Component",
         icon: FileText,
+        permission: "dynamic-component",
         subItems: [
-          { name: "About", href: "/dynamic-component/about", icon: FileText },
-          { name: "Partner", href: "/dynamic-component/partner", icon: FileText },
+          { name: "About", href: "/dynamic-component/about", icon: FileText, permission: "dynamic-component" },
+          { name: "Partner", href: "/dynamic-component/partner", icon: FileText, permission: "dynamic-component" },
         ],
       },
     ],
