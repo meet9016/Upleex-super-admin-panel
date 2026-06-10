@@ -136,23 +136,7 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
               </button>
             )}
 
-            {hasPermission('vendors') && (
-              <button
-                onClick={() => {
-                  router.push('/vendor-reports');
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <div className="p-1.5 bg-purple-100 rounded-lg">
-                  <BarChart3 size={16} className="text-purple-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Vendor Reports</p>
-                  <p className="text-xs text-gray-500">View vendor analytics</p>
-                </div>
-              </button>
-            )}
+
           </div>
 
           {/* Logout */}
