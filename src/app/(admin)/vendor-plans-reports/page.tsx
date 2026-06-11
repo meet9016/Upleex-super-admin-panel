@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { Search, X, Calendar } from 'lucide-react';
 import { FiMoreVertical } from 'react-icons/fi';
@@ -174,6 +174,7 @@ export default function VendorPlansReportsPage() {
     { headerName: 'Date', field: 'date', minWidth: 120 },
     { headerName: 'Transaction Type', field: 'transaction_type', minWidth: 150 },
     { headerName: 'Description', field: 'description', minWidth: 150 },
+    { headerName: 'Deducted From', field: 'deducted_from', minWidth: 140 },
     { headerName: 'Vendor', field: 'vendor_name', cellRenderer: VendorRenderer, minWidth: 250, flex: 2 },
     { headerName: 'Vendor Type', field: 'vendor_type', minWidth: 120 },
     { headerName: 'GST Number', field: 'gst_number', minWidth: 140 },
@@ -182,6 +183,36 @@ export default function VendorPlansReportsPage() {
     { headerName: 'GST %', field: 'gst_percent', minWidth: 100, cellStyle: { textAlign: 'center' } },
     { headerName: 'Total Amount', field: 'total_amount', cellRenderer: AmountRenderer, minWidth: 140 },
   ];
+
+  const pinnedBottomRowData = useMemo(() => {
+    if (!reports || reports.length === 0) return [];
+    
+    let totalRate = 0;
+    let totalTaxable = 0;
+    let totalAmount = 0;
+    
+    reports.forEach(item => {
+      totalRate += Number(item.rate || 0);
+      totalTaxable += Number(item.taxable_amount || 0);
+      totalAmount += Number(item.total_amount || 0);
+    });
+
+    return [{
+      id: 'bottom-total',
+      invoice_no: '',
+      date: '',
+      transaction_type: '',
+      description: '',
+      deducted_from: '',
+      vendor_name: '',
+      vendor_type: '',
+      gst_number: 'TOTAL:',
+      rate: totalRate,
+      taxable_amount: totalTaxable,
+      gst_percent: '',
+      total_amount: totalAmount,
+    }];
+  }, [reports]);
 
   // Removed dateOptions since we're using direct DatePickers now
 
@@ -289,6 +320,7 @@ export default function VendorPlansReportsPage() {
                 rowHeight={60}
                 showCheckboxes={false}
                 noRowsMessage="No vendor plans reports found"
+                pinnedBottomRowData={pinnedBottomRowData}
               />
             )}
           </CardContent>

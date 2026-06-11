@@ -35,6 +35,7 @@ interface AgGridTableProps {
   groupDefaultExpanded?: number;
   getRowHeight?: (params: any) => number; 
   noRowsMessage?: string;
+  pinnedBottomRowData?: any[];
 }
 
 const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
@@ -58,7 +59,8 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
   autoGroupColumnDef,
   groupDefaultExpanded,
   getRowHeight,
-  noRowsMessage
+  noRowsMessage,
+  pinnedBottomRowData
 }, ref) => {
   const router = useRouter();
   const internalRef = useRef<any>(null);
@@ -266,6 +268,7 @@ const AgGridTable = React.forwardRef<any, AgGridTableProps>(({
             autoGroupColumnDef={autoGroupColumnDef}
             groupDefaultExpanded={groupDefaultExpanded}
             getRowHeight={getRowHeight}
+            pinnedBottomRowData={pinnedBottomRowData}
           />
         </div>
       </div>
