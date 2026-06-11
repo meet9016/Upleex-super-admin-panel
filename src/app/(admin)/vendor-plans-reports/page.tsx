@@ -11,7 +11,9 @@ import endPointApi from '@/utils/endPointApi';
 import { Card, CardContent } from '@/components/ui/Card';
 import AgGridTable from '@/components/ui/AgGridTable';
 import PageLoader from '@/components/common/PageLoader';
+import SearchableDropdown from '@/components/ui/SearchableDropdown';
 import { exportVendorPlansReportToExcel, exportVendorPlansReportToPDF } from '@/utils/exportUtils';
+import DatePicker from '@/components/ui/DatePicker';
 
 interface VendorPlansReportData {
   invoice_no: string;
@@ -20,6 +22,7 @@ interface VendorPlansReportData {
   description: string;
   vendor_name: string;
   business_name: string;
+  vendor_type: string;
   gst_number: string;
   rate: number;
   taxable_amount: number;
@@ -71,13 +74,8 @@ export default function VendorPlansReportsPage() {
   const [excelLoading, setExcelLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  const [dateRangeFilter, setDateRangeFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
-  
-  const [pendingDateRange, setPendingDateRange] = useState('');
-  const [pendingStartDate, setPendingStartDate] = useState('');
-  const [pendingEndDate, setPendingEndDate] = useState('');
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -86,22 +84,19 @@ export default function VendorPlansReportsPage() {
       if (showActionsMenu && actionsMenuRef.current && !actionsMenuRef.current.contains(e.target as Node)) {
         setShowActionsMenu(false);
       }
-      if (showDateDropdown && dateDropdownRef.current && !dateDropdownRef.current.contains(e.target as Node)) {
-        setShowDateDropdown(false);
-      }
     };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
-  }, [showActionsMenu, showDateDropdown]);
+  }, [showActionsMenu]);
 
   const fetchVendorPlansReports = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (debouncedSearch) params.set('search', debouncedSearch);
-      if (dateRangeFilter) params.set('date_range', dateRangeFilter);
       if (startDateFilter) params.set('start_date', startDateFilter);
       if (endDateFilter) params.set('end_date', endDateFilter);
+      if (startDateFilter || endDateFilter) params.set('date_range', 'custom');
 
       const res = await api.get(`${endPointApi.getVendorPlansReport}?${params}`, { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
       if (res.data?.success) {
@@ -113,23 +108,18 @@ export default function VendorPlansReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, dateRangeFilter, startDateFilter, endDateFilter]);
+  }, [debouncedSearch, startDateFilter, endDateFilter]);
 
   useEffect(() => { fetchVendorPlansReports(); }, [fetchVendorPlansReports]);
 
   const handleClearAll = () => {
     setSearch('');
-    setDateRangeFilter('');
     setStartDateFilter('');
     setEndDateFilter('');
-    setPendingDateRange('');
-    setPendingStartDate('');
-    setPendingEndDate('');
   };
 
   const removeFilter = (filterName: string) => {
     if (filterName === 'date_range') {
-      setDateRangeFilter('');
       setStartDateFilter('');
       setEndDateFilter('');
     }
@@ -140,7 +130,7 @@ export default function VendorPlansReportsPage() {
     try {
       const filters = {
         search: search || undefined,
-        date_range: dateRangeFilter || undefined,
+        date_range: (startDateFilter || endDateFilter) ? 'custom' : undefined,
         start_date: startDateFilter || undefined,
         end_date: endDateFilter || undefined,
       };
@@ -162,7 +152,7 @@ export default function VendorPlansReportsPage() {
     try {
       const filters = {
         search: search || undefined,
-        date_range: dateRangeFilter || undefined,
+        date_range: (startDateFilter || endDateFilter) ? 'custom' : undefined,
         start_date: startDateFilter || undefined,
         end_date: endDateFilter || undefined,
       };
@@ -185,6 +175,7 @@ export default function VendorPlansReportsPage() {
     { headerName: 'Transaction Type', field: 'transaction_type', minWidth: 150 },
     { headerName: 'Description', field: 'description', minWidth: 150 },
     { headerName: 'Vendor', field: 'vendor_name', cellRenderer: VendorRenderer, minWidth: 250, flex: 2 },
+    { headerName: 'Vendor Type', field: 'vendor_type', minWidth: 120 },
     { headerName: 'GST Number', field: 'gst_number', minWidth: 140 },
     { headerName: 'Rate', field: 'rate', cellRenderer: AmountRenderer, minWidth: 120 },
     { headerName: 'Taxable Amount', field: 'taxable_amount', cellRenderer: AmountRenderer, minWidth: 140 },
@@ -192,15 +183,7 @@ export default function VendorPlansReportsPage() {
     { headerName: 'Total Amount', field: 'total_amount', cellRenderer: AmountRenderer, minWidth: 140 },
   ];
 
-  const dateOptions = [
-    { label: 'Today', value: 'today' },
-    { label: 'This Week', value: 'week' },
-    { label: 'This Month', value: 'month' },
-    { label: 'Last 3 Months', value: '3months' },
-    { label: 'Last 6 Months', value: '6months' },
-    { label: 'This Year', value: 'year' },
-    { label: 'Custom Range', value: 'custom' }
-  ];
+  // Removed dateOptions since we're using direct DatePickers now
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
@@ -228,54 +211,28 @@ export default function VendorPlansReportsPage() {
                   {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={14} /></button>}
                 </div>
 
-                {/* Date Range Filter */}
-                <div className="relative" ref={dateDropdownRef}>
-                  <button 
-                    onClick={() => { setPendingDateRange(dateRangeFilter); setPendingStartDate(startDateFilter); setPendingEndDate(endDateFilter); setShowDateDropdown(!showDateDropdown); }} 
-                    className={`px-4 py-2 border rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${dateRangeFilter || startDateFilter || endDateFilter ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                  >
-                    <span>Date Range</span>
-                    {dateRangeFilter && <span className="px-2 py-0.5 bg-blue-200 rounded text-xs">{dateRangeFilter}</span>}
-                  </button>
-                  {showDateDropdown && (
-                    <div className="absolute top-full mt-2 left-0 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-4">
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block font-semibold mb-2 text-sm text-gray-700">Quick Select</label>
-                          <select 
-                            value={pendingDateRange} 
-                            onChange={e => setPendingDateRange(e.target.value)} 
-                            className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
-                          >
-                            <option value="">Select Date Range</option>
-                            {dateOptions.map(option => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                        {pendingDateRange === 'custom' && (
-                          <>
-                            <div>
-                              <label className="block font-semibold mb-2 text-sm text-gray-700">Start Date</label>
-                              <input type="date" value={pendingStartDate} onChange={e => setPendingStartDate(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-                            </div>
-                            <div>
-                              <label className="block font-semibold mb-2 text-sm text-gray-700">End Date</label>
-                              <input type="date" value={pendingEndDate} onChange={e => setPendingEndDate(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" />
-                            </div>
-                          </>
-                        )}
-                        <div className="flex gap-2 pt-2 border-t">
-                          <button onClick={() => { setPendingDateRange(''); setPendingStartDate(''); setPendingEndDate(''); setDateRangeFilter(''); setStartDateFilter(''); setEndDateFilter(''); setShowDateDropdown(false); }} className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-100">Clear</button>
-                          <button onClick={() => { setDateRangeFilter(pendingDateRange); setStartDateFilter(pendingStartDate); setEndDateFilter(pendingEndDate); setShowDateDropdown(false); }} className="flex-1 px-3 py-2 btn-primary text-white rounded-lg text-sm">Apply</button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                {/* Date Range Filter via DatePicker components */}
+                <div className="flex items-center gap-2">
+                  <div className="w-40 relative z-40">
+                    <DatePicker 
+                      value={startDateFilter} 
+                      onChange={setStartDateFilter} 
+                      className="w-full text-sm"
+                    />
+                  </div>
+                  <span className="text-sm text-gray-500 font-medium">to</span>
+                  <div className="w-40 relative z-30">
+                    <DatePicker 
+                      value={endDateFilter} 
+                      onChange={setEndDateFilter} 
+                      min={startDateFilter}
+                      className="w-full text-sm"
+                    />
+                  </div>
                 </div>
 
                 {/* Clear All Button */}
-                {(search || dateRangeFilter) && (
+                {(search || startDateFilter || endDateFilter) && (
                   <button onClick={handleClearAll} className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm hover:bg-red-100 transition-colors font-medium">Clear All</button>
                 )}
               </div>
@@ -306,12 +263,12 @@ export default function VendorPlansReportsPage() {
             </div>
 
             {/* Active Filters Display */}
-            {(dateRangeFilter || startDateFilter || endDateFilter) && (
+            {(startDateFilter || endDateFilter) && (
               <div className="flex flex-wrap items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100">
                 <span className="text-xs font-semibold text-blue-700">Active Filters:</span>
-                {(dateRangeFilter || startDateFilter || endDateFilter) && (
+                {(startDateFilter || endDateFilter) && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                    Date: {dateRangeFilter || `${startDateFilter} to ${endDateFilter}`}
+                    Date: {startDateFilter ? startDateFilter : 'Any'} to {endDateFilter ? endDateFilter : 'Any'}
                     <button onClick={() => removeFilter('date_range')} className="hover:text-blue-900"><X size={12} /></button>
                   </span>
                 )}
