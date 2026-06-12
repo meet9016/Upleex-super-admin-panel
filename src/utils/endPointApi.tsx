@@ -8,6 +8,8 @@ export interface EndPointApi {
     adminLogin: string;
     adminRegister: string;
     getAllAdmins: string;
+    getAllUsers: string;
+    getActivityLogs: string;
     getAvailablePages: string;
     assignPermissions: string;
     getMyPermissions: string;
@@ -205,6 +207,8 @@ const endPointApi: EndPointApi = {
     adminLogin: 'admin/login',
     adminRegister: 'admin/register',
     getAllAdmins: 'admin/all-admins',
+    getAllUsers: 'admin/users',
+    getActivityLogs: 'admin/activity-logs',
     getAvailablePages: 'admin/available-pages',
     assignPermissions: 'admin/assign-permissions',
     getMyPermissions: 'admin/my-permissions',
