@@ -50,6 +50,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
     group: "Management",
     items: [
       { name: "Vendors", href: "/vendors", icon: Users, permission: "vendors" },
+      { name: "User List", href: "/user-list", icon: Users, permission: "users" },
       { name: "Vendor-products", href: "/vendor-products", icon: FolderPlus, permission: "products" },
       { name: "Vendor-services", href: "/vendor-services", icon: BadgeCheck, permission: "products" },
       {
