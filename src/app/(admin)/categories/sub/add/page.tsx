@@ -25,6 +25,7 @@ import PageLoader from "@/components/common/PageLoader";
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
   name: z.string().min(2, "Sub-category name is required"),
+  hsnCodes: z.any().optional(),
   image: z.any().refine(
     (val) => {
       if (val === 'existing') return true;
@@ -204,6 +205,7 @@ interface SubCategory {
   subcategory_name: string;
   image: string;
   parent_category?: string;
+  hsnCodes?: { materialType: string; code: string }[];
   created_at?: string;
   updated_at?: string;
   createdAt?: string;
@@ -217,6 +219,7 @@ interface SubCategoryRow {
   parent: string;
   parentId: string;
   image: string;
+  hsnCodes?: { materialType: string; code: string }[];
   status: string;
   created_at?: string;
   updated_at?: string;
@@ -442,6 +445,7 @@ export default function AddSubCategoryPage() {
     defaultValues: {
       categoryId: "",
       name: "",
+      hsnCodes: [{ materialType: "", code: "" }],
     }
   });
 
@@ -525,6 +529,7 @@ export default function AddSubCategoryPage() {
                 parent: category.categories_name,
                 parentId: category.categories_id,
                 image: sub.image || "",
+                hsnCodes: sub.hsnCodes || [],
                 status: "Active",
                 created_at: sub.created_at || sub.createdAt || new Date().toISOString(),
                 updated_at: sub.updated_at || sub.updatedAt || new Date().toISOString(),
@@ -561,6 +566,10 @@ export default function AddSubCategoryPage() {
       const formData = new FormData();
       formData.append("id", data.categoryId);
       formData.append("name", data.name);
+      if (data.hsnCodes) {
+        const cleanedHsnCodes = (data.hsnCodes as any[]).filter(h => h.materialType?.trim() && h.code?.trim());
+        formData.append("hsnCodes", JSON.stringify(cleanedHsnCodes));
+      }
 
       const cleanedSeo: SubCategorySeoContent = {
         ...seoContent,
@@ -603,6 +612,7 @@ export default function AddSubCategoryPage() {
         reset({
           categoryId: "",
           name: "",
+          hsnCodes: [{ materialType: "", code: "" }],
           image: undefined
         });
         setPreviewImage(null);
@@ -619,6 +629,7 @@ export default function AddSubCategoryPage() {
     setEditingSubCategory(subCategory);
     setValue("categoryId", subCategory.parentId);
     setValue("name", subCategory.name);
+    setValue("hsnCodes", Array.isArray(subCategory.hsnCodes) && subCategory.hsnCodes.length > 0 ? subCategory.hsnCodes : [{ materialType: "", code: "" }]);
     setValue("image", "existing");
     setSeoContent(normalizeSubCategorySeoContent(subCategory.seo_content));
     clearErrors();
@@ -635,6 +646,10 @@ export default function AddSubCategoryPage() {
       const formData = new FormData();
       formData.append("id", data.categoryId);
       formData.append("name", data.name);
+      if (data.hsnCodes) {
+        const cleanedHsnCodes = (data.hsnCodes as any[]).filter(h => h.materialType?.trim() && h.code?.trim());
+        formData.append("hsnCodes", JSON.stringify(cleanedHsnCodes));
+      }
 
       const cleanedSeo: SubCategorySeoContent = {
         ...seoContent,
@@ -682,6 +697,7 @@ export default function AddSubCategoryPage() {
         reset({
           categoryId: "",
           name: "",
+          hsnCodes: [{ materialType: "", code: "" }],
           image: undefined
         });
         setPreviewImage(null);
@@ -715,6 +731,7 @@ export default function AddSubCategoryPage() {
           reset({
             categoryId: "",
             name: "",
+            hsnCodes: [{ materialType: "", code: "" }],
             image: undefined
           }); // Clear the form
         }
@@ -825,6 +842,23 @@ export default function AddSubCategoryPage() {
       )
     },
     {
+      field: "hsnCodes",
+      headerName: "HSN Codes",
+      minWidth: 200,
+      cellClass: "ag-cell-with-border py-1",
+      cellRenderer: (params: { data: SubCategoryRow }) => (
+        <div className="flex flex-col text-xs space-y-1 h-full justify-center overflow-y-auto max-h-[100px]">
+          {Array.isArray(params.data.hsnCodes) && params.data.hsnCodes.length > 0 ? (
+            params.data.hsnCodes.map((item, idx) => (
+              <span key={idx} className="bg-slate-100 rounded px-1.5 py-0.5 whitespace-nowrap">
+                {item.materialType}: <span className="font-medium">{item.code}</span>
+              </span>
+            ))
+          ) : "-"}
+        </div>
+      )
+    },
+    {
       field: "created_at",
       headerName: "Created",
       minWidth: 150,
@@ -871,6 +905,7 @@ export default function AddSubCategoryPage() {
     reset({
       categoryId: "",
       name: "",
+      hsnCodes: [{ materialType: "", code: "" }],
       image: undefined
     });
   };
@@ -940,6 +975,69 @@ export default function AddSubCategoryPage() {
                         {...register("name")}
                         error={errors.name?.message}
                       />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-slate-700">
+                          Material-wise HSN Codes
+                        </label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] px-2"
+                          onClick={() => {
+                            const current = watch("hsnCodes") || [];
+                            setValue("hsnCodes", [...current, { materialType: "", code: "" }]);
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" /> Add HSN
+                        </Button>
+                      </div>
+
+                      {(watch("hsnCodes") || []).map((hsnItem: any, index: number) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            placeholder="Material (e.g. Wooden)"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm flex-1"
+                            value={hsnItem.materialType}
+                            onChange={(e) => {
+                              const current = [...(watch("hsnCodes") || [])];
+                              current[index].materialType = e.target.value;
+                              setValue("hsnCodes", current);
+                            }}
+                          />
+                          <Input
+                            placeholder="HSN Code"
+                            className="h-9 bg-slate-50 border-slate-100 text-sm flex-1"
+                            value={hsnItem.code}
+                            onChange={(e) => {
+                              const current = [...(watch("hsnCodes") || [])];
+                              current[index].code = e.target.value;
+                              setValue("hsnCodes", current);
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              const current = [...(watch("hsnCodes") || [])];
+                              if (current.length > 1) {
+                                current.splice(index, 1);
+                                setValue("hsnCodes", current);
+                              } else {
+                                current[0] = { materialType: "", code: "" };
+                                setValue("hsnCodes", current);
+                              }
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Image Upload Field */}
