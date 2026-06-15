@@ -5,7 +5,7 @@ import { apiService } from '@/services/api';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { toast } from 'react-toastify';
-import { Users, UserPlus, Shield, Settings as SettingsIcon, RefreshCw, Trash2, Edit } from 'lucide-react';
+import { Users, UserPlus, Shield, Settings as SettingsIcon, RefreshCw, Trash2, Edit, Smartphone } from 'lucide-react';
 import Link from 'next/link';
 
 interface Admin {
@@ -60,7 +60,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="shadow-sm border-0 bg-white hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -94,6 +94,25 @@ export default function SettingsPage() {
               <Link href="/admin-permissions">
                 <Button variant="outline" className="w-full mt-4">
                   Manage
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-0 bg-white hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Smartphone  className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Demo Numbers</h3>
+                  <p className="text-sm text-gray-600">Manage test accounts</p>
+                </div>
+              </div>
+              <Link href="/settings/demo-numbers">
+                <Button variant="outline" className="w-full mt-4">
+                  Manage Numbers
                 </Button>
               </Link>
             </CardContent>

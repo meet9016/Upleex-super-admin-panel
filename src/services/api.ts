@@ -332,6 +332,18 @@ class ApiService {
     a.remove();
     window.URL.revokeObjectURL(downloadUrl);
   }
+
+  // Settings
+  async getSetting(key: string) {
+    return this.request(`settings/${key}`);
+  }
+
+  async updateSetting(key: string, value: any) {
+    return this.request(`settings/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify({ value }),
+    });
+  }
 }
 
 export const apiService = new ApiService();
