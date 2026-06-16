@@ -196,6 +196,10 @@ export interface EndPointApi {
     // Dynamic Pages
     getDynamicPageBySlug: string;
     upsertDynamicPage: string;
+
+    // Settings
+    getSetting: string;
+    updateSetting: string;
 }
 
 const endPointApi: EndPointApi = {
@@ -397,6 +401,10 @@ const endPointApi: EndPointApi = {
     // Dynamic Pages
     getDynamicPageBySlug: 'dynamic-pages/:slug',
     upsertDynamicPage: 'dynamic-pages',
+
+    // Settings
+    getSetting: 'settings/:key',
+    updateSetting: 'settings/:key',
 };
 
 export default endPointApi;

@@ -16,7 +16,9 @@ class ApiService {
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE_URL}/${endpoint}`;
+    const cleanBase = API_BASE_URL?.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    const url = `${cleanBase}/${cleanEndpoint}`;
     
     const config: RequestInit = {
       headers: this.getAuthHeaders(),
@@ -41,7 +43,9 @@ class ApiService {
   }
 
   private async requestFormData<T>(endpoint: string, formData: FormData): Promise<T> {
-    const url = `${API_BASE_URL}/${endpoint}`;
+    const cleanBase = API_BASE_URL?.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    const url = `${cleanBase}/${cleanEndpoint}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: this.getAuthHeaders(true),
@@ -335,11 +339,13 @@ class ApiService {
 
   // Settings
   async getSetting(key: string) {
-    return this.request(`settings/${key}`);
+    const endpoint = endPointApi.getSetting.replace(':key', key);
+    return this.request(endpoint);
   }
 
   async updateSetting(key: string, value: any) {
-    return this.request(`settings/${key}`, {
+    const endpoint = endPointApi.updateSetting.replace(':key', key);
+    return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify({ value }),
     });
