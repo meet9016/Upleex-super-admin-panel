@@ -9,6 +9,8 @@ export interface EndPointApi {
     adminRegister: string;
     getAllAdmins: string;
     getAllUsers: string;
+    exportUsersExcel: string;
+    exportUsersPDF: string;
     getAvailablePages: string;
     assignPermissions: string;
     getMyPermissions: string;
@@ -207,6 +209,8 @@ const endPointApi: EndPointApi = {
     adminRegister: 'admin/register',
     getAllAdmins: 'admin/all-admins',
     getAllUsers: 'admin/users',
+    exportUsersExcel: 'export/users/excel',
+    exportUsersPDF: 'export/users/pdf',
     getAvailablePages: 'admin/available-pages',
     assignPermissions: 'admin/assign-permissions',
     getMyPermissions: 'admin/my-permissions',

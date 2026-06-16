@@ -154,3 +154,9 @@ export const exportServicePriorityPurchasesToExcel = (filters?: Record<string, a
 
 export const exportServicePriorityPurchasesToPDF = (filters?: Record<string, any>) =>
   exportData({ endpoint: (endPointApi as any).exportServicePriorityPurchasesPDF, format: 'pdf', prefix: 'service_priority_purchases', filters });
+
+export const exportUsersToExcel = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportUsersExcel, format: 'xlsx', prefix: 'users', filters });
+
+export const exportUsersToPDF = (filters?: Record<string, any>) =>
+  exportData({ endpoint: (endPointApi as any).exportUsersPDF, format: 'pdf', prefix: 'users', filters });

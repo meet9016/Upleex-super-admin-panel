@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
-import { Search, X } from "lucide-react";
+import { Search, X, Download, FileSpreadsheet, FileText, MoreVertical } from "lucide-react";
 import { ColDef } from "ag-grid-community";
 import { Card, CardContent } from "@/components/ui/Card";
 import { api } from "@/utils/axiosInstance";
 import endPointApi from "@/utils/endPointApi";
+import { exportUsersToExcel, exportUsersToPDF } from "@/utils/exportUtils";
 import AgGridTable from "@/components/ui/AgGridTable";
 
 interface UserRow {
@@ -33,6 +34,20 @@ export default function UserListPage() {
     const [rowData, setRowData] = useState<UserRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchText, setSearchText] = useState("");
+    const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+    const exportMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+                setIsExportMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const debouncedSearch = useDebounce(searchText, 500);
     const validSearchText = debouncedSearch.length >= 3 || debouncedSearch.length === 0 ? debouncedSearch : "";
@@ -60,6 +75,22 @@ export default function UserListPage() {
     useEffect(() => {
         fetchUsers(validSearchText);
     }, [fetchUsers, validSearchText]);
+
+    const handleExportExcel = async () => {
+        try {
+            await exportUsersToExcel({ search: validSearchText });
+        } catch (error: any) {
+            toast.error(error.message || "Failed to export Excel");
+        }
+    };
+
+    const handleExportPDF = async () => {
+        try {
+            await exportUsersToPDF({ search: validSearchText });
+        } catch (error: any) {
+            toast.error(error.message || "Failed to export PDF");
+        }
+    };
 
     const columnDefs: ColDef<any>[] = [
         {
@@ -118,6 +149,40 @@ export default function UserListPage() {
                             >
                                 <X size={16} />
                             </button>
+                        )}
+                    </div>
+
+                    <div className="relative" ref={exportMenuRef}>
+                        <button
+                            onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                            className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors bg-white focus:outline-none flex items-center justify-center h-[38px] w-[38px]"
+                        >
+                            <MoreVertical size={20} className="text-slate-600" />
+                        </button>
+                        
+                        {isExportMenuOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] z-50 py-2">
+                                <button
+                                    onClick={() => {
+                                        handleExportExcel();
+                                        setIsExportMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                                >
+                                    <FileSpreadsheet size={18} className="text-[#00875A]" />
+                                    Export to Excel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleExportPDF();
+                                        setIsExportMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"
+                                >
+                                    <FileText size={18} className="text-[#DE350B]" />
+                                    Export to PDF
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
