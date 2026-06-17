@@ -20,6 +20,7 @@ interface VendorPlansReportData {
   date: string;
   transaction_type: string;
   description: string;
+  deducted_from?: string;
   vendor_name: string;
   business_name: string;
   vendor_type: string;
@@ -57,6 +58,42 @@ const VendorRenderer = (params: any) => {
         <p className="text-sm font-medium text-slate-800 leading-tight">{name}</p>
         {business && <p className="text-xs text-slate-500 leading-tight">{business}</p>}
       </div>
+    </div>
+  );
+};
+
+const DeductedFromRenderer = (params: any) => {
+  const value = params.value;
+  
+  if (!value || value === '—' || value === '') {
+    return <div className="flex items-center h-full text-slate-500">—</div>;
+  }
+
+  let bgColor = 'bg-gray-100';
+  let textColor = 'text-gray-700';
+  let borderColor = 'border-gray-200';
+
+  const lowerValue = String(value).toLowerCase();
+  
+  if (lowerValue.includes('extra')) {
+    bgColor = 'bg-purple-100';
+    textColor = 'text-purple-700';
+    borderColor = 'border-purple-200';
+  } else if (lowerValue.includes('unlimited')) {
+    bgColor = 'bg-emerald-100';
+    textColor = 'text-emerald-700';
+    borderColor = 'border-emerald-200';
+  } else if (lowerValue.includes('main')) {
+    bgColor = 'bg-blue-100';
+    textColor = 'text-blue-700';
+    borderColor = 'border-blue-200';
+  }
+
+  return (
+    <div className="flex items-center h-full">
+      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${bgColor} ${textColor} ${borderColor}`}>
+        {value}
+      </span>
     </div>
   );
 };
@@ -174,7 +211,7 @@ export default function VendorPlansReportsPage() {
     { headerName: 'Date', field: 'date', minWidth: 120 },
     { headerName: 'Transaction Type', field: 'transaction_type', minWidth: 150 },
     { headerName: 'Description', field: 'description', minWidth: 150 },
-    { headerName: 'Deducted From', field: 'deducted_from', minWidth: 140 },
+    { headerName: 'Deducted From', field: 'deducted_from', cellRenderer: DeductedFromRenderer, minWidth: 140 },
     { headerName: 'Vendor', field: 'vendor_name', cellRenderer: VendorRenderer, minWidth: 250, flex: 2 },
     { headerName: 'Vendor Type', field: 'vendor_type', minWidth: 120 },
     { headerName: 'GST Number', field: 'gst_number', minWidth: 140 },
