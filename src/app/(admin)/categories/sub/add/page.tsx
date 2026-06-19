@@ -25,7 +25,7 @@ import PageLoader from "@/components/common/PageLoader";
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
   name: z.string().min(2, "Sub-category name is required"),
-  gst: z.number().optional().default(0),
+  gst: z.number().min(0),
   hsnCodes: z.any().optional(),
   image: z.any().refine(
     (val) => {
