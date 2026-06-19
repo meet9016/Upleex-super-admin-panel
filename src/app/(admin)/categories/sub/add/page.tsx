@@ -25,6 +25,7 @@ import PageLoader from "@/components/common/PageLoader";
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
   name: z.string().min(2, "Sub-category name is required"),
+  gst: z.number().optional().default(0),
   hsnCodes: z.any().optional(),
   image: z.any().refine(
     (val) => {
@@ -206,6 +207,7 @@ interface SubCategory {
   image: string;
   parent_category?: string;
   hsnCodes?: { materialType: string; code: string }[];
+  gst?: number;
   created_at?: string;
   updated_at?: string;
   createdAt?: string;
@@ -220,6 +222,7 @@ interface SubCategoryRow {
   parentId: string;
   image: string;
   hsnCodes?: { materialType: string; code: string }[];
+  gst?: number;
   status: string;
   created_at?: string;
   updated_at?: string;
@@ -445,6 +448,7 @@ export default function AddSubCategoryPage() {
     defaultValues: {
       categoryId: "",
       name: "",
+      gst: 0,
       hsnCodes: [{ materialType: "", code: "" }],
     }
   });
@@ -530,6 +534,7 @@ export default function AddSubCategoryPage() {
                 parentId: category.categories_id,
                 image: sub.image || "",
                 hsnCodes: sub.hsnCodes || [],
+                gst: sub.gst || 0,
                 status: "Active",
                 created_at: sub.created_at || sub.createdAt || new Date().toISOString(),
                 updated_at: sub.updated_at || sub.updatedAt || new Date().toISOString(),
@@ -566,6 +571,9 @@ export default function AddSubCategoryPage() {
       const formData = new FormData();
       formData.append("id", data.categoryId);
       formData.append("name", data.name);
+      if (data.gst !== undefined) {
+        formData.append("gst", String(data.gst));
+      }
       if (data.hsnCodes) {
         const cleanedHsnCodes = (data.hsnCodes as any[]).filter(h => h.materialType?.trim() && h.code?.trim());
         formData.append("hsnCodes", JSON.stringify(cleanedHsnCodes));
@@ -612,6 +620,7 @@ export default function AddSubCategoryPage() {
         reset({
           categoryId: "",
           name: "",
+          gst: 0,
           hsnCodes: [{ materialType: "", code: "" }],
           image: undefined
         });
@@ -629,6 +638,7 @@ export default function AddSubCategoryPage() {
     setEditingSubCategory(subCategory);
     setValue("categoryId", subCategory.parentId);
     setValue("name", subCategory.name);
+    setValue("gst", subCategory.gst || 0);
     setValue("hsnCodes", Array.isArray(subCategory.hsnCodes) && subCategory.hsnCodes.length > 0 ? subCategory.hsnCodes : [{ materialType: "", code: "" }]);
     setValue("image", "existing");
     setSeoContent(normalizeSubCategorySeoContent(subCategory.seo_content));
@@ -646,6 +656,9 @@ export default function AddSubCategoryPage() {
       const formData = new FormData();
       formData.append("id", data.categoryId);
       formData.append("name", data.name);
+      if (data.gst !== undefined) {
+        formData.append("gst", String(data.gst));
+      }
       if (data.hsnCodes) {
         const cleanedHsnCodes = (data.hsnCodes as any[]).filter(h => h.materialType?.trim() && h.code?.trim());
         formData.append("hsnCodes", JSON.stringify(cleanedHsnCodes));
@@ -697,6 +710,7 @@ export default function AddSubCategoryPage() {
         reset({
           categoryId: "",
           name: "",
+          gst: 0,
           hsnCodes: [{ materialType: "", code: "" }],
           image: undefined
         });
@@ -905,6 +919,7 @@ export default function AddSubCategoryPage() {
     reset({
       categoryId: "",
       name: "",
+      gst: 0,
       hsnCodes: [{ materialType: "", code: "" }],
       image: undefined
     });
@@ -974,6 +989,20 @@ export default function AddSubCategoryPage() {
                         className="h-9 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg text-sm"
                         {...register("name")}
                         error={errors.name?.message}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label htmlFor="gst" className="text-xs font-semibold text-slate-700">
+                        GST Rate (%)
+                      </label>
+                      <Input
+                        id="gst"
+                        type="number"
+                        step="0.01"
+                        placeholder="e.g. 18"
+                        className="h-9 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg text-sm"
+                        {...register("gst", { valueAsNumber: true })}
                       />
                     </div>
 
