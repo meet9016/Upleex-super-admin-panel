@@ -1006,13 +1006,26 @@ export default function AddSubCategoryPage() {
                       <label htmlFor="gst" className="text-xs font-semibold text-slate-700">
                         GST Rate (%)
                       </label>
-                      <Input
-                        id="gst"
-                        type="number"
-                        step="0.01"
-                        placeholder="e.g. 18"
-                        className="h-9 bg-slate-50 border-slate-100 focus:bg-white focus:ring-primary/20 transition-all rounded-lg text-sm"
-                        {...register("gst", { valueAsNumber: true })}
+                      <Controller
+                        name="gst"
+                        control={control}
+                        render={({ field }) => (
+                          <SearchableDropdown
+                            options={[
+                              { value: "0", label: "0%" },
+                              { value: "5", label: "5%" },
+                              { value: "18", label: "18%" },
+                            ]}
+                            value={String(watch('gst') ?? '0')}
+                            onChange={(val) => {
+                              const v = Array.isArray(val) ? val[0] : val;
+                              setValue('gst', Number(v), { shouldValidate: true, shouldDirty: true });
+                            }}
+                            error={!!errors.gst}
+                            searchable={false}
+                            multiple={false}
+                          />
+                        )}
                       />
                     </div>
 
