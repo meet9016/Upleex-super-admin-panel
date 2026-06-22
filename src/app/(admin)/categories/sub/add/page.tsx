@@ -858,17 +858,27 @@ export default function AddSubCategoryPage() {
     {
       field: "hsnCodes",
       headerName: "HSN Codes",
-      minWidth: 200,
-      cellClass: "ag-cell-with-border py-1",
+      minWidth: 250,
+      autoHeight: true,
+      wrapText: true,
+      cellClass: "ag-cell-with-border",
       cellRenderer: (params: { data: SubCategoryRow }) => (
-        <div className="flex flex-col text-xs space-y-1 h-full justify-center overflow-y-auto max-h-[100px]">
+        <div className="flex flex-wrap gap-1 items-center w-full py-0.5">
           {Array.isArray(params.data.hsnCodes) && params.data.hsnCodes.length > 0 ? (
             params.data.hsnCodes.map((item, idx) => (
-              <span key={idx} className="bg-slate-100 rounded px-1.5 py-0.5 whitespace-nowrap">
-                {item.materialType}: <span className="font-medium">{item.code}</span>
-              </span>
+              <div 
+                key={idx} 
+                className="inline-flex items-center gap-1 bg-white border border-slate-200 text-slate-700 rounded px-1.5 h-5 text-[11px] shadow-sm max-w-full"
+                title={`${item.materialType}: ${item.code}`}
+              >
+                <span className="truncate max-w-[140px] font-medium leading-none">{item.materialType}</span>
+                <span className="text-slate-300 leading-none">|</span>
+                <span className="font-semibold text-blue-600 leading-none">{item.code}</span>
+              </div>
             ))
-          ) : "-"}
+          ) : (
+            <span className="text-slate-400">-</span>
+          )}
         </div>
       )
     },
