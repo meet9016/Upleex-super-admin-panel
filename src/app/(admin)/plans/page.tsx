@@ -157,7 +157,7 @@ export default function PlansPage() {
               <GeneralPlanTab />
             </div>
             <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
-              <PlanPurchasesTab />
+              <PlanPurchasesTab scope="product" />
             </div>
             <div className={cn(activeTab === "boost" ? "block" : "hidden")}>
               <RentalBoostTab />
@@ -172,7 +172,7 @@ export default function PlansPage() {
               <ServicePriorityTab />
             </div>
             <div className={cn(activeTab === "purchases" ? "block" : "hidden")}>
-              <PlanPurchasesTab />
+              <PlanPurchasesTab scope="service" />
             </div>
           </>
         )}

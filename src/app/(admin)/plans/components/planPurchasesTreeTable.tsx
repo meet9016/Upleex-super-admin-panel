@@ -72,6 +72,7 @@ interface PlanPurchasesTreeTableProps {
   onDelete: (purchase: any) => void;
   loading?: boolean;
   type: 'listing' | 'priority' | 'booster' | 'general';
+  scope?: 'product' | 'service';
 }
 
 // Custom group cell renderer
@@ -121,6 +122,7 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
   onDelete,
   loading = false,
   type = 'listing',
+  scope = 'product',
 }, ref) => {
   const gridRef = useRef<AgGridReact>(null);
   const [isDark, setIsDark] = useState(false);
@@ -189,7 +191,8 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
           } else {
              totalAmount = p.amount;
              totalPrice = p.price;
-             productCount = p.product_ids?.length || (p.product_id ? 1 : 0);
+             const idsArray = scope === 'service' ? p.service_ids : p.product_ids;
+             productCount = idsArray?.length || (p.product_id ? 1 : 0);
           }
 
           const purchaseNode: TreeDataItem = {
@@ -199,10 +202,10 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
             plan_type: p.plan_name || p.plan_type || `${p.days || '?'}-Day Boost`,
             months: p.months,
             days: p.days,
-            max_products: p.max_products || p.total_slots || productCount,
+            max_products: scope === 'service' ? (p.max_services || p.total_slots || productCount) : (p.max_products || p.total_slots || productCount),
             amount: totalAmount || totalPrice || p.price || p.amount,
             product_count: productCount,
-            product_name: p.product_name,
+            product_name: scope === 'service' ? p.service_name : p.product_name,
             start_at: p.start_at || p.start_date,
             expire_at: p.expire_at || p.expiry_date,
             createdAt: p.createdAt,
@@ -229,21 +232,24 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
                     path: [...purchasePath, String(prodId)],
                 });
             });
-          } else if (p.product_ids && Array.isArray(p.product_ids) && p.product_ids.length > 0) {
-            p.product_ids.forEach((prod: any, prodIdx: number) => {
-              const prodId = typeof prod === 'string' ? prod : (prod._id || prod.id || `${pId}-${prodIdx}`);
-              const prodName = typeof prod === 'object' ? prod.product_name : `Product ID: ${prodId}`;
-              purchaseNode.children!.push({
-                id: prodId,
-                name: prodName,
-                type: 'product',
-                product_name: prodName,
-                category_name: typeof prod === 'object' ? prod.category_name : undefined,
-                sub_category_name: typeof prod === 'object' ? prod.sub_category_name : undefined,
-                expire_at: typeof prod === 'object' ? (prod.expires_at || prod.priority_expiry) : undefined,
-                path: [...purchasePath, String(prodId)],
-              } as TreeDataItem);
-            });
+          } else {
+            const idsArray = scope === 'service' ? p.service_ids : p.product_ids;
+            if (idsArray && Array.isArray(idsArray) && idsArray.length > 0) {
+              idsArray.forEach((prod: any, prodIdx: number) => {
+                const prodId = typeof prod === 'string' ? prod : (prod._id || prod.id || `${pId}-${prodIdx}`);
+                const prodName = typeof prod === 'object' ? (scope === 'service' ? prod.service_name : prod.product_name) : `${scope === 'service' ? 'Service' : 'Product'} ID: ${prodId}`;
+                purchaseNode.children!.push({
+                  id: prodId,
+                  name: prodName,
+                  type: 'product',
+                  product_name: prodName,
+                  category_name: typeof prod === 'object' ? prod.category_name : undefined,
+                  sub_category_name: typeof prod === 'object' ? prod.sub_category_name : undefined,
+                  expire_at: typeof prod === 'object' ? (prod.expires_at || prod.priority_expiry) : undefined,
+                  path: [...purchasePath, String(prodId)],
+                } as TreeDataItem);
+              });
+            }
           }
 
           return purchaseNode;
@@ -264,7 +270,7 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
       valueGetter: (p) => p.data?.type === 'purchase' ? (p.data.days || p.data.months || '') : '',
     },
     {
-      headerName: type === 'booster' ? "Product Name" : "Max Products",
+      headerName: type === 'booster' ? (scope === 'service' ? "Service Name" : "Product Name") : (scope === 'service' ? "Max Services" : "Max Products"),
       field: type === 'booster' ? "product_name" : "max_products",
       minWidth: 150,
       flex: 1.5,
@@ -329,7 +335,7 @@ const PlanPurchasesTreeTable = React.forwardRef<any, PlanPurchasesTreeTableProps
   }), []);
 
   const autoGroupColumnDef: ColDef<TreeDataItem> = useMemo(() => ({
-    headerName: "Vendor / Plan / Product",
+    headerName: scope === "service" ? "Vendor / Plan / Service" : "Vendor / Plan / Product",
     field: "name",
     cellRenderer: "agGroupCellRenderer",
     cellRendererParams: {

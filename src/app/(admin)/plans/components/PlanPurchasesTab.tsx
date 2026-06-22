@@ -24,7 +24,13 @@ import {
   exportPriorityPurchasesToExcel,
   exportPriorityPurchasesToPDF,
   exportRentalBoostPurchasesToExcel,
-  exportRentalBoostPurchasesToPDF
+  exportRentalBoostPurchasesToPDF,
+  exportServiceListingPurchasesToExcel,
+  exportServiceListingPurchasesToPDF,
+  exportServicePriorityPurchasesToExcel,
+  exportServicePriorityPurchasesToPDF,
+  exportServicePlansReportToExcel,
+  exportServicePlansReportToPDF
 } from "@/utils/exportUtils";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FileJson, FileText } from "lucide-react";
@@ -53,7 +59,7 @@ type Purchase = {
   vendor_name?: string;
 };
 
-export default function PlanPurchasesTab() {
+export default function PlanPurchasesTab({ scope = "product" }: { scope?: "product" | "service" }) {
   const [activeSubTab, setActiveSubTab] = useState<'listing' | 'priority' | 'booster' | 'general'>('listing');
   const [rows, setRows] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
@@ -156,14 +162,22 @@ export default function PlanPurchasesTab() {
 
       const queryString = params.toString();
       let url = "";
-      if (activeSubTab === 'listing') {
-        url = endPointApi.getAllListingPlans;
-      } else if (activeSubTab === 'priority') {
-        url = endPointApi.getAllPriorityPurchases;
-      } else if (activeSubTab === 'booster') {
-        url = endPointApi.getAllRentalBoostPurchases;
-      } else if (activeSubTab === 'general') {
-        url = endPointApi.getAllGeneralPlanPurchases;
+      if (scope === "product") {
+        if (activeSubTab === 'listing') {
+          url = endPointApi.getAllListingPlans;
+        } else if (activeSubTab === 'priority') {
+          url = endPointApi.getAllPriorityPurchases;
+        } else if (activeSubTab === 'booster') {
+          url = endPointApi.getAllRentalBoostPurchases;
+        } else if (activeSubTab === 'general') {
+          url = endPointApi.getAllGeneralPlanPurchases;
+        }
+      } else {
+        if (activeSubTab === 'listing') {
+          url = endPointApi.getAllServiceListingPurchases;
+        } else if (activeSubTab === 'priority') {
+          url = endPointApi.getAllServicePriorityPurchases;
+        }
       }
 
       const res = await api.get(queryString ? `${url}?${queryString}` : url);
@@ -303,19 +317,32 @@ export default function PlanPurchasesTab() {
       let exportFunc = exportAllPlansToExcel;
       let successMsg = 'All plan purchases exported to Excel successfully!';
       
-      if (activeSubTab === 'listing') {
-        exportFunc = exportListingPurchasesToExcel;
-        successMsg = 'Product listing plan purchases exported to Excel successfully!';
-      } else if (activeSubTab === 'priority') {
-        exportFunc = exportPriorityPurchasesToExcel;
-        successMsg = 'Priority plan purchases exported to Excel successfully!';
-      } else if (activeSubTab === 'booster') {
-        exportFunc = exportRentalBoostPurchasesToExcel;
-        successMsg = 'Rental boost plan purchases exported to Excel successfully!';
-      } else if (activeSubTab === 'general') {
-        // Fallback to all plans if no specific export
-        exportFunc = exportAllPlansToExcel;
-        successMsg = 'All plan purchases exported to Excel successfully!';
+      if (scope === "product") {
+        if (activeSubTab === 'listing') {
+          exportFunc = exportListingPurchasesToExcel;
+          successMsg = 'Product listing plan purchases exported to Excel successfully!';
+        } else if (activeSubTab === 'priority') {
+          exportFunc = exportPriorityPurchasesToExcel;
+          successMsg = 'Priority plan purchases exported to Excel successfully!';
+        } else if (activeSubTab === 'booster') {
+          exportFunc = exportRentalBoostPurchasesToExcel;
+          successMsg = 'Rental boost plan purchases exported to Excel successfully!';
+        } else if (activeSubTab === 'general') {
+          // Fallback to all plans if no specific export
+          exportFunc = exportAllPlansToExcel;
+          successMsg = 'All plan purchases exported to Excel successfully!';
+        }
+      } else {
+        if (activeSubTab === 'listing') {
+          exportFunc = exportServiceListingPurchasesToExcel;
+          successMsg = 'Service listing plan purchases exported to Excel successfully!';
+        } else if (activeSubTab === 'priority') {
+          exportFunc = exportServicePriorityPurchasesToExcel;
+          successMsg = 'Service priority plan purchases exported to Excel successfully!';
+        } else {
+          exportFunc = exportAllPlansToExcel;
+          successMsg = 'All plan purchases exported to Excel successfully!';
+        }
       }
       
       await exportFunc(params);
@@ -336,18 +363,31 @@ export default function PlanPurchasesTab() {
       let exportFunc = exportAllPlansToPDF;
       let successMsg = 'All plan purchases exported to PDF successfully!';
       
-      if (activeSubTab === 'listing') {
-        exportFunc = exportListingPurchasesToPDF;
-        successMsg = 'Product listing plan purchases exported to PDF successfully!';
-      } else if (activeSubTab === 'priority') {
-        exportFunc = exportPriorityPurchasesToPDF;
-        successMsg = 'Priority plan purchases exported to PDF successfully!';
-      } else if (activeSubTab === 'booster') {
-        exportFunc = exportRentalBoostPurchasesToPDF;
-        successMsg = 'Rental boost plan purchases exported to PDF successfully!';
-      } else if (activeSubTab === 'general') {
-        exportFunc = exportAllPlansToPDF;
-        successMsg = 'All plan purchases exported to PDF successfully!';
+      if (scope === "product") {
+        if (activeSubTab === 'listing') {
+          exportFunc = exportListingPurchasesToPDF;
+          successMsg = 'Product listing plan purchases exported to PDF successfully!';
+        } else if (activeSubTab === 'priority') {
+          exportFunc = exportPriorityPurchasesToPDF;
+          successMsg = 'Priority plan purchases exported to PDF successfully!';
+        } else if (activeSubTab === 'booster') {
+          exportFunc = exportRentalBoostPurchasesToPDF;
+          successMsg = 'Rental boost plan purchases exported to PDF successfully!';
+        } else if (activeSubTab === 'general') {
+          exportFunc = exportAllPlansToPDF;
+          successMsg = 'All plan purchases exported to PDF successfully!';
+        }
+      } else {
+        if (activeSubTab === 'listing') {
+          exportFunc = exportServiceListingPurchasesToPDF;
+          successMsg = 'Service listing plan purchases exported to PDF successfully!';
+        } else if (activeSubTab === 'priority') {
+          exportFunc = exportServicePriorityPurchasesToPDF;
+          successMsg = 'Service priority plan purchases exported to PDF successfully!';
+        } else {
+          exportFunc = exportAllPlansToPDF;
+          successMsg = 'All plan purchases exported to PDF successfully!';
+        }
       }
       
       await exportFunc(params);
@@ -363,8 +403,13 @@ export default function PlanPurchasesTab() {
   const handleExportAllPlansExcel = async () => {
     try {
       setAllPlansExcelLoading(true);
-      await exportAllPlansToExcel();
-      toast.success('All plan purchases exported to Excel successfully!');
+      if (scope === "service") {
+        await exportServicePlansReportToExcel();
+        toast.success('All service plan purchases exported to Excel successfully!');
+      } else {
+        await exportAllPlansToExcel();
+        toast.success('All plan purchases exported to Excel successfully!');
+      }
       setShowAllPlansMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to Excel');
@@ -376,8 +421,13 @@ export default function PlanPurchasesTab() {
   const handleExportAllPlansPDF = async () => {
     try {
       setAllPlansPdfLoading(true);
-      await exportAllPlansToPDF();
-      toast.success('All plan purchases exported to PDF successfully!');
+      if (scope === "service") {
+        await exportServicePlansReportToPDF();
+        toast.success('All service plan purchases exported to PDF successfully!');
+      } else {
+        await exportAllPlansToPDF();
+        toast.success('All plan purchases exported to PDF successfully!');
+      }
       setShowAllPlansMenu(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to export to PDF');
@@ -540,24 +590,28 @@ export default function PlanPurchasesTab() {
         >
           Priority Plan
         </button>
-        <button
-          onClick={() => setActiveSubTab('booster')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'booster'
-            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
-            : 'text-gray-500 hover:text-gray-800'
-            }`}
-        >
-          Rental Boost Plan
-        </button>
-        <button
-          onClick={() => setActiveSubTab('general')}
-          className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'general'
-            ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
-            : 'text-gray-500 hover:text-gray-800'
-            }`}
-        >
-          General Plan
-        </button>
+        {scope === "product" && (
+          <>
+            <button
+              onClick={() => setActiveSubTab('booster')}
+              className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'booster'
+                ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+                : 'text-gray-500 hover:text-gray-800'
+                }`}
+            >
+              Rental Boost Plan
+            </button>
+            <button
+              onClick={() => setActiveSubTab('general')}
+              className={`px-6 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${activeSubTab === 'general'
+                ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/[0.04]'
+                : 'text-gray-500 hover:text-gray-800'
+                }`}
+            >
+              General Plan
+            </button>
+          </>
+        )}
 
         {/* All Plans Export Menu */}
         <div className="relative ml-2" ref={allPlansMenuRef}>

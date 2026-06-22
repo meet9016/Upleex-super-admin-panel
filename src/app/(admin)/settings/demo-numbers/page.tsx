@@ -38,18 +38,24 @@ export default function DemoNumbersPage() {
         toast.success('Demo numbers updated successfully');
         setNumbers(updatedNumbers);
       }
-    } catch (error) {
-      toast.error('Failed to update demo numbers');
+    } catch (error: any) {
+      const msg = error?.message || 'Failed to update demo numbers';
+      toast.error(msg);
     }
   };
 
   const handleAdd = () => {
-    if (!newNumber.trim()) return;
-    if (numbers.includes(newNumber.trim())) {
+    const trimmed = newNumber.trim();
+    if (!trimmed) return;
+    if (!/^\d{10}$/.test(trimmed)) {
+      toast.warning('Please enter a valid 10-digit phone number');
+      return;
+    }
+    if (numbers.includes(trimmed)) {
       toast.warning('This number is already in the list');
       return;
     }
-    const updatedNumbers = [...numbers, newNumber.trim()];
+    const updatedNumbers = [...numbers, trimmed];
     saveNumbers(updatedNumbers);
     setNewNumber('');
   };
@@ -100,10 +106,15 @@ export default function DemoNumbersPage() {
     <div className="flex flex-col md:flex-row gap-3 mb-6">
       <div className="relative flex-1">
         <input
-          type="text"
+          type="tel"
           value={newNumber}
-          onChange={(e) => setNewNumber(e.target.value)}
-          placeholder="Enter phone number"
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, '');
+            if (val.length <= 10) setNewNumber(val);
+          }}
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          placeholder="Enter 10-digit phone number"
+          maxLength={10}
           className="w-full h-11 pl-4 pr-4 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
         />
       </div>

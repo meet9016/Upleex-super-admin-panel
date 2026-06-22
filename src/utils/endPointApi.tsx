@@ -192,6 +192,9 @@ export interface EndPointApi {
     getVendorPlansReport: string;
     exportVendorPlansReportExcel: string;
     exportVendorPlansReportPDF: string;
+    getServicePlansReport: string;
+    exportServicePlansReportExcel: string;
+    exportServicePlansReportPDF: string;
 
     // Dynamic Pages
     getDynamicPageBySlug: string;
@@ -295,7 +298,7 @@ const endPointApi: EndPointApi = {
     createServicePlan: 'service-plans/create',
     updateServicePlan: 'service-plans/update',
     deleteServicePlan: 'service-plans/delete',
-    getAllServiceListingPurchases: 'service-listing-plans/purchases/getall',
+    getAllServiceListingPurchases: 'service-listing-plans/getall',
     exportServiceListingPurchasesExcel: 'export/service-listing-purchases/excel',
     exportServiceListingPurchasesPDF: 'export/service-listing-purchases/pdf',
     // Priority Plans
@@ -397,6 +400,9 @@ const endPointApi: EndPointApi = {
     getVendorPlansReport: 'admin/vendor-plans-report',
     exportVendorPlansReportExcel: 'export/vendor-plans-report/excel',
     exportVendorPlansReportPDF: 'export/vendor-plans-report/pdf',
+    getServicePlansReport: 'admin/service-plans-report',
+    exportServicePlansReportExcel: 'export/service-plans-report/excel',
+    exportServicePlansReportPDF: 'export/service-plans-report/pdf',
 
     // Dynamic Pages
     getDynamicPageBySlug: 'dynamic-pages/:slug',

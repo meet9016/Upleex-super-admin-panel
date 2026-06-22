@@ -60,6 +60,7 @@ const menuItems: { group: string; items: MenuItem[] }[] = [
         subItems: [
           { name: "Vendor Reports", href: "/vendor-reports", icon: FileText, permission: "reports" },
           { name: "Vendor Plans Reports", href: "/vendor-plans-reports", icon: FileText, permission: "reports" },
+          { name: "Service Plans Reports", href: "/service-plans-reports", icon: FileText, permission: "reports" },
         ],
       },
       { name: "Dropdowns", href: "/dropdowns", icon: IoIosArrowDropdown , permission: "dropdowns" },
