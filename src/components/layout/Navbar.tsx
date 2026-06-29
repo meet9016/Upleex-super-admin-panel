@@ -55,9 +55,26 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const [userEmail, setUserEmail] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const isFetchingRef = useRef(false);
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) return;
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -168,24 +185,38 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           {isOpen && (
             <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-[#6366f1] to-[#0ea5e9]">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-slate-800 text-sm">Notifications</span>
+                  <span className="font-semibold text-white text-sm">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full">{unreadCount}</span>
+                    <span className="px-2 py-0.5 text-xs font-bold text-[#6366f1] bg-white rounded-full">
+                      {unreadCount}
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {unreadCount > 0 && (
-                    <button onClick={markAllAsRead} className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700">
-                      <CheckCheck size={14} /> Mark all read
+                  {notificationPermission !== 'granted' && (
+                    <button
+                      onClick={requestNotificationPermission}
+                      className="text-xs font-medium text-[#6366f1] hover:text-[#4f46e5] cursor-pointer bg-white px-2 py-1 rounded shadow-sm transition-colors"
+                    >
+                      {notificationPermission === 'denied' ? 'Enable Notifications' : 'Allow Notifications'}
                     </button>
                   )}
-                  <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <button onClick={() => setIsOpen(false)} className="text-white/70 hover:text-white transition-colors">
                     <X size={16} />
                   </button>
                 </div>
               </div>
+
+              {/* Permission denied message */}
+              {notificationPermission === 'denied' && (
+                <div className="px-5 py-3 bg-yellow-50 border-b border-yellow-100">
+                  <p className="text-xs text-yellow-800">
+                    Notifications are blocked. Please enable them in your browser settings to receive real-time updates.
+                  </p>
+                </div>
+              )}
 
               {/* List */}
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">
@@ -204,38 +235,55 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                       <button
                         key={id}
                         onClick={() => handleNotifClick(notif)}
-                        className={`w-full text-left flex gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors ${!notif.is_read ? "bg-blue-50/50" : ""}`}
+                        className={`w-full text-left flex gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors group relative ${!notif.is_read ? "bg-blue-50/50" : ""}`}
                       >
                         <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${getTypeColor(notif.type)}`}>
                           <Bell size={14} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center justify-between mb-1">
                             <p 
                               title={notif.title}
-                              className={`text-sm font-semibold truncate ${!notif.is_read ? "text-slate-900" : "text-slate-700"}`}>
+                              className={`text-sm font-semibold truncate pr-4 ${!notif.is_read ? "text-slate-900" : "text-slate-700"}`}>
                               {notif.title}
                             </p>
-                            {productType && (
-                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${getProductTypeBadgeColor(productType)}`}>
-                                {productType}
-                              </span>
-                            )}
+                            <span className="text-[10px] text-slate-400 whitespace-nowrap ml-2">
+                              {formatDate(notif.createdAt).split(' ')[0]}
+                            </span>
                           </div>
+                          {productType && (
+                            <span className={`inline-block mb-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${getProductTypeBadgeColor(productType)}`}>
+                              {productType}
+                            </span>
+                          )}
                           <p 
                             title={notif.body?.replace(/<[^>]*>?/gm, '')}
-                            className="text-xs text-slate-500 mt-0.5 line-clamp-2" dangerouslySetInnerHTML={{ __html: notif.body }} />
+                            className="text-xs text-slate-500 mt-0.5 line-clamp-2 pr-6" dangerouslySetInnerHTML={{ __html: notif.body }} />
                           {notif.data?.vendorName && (
-                            <p className="text-[11px] text-slate-400 mt-1">Vendor: {notif.data.vendorName}</p>
+                            <p className="text-[11px] text-slate-400 mt-1">Vendor: <span className="font-medium text-slate-600">{notif.data.vendorName}</span></p>
                           )}
-                          <p className="text-[11px] text-slate-400 mt-1">{formatDate(notif.createdAt)}</p>
                         </div>
-                        {!notif.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />}
+                        {!notif.is_read && (
+                           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full group-hover:opacity-0 transition-opacity" />
+                        )}
                       </button>
                     );
                   })
                 )}
               </div>
+
+              {/* Footer / Mark all as read */}
+              {unreadCount > 0 && (
+                <div className="border-t border-slate-100">
+                  <button
+                    onClick={markAllAsRead}
+                    className="w-full px-4 py-3 text-sm bg-gradient-to-r from-[#6366f1] to-[#0ea5e9] text-white font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  >
+                    <CheckCheck className="w-4 h-4" />
+                    Mark all as read ({unreadCount})
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
