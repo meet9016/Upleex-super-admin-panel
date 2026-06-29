@@ -185,12 +185,12 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           {isOpen && (
             <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-[#6366f1] to-[#0ea5e9]">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white text-sm">Notifications</span>
+                  <span className="font-semibold text-slate-800 text-sm">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 text-xs font-bold text-[#6366f1] bg-white rounded-full">
-                      {unreadCount}
+                    <span className="px-2 py-0.5 text-[11px] font-bold text-indigo-600 bg-indigo-50 rounded-full">
+                      {unreadCount} new
                     </span>
                   )}
                 </div>
@@ -198,12 +198,12 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                   {notificationPermission !== 'granted' && (
                     <button
                       onClick={requestNotificationPermission}
-                      className="text-xs font-medium text-[#6366f1] hover:text-[#4f46e5] cursor-pointer bg-white px-2 py-1 rounded shadow-sm transition-colors"
+                      className="text-[11px] font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors"
                     >
-                      {notificationPermission === 'denied' ? 'Enable Notifications' : 'Allow Notifications'}
+                      {notificationPermission === 'denied' ? 'Enable' : 'Allow'}
                     </button>
                   )}
-                  <button onClick={() => setIsOpen(false)} className="text-white/70 hover:text-white transition-colors">
+                  <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors ml-1">
                     <X size={16} />
                   </button>
                 </div>
@@ -273,17 +273,20 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               </div>
 
               {/* Footer / Mark all as read */}
-              {unreadCount > 0 && (
-                <div className="border-t border-slate-100">
-                  <button
-                    onClick={markAllAsRead}
-                    className="w-full px-4 py-3 text-sm bg-gradient-to-r from-[#6366f1] to-[#0ea5e9] text-white font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                  >
-                    <CheckCheck className="w-4 h-4" />
-                    Mark all as read ({unreadCount})
-                  </button>
-                </div>
-              )}
+              <div className="border-t border-slate-100 bg-slate-50 rounded-b-2xl overflow-hidden mt-1">
+                <button
+                  onClick={markAllAsRead}
+                  disabled={unreadCount === 0}
+                  className={`w-full px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                    unreadCount > 0 
+                      ? 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/50' 
+                      : 'text-slate-400 cursor-not-allowed bg-slate-50'
+                  }`}
+                >
+                  <CheckCheck className="w-4 h-4" />
+                  Mark all as read
+                </button>
+              </div>
             </div>
           )}
         </div>
