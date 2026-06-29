@@ -505,14 +505,51 @@ export default function AddSubCategoryPage() {
     fetchCategories();
   }, []);
 
-  // Search effect
+  // Search effect — calls backend when search text is present
   useEffect(() => {
-    if (debouncedSearch) {
-      // If you have a backend API that supports searching subcategories
-    } else {
+    if (debouncedSearch && debouncedSearch.trim().length >= 2) {
+      fetchSubCategoriesSearch(debouncedSearch.trim());
+    } else if (!debouncedSearch) {
       fetchCategories();
     }
   }, [debouncedSearch]);
+
+  // Backend search for subcategories
+  const fetchSubCategoriesSearch = async (searchTerm: string) => {
+    try {
+      setIsFetching(true);
+      const res = await api.get(endPointApi.getSubCategoryList, {
+        params: { search: searchTerm }
+      });
+
+      if (res.data?.data) {
+        // Map result — resolve parent category name from already-loaded categories
+        const rows: SubCategoryRow[] = res.data.data.map((sub: any) => {
+          const parentCat = categories.find(
+            (c) => String(c.categories_id) === String(sub.categoryId)
+          );
+          return {
+            id: sub.id || sub._id,
+            name: sub.name,
+            parent: parentCat?.categories_name || 'Unknown',
+            parentId: String(sub.categoryId || ''),
+            image: sub.image || '',
+            hsnCodes: sub.hsnCodes || [],
+            gst: sub.gst || 0,
+            status: 'Active',
+            created_at: sub.created_at || new Date().toISOString(),
+            updated_at: sub.updated_at || new Date().toISOString(),
+            seo_content: sub.seo_content,
+          };
+        });
+        setSubCategories(rows);
+      }
+    } catch (error) {
+      toast.error('Search failed');
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -555,11 +592,17 @@ export default function AddSubCategoryPage() {
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return "/placeholder-image.jpg";
 
-    if (imagePath.startsWith('http')) return imagePath;
+    // Already a full URL (from external service like digitalks)
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
 
-    if (imagePath.startsWith('/uploads')) {
-      return `${process.env.NEXT_PUBLIC_API_URL}${imagePath}`;
+    // Relative path from old storage
+    if (imagePath.startsWith('/uploads') || imagePath.startsWith('/upload')) {
+      const base = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || '';
+      return `${base}${imagePath}`;
     }
+
+    // Any other non-empty path — try to display it directly
+    if (imagePath.trim()) return imagePath;
 
     return "/placeholder-image.jpg";
   };
@@ -802,13 +845,15 @@ export default function AddSubCategoryPage() {
     setSearchText("");
   };
 
-  // Filter subcategories based on search
-  const filteredSubCategories = (searchText.length >= 3 || searchText.length === 0)
-    ? subCategories.filter(sub =>
-      sub.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      sub.parent.toLowerCase().includes(searchText.toLowerCase())
-    )
-    : subCategories;
+  // When debouncedSearch >= 2 chars, backend already filtered results — show as-is.
+  // For 1-char or empty, do client-side filter as a fallback.
+  const filteredSubCategories = debouncedSearch && debouncedSearch.trim().length >= 2
+    ? subCategories
+    : subCategories.filter(sub =>
+        !searchText ||
+        sub.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        sub.parent.toLowerCase().includes(searchText.toLowerCase())
+      );
 
   const columnDefs: ColDef<SubCategoryRow>[] = [
     {
