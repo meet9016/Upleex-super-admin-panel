@@ -85,7 +85,8 @@ const VendorPaymentDetailsModal: React.FC<VendorPaymentDetailsModalProps> = ({
     };
 
     const canReleasePayment = () => {
-        return data.payment_status === 'pending' && new Date() >= new Date(data.release_date);
+        // Only allow release if payment is pending AND release_date has passed
+        return data.payment_status === 'pending' && data.release_date && new Date() >= new Date(data.release_date);
     };
 
     const handleReleaseClick = () => {
