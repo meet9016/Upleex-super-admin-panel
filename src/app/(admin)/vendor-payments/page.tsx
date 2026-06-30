@@ -114,6 +114,12 @@ export default function VendorPaymentsPage() {
                             : payment
                     )
                 );
+                // Update selected payment if it's currently open in the modal
+                setSelectedPayment(prev => 
+                    prev && prev._id === paymentId 
+                        ? { ...prev, payment_status: 'released', released_at: new Date().toISOString(), released_by: 'admin' }
+                        : prev
+                );
                 // Refresh stats
                 fetchPaymentStats();
             } else {
@@ -141,6 +147,12 @@ export default function VendorPaymentsPage() {
                             ? { ...payment, payment_status: 'cancelled', notes: reason || 'Cancelled by admin' }
                             : payment
                     )
+                );
+                // Update selected payment if it's currently open in the modal
+                setSelectedPayment(prev => 
+                    prev && prev._id === paymentId 
+                        ? { ...prev, payment_status: 'cancelled', notes: reason || 'Cancelled by admin' }
+                        : prev
                 );
                 // Refresh stats
                 fetchPaymentStats();
