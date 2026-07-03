@@ -10,6 +10,10 @@ interface LineChartProps {
   valuePrefix?: string;
   color?: string;
   gradientColor?: string;
+  countLabel?: string;
+  height?: number;
+  sparkline?: boolean;
+  labelColor?: string;
 }
 
 export default function LineChart({
@@ -19,6 +23,10 @@ export default function LineChart({
   valuePrefix = "₹",
   color = "#3b82f6",
   gradientColor = "rgba(59, 130, 246, 0.1)",
+  countLabel = "transactions",
+  sparkline = false,
+  labelColor,
+  height,
 }: LineChartProps) {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -49,11 +57,12 @@ export default function LineChart({
     );
   }
 
+  const isManyPoints = data.length > 15;
+  const padding = sparkline ? { top: 2, right: 2, bottom: 2, left: 2 } : { top: 20, right: 20, bottom: isManyPoints ? 50 : 35, left: 50 };
   const width = dimensions.width || 800;
-  const height = 320;
-  const padding = { top: 30, right: 30, bottom: 40, left: 60 };
+  const chartHeightValue = sparkline ? 80 : (height || (dimensions.height || 240));
   const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
+  const chartHeight = chartHeightValue - padding.top - padding.bottom;
 
   const maxVal = Math.max(...data.map((d) => d.amount), 1);
   const minVal = Math.min(...data.map((d) => d.amount), 0);
@@ -68,6 +77,9 @@ export default function LineChart({
     month: d.month,
     count: d.count,
   }));
+
+  // Generate Y-axis tick values (5 evenly spaced ticks from 0 to maxVal)
+  const yAxisTicks = [0, 1, 2, 3, 4].map(i => Math.round((maxVal * i) / 4));
 
   // Generate smooth path using cubic bezier
   const getPath = () => {
@@ -91,9 +103,9 @@ export default function LineChart({
     if (!linePath) return "";
     const lastPoint = points[points.length - 1];
     const firstPoint = points[0];
-    return `${linePath} L ${lastPoint.x} ${height - padding.bottom} L ${
+    return `${linePath} L ${lastPoint.x} ${chartHeightValue - padding.bottom} L ${
       firstPoint.x
-    } ${height - padding.bottom} Z`;
+    } ${chartHeightValue - padding.bottom} Z`;
   };
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -125,8 +137,8 @@ export default function LineChart({
   };
 
   return (
-    <div className="w-full">
-      {title && (
+    <div className="w-full h-full flex flex-col">
+      {!sparkline && title && (
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
           {subtitle && (
@@ -134,14 +146,14 @@ export default function LineChart({
           )}
         </div>
       )}
-      <div className="relative">
+      <div className={`relative ${sparkline ? 'flex-1' : ''}`}>
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-auto"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          style={{ cursor: "crosshair" }}
+          viewBox={`0 0 ${width} ${chartHeightValue}`}
+          className={`w-full ${sparkline ? `h-[${chartHeightValue}px]` : 'h-auto'}`}
+          onMouseMove={sparkline ? undefined : handleMouseMove}
+          onMouseLeave={sparkline ? undefined : handleMouseLeave}
+          style={{ cursor: sparkline ? "default" : "crosshair" }}
         >
           <defs>
             <linearGradient
@@ -169,29 +181,29 @@ export default function LineChart({
             </filter>
           </defs>
 
-          {/* Y-axis grid lines */}
-          {[...Array(5)].map((_, i) => {
-            const value = minVal + (range * (4 - i)) / 4;
-            const y = yScale(value);
+          {/* Grid lines */}
+          {!sparkline && yAxisTicks.map((tick, i) => {
+            const y = chartHeightValue - padding.bottom - (tick / maxVal) * chartHeight;
             return (
-              <g key={`grid-${i}`}>
+              <g key={i}>
                 <line
                   x1={padding.left}
                   y1={y}
                   x2={width - padding.right}
                   y2={y}
-                  stroke="#e2e8f0"
+                  stroke={labelColor ? "rgba(255,255,255,0.12)" : "#f1f5f9"}
                   strokeWidth="1"
                   strokeDasharray="4 4"
                 />
                 <text
-                  x={padding.left - 8}
+                  x={padding.left - 10}
                   y={y + 4}
                   textAnchor="end"
-                  className="text-[11px] fill-slate-400 font-mono"
+                  className="text-[11px] font-medium"
+                  fill={labelColor || "#94a3b8"}
                 >
                   {valuePrefix}
-                  {value.toLocaleString("en-IN")}
+                  {tick.toLocaleString()}
                 </text>
               </g>
             );
@@ -217,7 +229,7 @@ export default function LineChart({
           />
 
           {/* Data points and hover areas */}
-          {points.map((point, i) => (
+          {!sparkline && points.map((point, i) => (
             <g key={i}>
               <circle
                 cx={point.x}
@@ -235,23 +247,25 @@ export default function LineChart({
           ))}
 
           {/* X-axis labels */}
-          {points.map((point, i) => (
+          {!sparkline && points.map((point, i) => {
+            const isManyPoints = points.length > 15;
+            return (
             <text
               key={`label-${i}`}
               x={point.x}
-              y={height - padding.bottom + 20}
-              textAnchor="middle"
-              className={`text-[11px] font-medium transition-colors duration-200 ${
-                hoveredPoint === i ? "fill-slate-700" : "fill-slate-400"
-              }`}
+              y={chartHeightValue - padding.bottom + 15}
+              textAnchor={isManyPoints ? "end" : "middle"}
+              transform={isManyPoints ? `rotate(-90, ${point.x}, ${chartHeightValue - padding.bottom + 15})` : undefined}
+              fill={labelColor || (hoveredPoint === i ? "#334155" : "#94a3b8")}
+              className={`text-[10px] sm:text-[11px] font-medium transition-colors duration-200`}
             >
               {point.month}
             </text>
-          ))}
+          )})}
         </svg>
 
         {/* Tooltip */}
-        {hoveredPoint !== null && points[hoveredPoint] && (
+        {!sparkline && hoveredPoint !== null && points[hoveredPoint] && (
           <div
             className="absolute z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-150"
             style={{
@@ -260,29 +274,22 @@ export default function LineChart({
               transform: "translate(-50%, -100%)",
             }}
           >
-            <div className="bg-slate-800 text-white rounded-xl shadow-2xl p-3 min-w-[140px]">
-              <p className="text-xs font-semibold text-slate-400 mb-1">
+            <div className="bg-slate-800 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap flex flex-col gap-1 border border-slate-700">
+              <span className="font-semibold text-slate-200">
                 {points[hoveredPoint].month}
-              </p>
-              <p className="text-lg font-bold">
-                {valuePrefix}
-                {points[hoveredPoint].value.toLocaleString("en-IN")}
-              </p>
-              {points[hoveredPoint].count !== undefined && (
-                <p className="text-xs text-slate-300 mt-1">
-                  {points[hoveredPoint].count} transactions
-                </p>
-              )}
-              <div
-                className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: "6px solid transparent",
-                  borderRight: "6px solid transparent",
-                  borderTop: `6px solid #1e293b`,
-                }}
-              />
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="font-bold">
+                  {valuePrefix}
+                  {points[hoveredPoint].value.toLocaleString()}
+                </span>
+                {points[hoveredPoint].count !== undefined && countLabel && (
+                  <span className="text-slate-400 font-medium">
+                    ({points[hoveredPoint].count} {countLabel})
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}

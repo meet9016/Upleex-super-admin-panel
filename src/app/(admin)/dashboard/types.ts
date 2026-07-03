@@ -1,3 +1,24 @@
+export interface TopVendor {
+  _id: string;
+  vendor_id: string;
+  business_name: string;
+  full_name: string;
+  total_products: number;
+  sell_products: number;
+  rent_products: number;
+}
+
+export interface ChartDataPoint {
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface ChartVendorPoint {
+  label: string;
+  count: number;
+}
+
 export interface DashboardStats {
   vendors: {
     total: number;
@@ -43,21 +64,22 @@ export interface DashboardStats {
     totalDebited: number;
     vendorCount: number;
   };
-  monthlyCredits: {
-    month: string;
-    year: number;
-    amount: number;
-    count: number;
-  }[];
-  monthlyVendors: {
-    month: string;
-    year: number;
-    count: number;
-  }[];
+  // New chart fields (range-aware)
+  chartCredits: ChartDataPoint[];
+  chartVendors: ChartVendorPoint[];
+  // Legacy (kept for fallback)
+  monthlyCredits?: ChartDataPoint[];
+  monthlyVendors?: ChartVendorPoint[];
+  revenueStats: {
+    weekly: number;
+    monthly: number;
+    yearly: number;
+  };
   extras: {
     totalQuotes: number;
     totalContacts: number;
     totalBlogs: number;
     totalPlans: number;
   };
+  topVendors?: TopVendor[];
 }
