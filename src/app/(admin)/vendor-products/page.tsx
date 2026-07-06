@@ -39,6 +39,7 @@ export default function VendorProductApprovalPage() {
   const [overallCounts, setOverallCounts] = useState({ rent: 0, sell: 0 });
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [generalPlanProductMap, setGeneralPlanProductMap] = useState<Record<string, string>>({});
   const LIMIT = 20;
 
   useEffect(() => {
@@ -53,7 +54,32 @@ export default function VendorProductApprovalPage() {
     setPage(1);
     setHasMore(true);
     fetchVendorsWithProducts(1, activeTab, debouncedSearch);
+    fetchGeneralPlanMap();
   }, [activeTab, debouncedSearch]);
+
+  const fetchGeneralPlanMap = async () => {
+    try {
+      const res = await api.get(endPointApi.getAllGeneralPlanPurchases);
+      const purchases: any[] = res?.data?.data || [];
+      const map: Record<string, string> = {};
+      const now = new Date();
+      
+      purchases.forEach((purchase: any) => {
+        if (purchase.expire_at && new Date(purchase.expire_at) < now) return;
+        const planType: string = purchase.plan_type || '';
+        const productIds: any[] = purchase.product_ids || [];
+        
+        productIds.forEach((prod: any) => {
+          const id = typeof prod === 'string' ? prod : String(prod._id || prod.id || prod.product_id || '');
+          if (id) map[id] = planType;
+        });
+      });
+      
+      setGeneralPlanProductMap(map);
+    } catch (error) {
+      console.error('Failed to fetch general plan map', error);
+    }
+  };
 
   const fetchVendorsWithProducts = async (pageNum: number, tab: 'rent' | 'sell' = activeTab, search: string = debouncedSearch) => {
     try {
@@ -282,6 +308,7 @@ export default function VendorProductApprovalPage() {
               activeTab={activeTab}
               onTabChange={(tab) => setActiveTab(tab)}
               overallCounts={overallCounts}
+              generalPlanProductMap={generalPlanProductMap}
             />
 
             {/* Loading more indicator */}

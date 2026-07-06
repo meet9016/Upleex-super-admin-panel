@@ -184,6 +184,7 @@ export default function LineChart({
           {/* Grid lines */}
           {!sparkline && yAxisTicks.map((tick, i) => {
             const y = chartHeightValue - padding.bottom - (tick / maxVal) * chartHeight;
+            const label = valuePrefix ? `${valuePrefix}${tick.toLocaleString()}` : tick.toLocaleString();
             return (
               <g key={i}>
                 <line
@@ -196,14 +197,13 @@ export default function LineChart({
                   strokeDasharray="4 4"
                 />
                 <text
-                  x={padding.left - 10}
+                  x={padding.left - 6}
                   y={y + 4}
                   textAnchor="end"
                   className="text-[11px] font-medium"
                   fill={labelColor || "#94a3b8"}
                 >
-                  {valuePrefix}
-                  {tick.toLocaleString()}
+                  {label}
                 </text>
               </g>
             );

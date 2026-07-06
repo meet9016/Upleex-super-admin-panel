@@ -136,6 +136,8 @@ export default function DashboardPage() {
         },
         monthlyCredits: [],
         monthlyVendors: [],
+        chartCredits: [],
+        chartVendors: [],
         extras: {
           totalQuotes: 0,
           totalContacts: 0,
@@ -424,7 +426,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Revenue Breakdown — Static Weekly/Monthly/Yearly Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      {/* <div className="grid gap-4 md:grid-cols-3 mb-6">
         <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
@@ -461,7 +463,7 @@ export default function DashboardPage() {
             <h4 className="text-2xl font-bold text-slate-800">₹{formatCurrency(stats?.revenueStats?.yearly || 0)}</h4>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Platform Overview full width now */}
       <div className="mb-8">

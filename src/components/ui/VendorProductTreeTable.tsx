@@ -72,6 +72,7 @@ interface Vendor {
 }
 
 interface TreeDataItem {
+  _id?: string;
   id: string;
   name: string;
   type: "vendor" | "product";
@@ -105,10 +106,16 @@ interface VendorProductTreeTableProps {
   activeTab: 'rent' | 'sell';
   onTabChange: (tab: 'rent' | 'sell') => void;
   overallCounts: { rent: number; sell: number };
+  generalPlanProductMap: Record<string, string>;
 }
 
 // Product Detail Modal Component
-const ProductDetailModal = ({ product, isOpen, onClose }: { product: TreeDataItem | null; isOpen: boolean; onClose: () => void }) => {
+const ProductDetailModal = ({ product, isOpen, onClose, generalPlanProductMap }: { 
+  product: TreeDataItem | null; 
+  isOpen: boolean; 
+  onClose: () => void; 
+  generalPlanProductMap: Record<string, string>;
+}) => {
   if (!isOpen || !product) return null;
 console.log("product",product);
   const InfoCard = ({ icon: Icon, label, value, isPrice = false }: any) => (
@@ -130,6 +137,44 @@ console.log("product",product);
       </div>
     </div>
   );
+
+  const productId = String(product.id || product._id || '');
+  const pricingType = (product as any).pricing_type?.toLowerCase() || 'free';
+  const planType = generalPlanProductMap[productId];
+
+  const renderPricingType = () => {
+    if (pricingType === 'free') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+          Free
+        </span>
+      );
+    }
+
+    if (planType) {
+      return (
+        <div className="flex flex-col gap-1">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 w-fit">
+            ✓ Paid
+          </span>
+          <span className="text-[10px] font-semibold text-purple-600 capitalize">
+            General • {planType}
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 w-fit">
+          ✓ Paid
+        </span>
+        <span className="text-[10px] font-semibold text-blue-600">
+          Base Listing
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto">
@@ -191,15 +236,7 @@ console.log("product",product);
               <InfoCard icon={Calendar} label="Created Date" value={product.createdAt ? new Date(product.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'} />
               <InfoCard icon={Box} label="Price" value={product.price} isPrice={true} />
               <InfoCard icon={Box} label="Deposit Amount" value={product.deposit_amount} isPrice={true} />
-              <InfoCard icon={Tag} label="Pricing Type" value={
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                  (product as any).pricing_type === 'paid'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {(product as any).pricing_type === 'paid' ? '✓ Paid' : 'Free'}
-                </span>
-              } />
+              <InfoCard icon={Tag} label="Pricing Type" value={renderPricingType()} />
             </div>
 
             {/* Description Section */}
@@ -387,6 +424,7 @@ export default function VendorProductTreeTable({
   activeTab,
   onTabChange,
   overallCounts,
+  generalPlanProductMap,
 }: VendorProductTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -750,6 +788,7 @@ export default function VendorProductTreeTable({
         product={selectedProduct}
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        generalPlanProductMap={generalPlanProductMap}
       />
     </div>
   );
