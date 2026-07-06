@@ -151,29 +151,31 @@ console.log("product",product);
       );
     }
 
-    if (planType) {
-      return (
-        <div className="flex flex-col gap-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 w-fit">
-            ✓ Paid
-          </span>
-          <span className="text-[10px] font-semibold text-purple-600 capitalize">
-            General • {planType}
-          </span>
-        </div>
-      );
-    }
+  if (planType) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+        ✓ Paid
+      </span>
 
-    return (
-      <div className="flex flex-col gap-1">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 w-fit">
-          ✓ Paid
-        </span>
-        <span className="text-[10px] font-semibold text-blue-600">
-          Base Listing
-        </span>
-      </div>
-    );
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 capitalize">
+        General • {planType}
+      </span>
+    </div>
+  );
+}
+
+return (
+  <div className="flex items-center gap-2 flex-wrap">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+      ✓ Paid
+    </span>
+
+    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold  text-blue-700">
+      Base Listing
+    </span>
+  </div>
+);
   };
 
   return (
