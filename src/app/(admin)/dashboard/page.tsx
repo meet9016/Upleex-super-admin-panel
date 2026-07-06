@@ -71,6 +71,8 @@ export default function DashboardPage() {
   }, [router]);
 
   const fetchDashboardData = useCallback(async () => {
+    // Don't fetch for custom until user has selected dates
+    if (chartRange === 'custom' && !customDates) return;
     try {
       let query = `?range=${chartRange}`;
       if (chartRange === 'custom' && customDates) {
@@ -186,6 +188,9 @@ export default function DashboardPage() {
         },
       });
       return () => fp.destroy();
+    } else if (chartRange !== "custom") {
+      // Reset custom dates when switching away
+      setCustomDates(null);
     }
   }, [chartRange]);
 
@@ -561,23 +566,23 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pb-8">
-            <LineChart
-              data={chartData}
-              title={chartView === "revenue" ? "Monthly Revenue" : "New Vendors"}
-              subtitle={
-                chartView === "revenue"
-                  ? "Total wallet credits over time"
-                  : "Monthly vendor acquisition trend"
-              }
-              valuePrefix={chartView === "revenue" ? "₹" : ""}
-              color={chartView === "revenue" ? "#3b82f6" : "#f59e0b"}
-              gradientColor={
-                chartView === "revenue"
-                  ? "rgba(59, 130, 246, 0.1)"
-                  : "rgba(245, 158, 11, 0.1)"
-              }
-              countLabel={chartView === "revenue" ? "transactions" : ""}
-            />
+          <LineChart
+                data={chartData}
+                title={chartView === "revenue" ? "Monthly Revenue" : "New Vendors"}
+                subtitle={
+                  chartView === "revenue"
+                    ? "Total wallet credits over time"
+                    : "Monthly vendor acquisition trend"
+                }
+                valuePrefix={chartView === "revenue" ? "₹" : ""}
+                color={chartView === "revenue" ? "#3b82f6" : "#f59e0b"}
+                gradientColor={
+                  chartView === "revenue"
+                    ? "rgba(59, 130, 246, 0.1)"
+                    : "rgba(245, 158, 11, 0.1)"
+                }
+                countLabel={chartView === "revenue" ? "transactions" : ""}
+              />
           </CardContent>
         </Card>
 
