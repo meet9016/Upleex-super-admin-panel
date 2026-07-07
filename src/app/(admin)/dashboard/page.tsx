@@ -79,9 +79,9 @@ export default function DashboardPage() {
         query += `&startDate=${customDates.start.toISOString()}&endDate=${customDates.end.toISOString()}`;
       }
       
-      const [dashboardRes, vendorsRes] = await Promise.all([
+      const [dashboardRes, topVendorsRes] = await Promise.all([
         api.get(`${endPointApi.getDashboardStats}${query}`),
-        api.get(endPointApi.getAllVendors, { params: { page: 1, limit: 10 } })
+        api.get(endPointApi.getTopVendors, { params: { limit: 10 } })
       ]);
       
       if (dashboardRes?.data?.success && dashboardRes?.data?.data) {
@@ -90,23 +90,9 @@ export default function DashboardPage() {
         throw new Error("Invalid response format");
       }
       
-      // Process vendors data
-      if (vendorsRes?.data?.data) {
-        const vendorsWithCounts: TopVendor[] = vendorsRes.data.data.map((v: any) => {
-          const sellCount = v.vendorSellCount || 0;
-          const rentCount = v.vendorRentCount || 0;
-          const total = sellCount + rentCount;
-          return {
-            _id: v._id,
-            vendor_id: v.vendor_id,
-            business_name: v.business_name || v.full_name || v.vendor_id || 'Unknown',
-            full_name: v.full_name || v.business_name || v.vendor_id || 'Unknown',
-            total_products: total,
-            sell_products: sellCount,
-            rent_products: rentCount
-          };
-        }).sort((a: TopVendor, b: TopVendor) => b.total_products - a.total_products).slice(0, 10);
-        setTopVendors(vendorsWithCounts);
+      // Process top vendors data
+      if (topVendorsRes?.data?.success && topVendorsRes?.data?.data) {
+        setTopVendors(topVendorsRes.data.data);
       }
     } catch (error) {
       console.error(error);

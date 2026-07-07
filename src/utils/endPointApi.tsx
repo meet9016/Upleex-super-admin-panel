@@ -179,6 +179,7 @@ export interface EndPointApi {
 
     // Dashboard Stats
     getDashboardStats: string;
+    getTopVendors: string;
 
     // Admin Orders
     adminRentOrders: string;
@@ -387,6 +388,7 @@ const endPointApi: EndPointApi = {
 
     // Dashboard Stats
     getDashboardStats: 'admin/dashboard-stats',
+    getTopVendors: 'vendor/top-vendors',
 
     // Admin Orders
     adminRentOrders: 'admin/orders/rent',
