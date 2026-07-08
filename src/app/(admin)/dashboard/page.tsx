@@ -362,14 +362,26 @@ export default function DashboardPage() {
 
   const chartData =
     chartView === "revenue"
-      ? (stats?.chartCredits || []).map((item: any) => ({
-          month: item.label,
-          amount: item.amount,
-        }))
-      : (stats?.chartVendors || []).map((item: any) => ({
-          month: item.label,
-          amount: item.count,
-        }));
+      ? (stats?.chartCredits || []).length > 0 
+        ? (stats?.chartCredits || []).map((item: any) => ({
+            month: item.label,
+            amount: item.amount,
+          }))
+        : [
+            { month: "Period 1", amount: 0 },
+            { month: "Period 2", amount: 0 },
+            { month: "Period 3", amount: 0 }
+          ]
+      : (stats?.chartVendors || []).length > 0
+        ? (stats?.chartVendors || []).map((item: any) => ({
+            month: item.label,
+            amount: item.count,
+          }))
+        : [
+            { month: "Period 1", amount: 0 },
+            { month: "Period 2", amount: 0 },
+            { month: "Period 3", amount: 0 }
+          ];
 
   const topVendorsChartData = topVendors.map(vendor => ({
     label: vendor.business_name || vendor.full_name || vendor.vendor_id || "Unknown Vendor",
