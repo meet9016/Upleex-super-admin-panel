@@ -353,7 +353,7 @@ export default function ServiceListingTab() {
         </div>
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader><CardTitle>Service Plan List</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Service Listing Plans List</CardTitle></CardHeader>
             <CardContent className="p-0">
               <AgGridTable
                 loading={loading}
