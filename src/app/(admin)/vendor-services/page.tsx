@@ -74,25 +74,16 @@ export default function VendorServiceApprovalPage() {
       const totalPagesResp = res?.data?.totalPages;
       const pageResp = res?.data?.page || pageNum;
 
-      // Fetch services for each vendor
-      const vendorsWithServices = await Promise.all(
-        vendorList.map(async (vendor: Vendor) => {
-          if (!vendor.vendor_id) return { ...vendor, services: [] };
-          try {
-            const serviceRes = await api.get(`${endPointApi.getVendorServices}/${vendor.vendor_id}`);
-            const payload = serviceRes.data?.data;
-            const services = Array.isArray(payload) ? payload : payload?.services || [];
-            const counts = Array.isArray(payload) ? null : payload?.counts || null;
-            return {
-              ...vendor,
-              services,
-              ...(counts ? { pending_count: counts.pending, approved_count: counts.approved, rejected_count: counts.rejected } : {})
-            } as any;
-          } catch (error) {
-            return { ...vendor, services: [] };
-          }
-        })
-      );
+      // Services are now included in the vendor list from backend
+      const vendorsWithServices = vendorList.map((vendor: any) => {
+        return {
+          ...vendor,
+          services: vendor.services || [],
+          pending_count: vendor.counts?.pending,
+          approved_count: vendor.counts?.approved,
+          rejected_count: vendor.counts?.rejected
+        } as any;
+      });
 
       setVendors(prev => {
         if (pageNum === 1) return vendorsWithServices;
@@ -239,12 +230,12 @@ export default function VendorServiceApprovalPage() {
       const scrollPosition = window.innerHeight + window.scrollY;
       const threshold = document.documentElement.scrollHeight - 200;
       if (scrollPosition >= threshold) {
-        fetchVendorsWithServices(page + 1);
+        fetchVendorsWithServices(page + 1, debouncedSearch);
       }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore, loadingMore, loading]);
+  }, [page, hasMore, loadingMore, loading, debouncedSearch]);
 
   return (
     <div className="p-1">
