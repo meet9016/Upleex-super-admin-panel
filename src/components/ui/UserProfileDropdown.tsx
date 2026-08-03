@@ -39,9 +39,9 @@ export function UserProfileDropdown({ userName, userEmail }: UserProfileDropdown
         window.dispatchEvent(new Event('adminLoggedOut'));
         toast.success('Logged out successfully');
         
-        // Force redirect using window.location for reliable logout
+        // Force redirect using window.location.replace for reliable logout to prevent back button navigation
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.replace('/login');
         }, 500);
       }
     } catch (error) {
