@@ -35,6 +35,7 @@ export default function VendorPaymentsPage() {
         vendor_id: ''
     });
     const [selectedRows, setSelectedRows] = useState<VendorPaymentTreeData[]>([]);
+    const [expandedVendorIds, setExpandedVendorIds] = useState<string[]>([]);
 
     const handleTabChange = (tab: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -53,7 +54,7 @@ export default function VendorPaymentsPage() {
                 type: activeTab,
                 ...filters
             });
-            
+
             if (response && response.success) {
                 setPayments(response.data?.payments || []);
                 setPagination(response.data?.pagination || {
@@ -100,23 +101,23 @@ export default function VendorPaymentsPage() {
 
     const handleReleasePayment = async (paymentId: string, notes?: string) => {
         setIsReleasing(paymentId);
-        
+
         try {
             const response: ReleasePaymentResponse = await apiService.releasePayment(paymentId, notes);
-            
+
             if (response && response.success) {
                 toast.success("Payment released successfully");
                 // Update the payment in the list
-                setPayments(prev => 
-                    prev.map(payment => 
+                setPayments(prev =>
+                    prev.map(payment =>
                         payment._id === paymentId
                             ? { ...payment, payment_status: 'released', released_at: new Date().toISOString(), released_by: 'admin' }
                             : payment
                     )
                 );
                 // Update selected payment if it's currently open in the modal
-                setSelectedPayment(prev => 
-                    prev && prev._id === paymentId 
+                setSelectedPayment(prev =>
+                    prev && prev._id === paymentId
                         ? { ...prev, payment_status: 'released', released_at: new Date().toISOString(), released_by: 'admin' }
                         : prev
                 );
@@ -134,23 +135,23 @@ export default function VendorPaymentsPage() {
 
     const handleCancelPayment = async (paymentId: string, reason?: string) => {
         setIsReleasing(paymentId);
-        
+
         try {
             const response: ReleasePaymentResponse = await apiService.cancelPayment(paymentId, reason);
-            
+
             if (response && response.success) {
                 toast.success("Payment cancelled successfully");
                 // Update the payment in the list
-                setPayments(prev => 
-                    prev.map(payment => 
+                setPayments(prev =>
+                    prev.map(payment =>
                         payment._id === paymentId
                             ? { ...payment, payment_status: 'cancelled', notes: reason || 'Cancelled by admin' }
                             : payment
                     )
                 );
                 // Update selected payment if it's currently open in the modal
-                setSelectedPayment(prev => 
-                    prev && prev._id === paymentId 
+                setSelectedPayment(prev =>
+                    prev && prev._id === paymentId
                         ? { ...prev, payment_status: 'cancelled', notes: reason || 'Cancelled by admin' }
                         : prev
                 );
@@ -227,9 +228,9 @@ export default function VendorPaymentsPage() {
     // Transform payments data for tree table
     const transformedData: VendorPaymentTreeData[] = React.useMemo(() => {
         if (!payments || payments.length === 0) return [];
-        
+
         const vendorGroups: { [key: string]: VendorPayment[] } = {};
-        
+
         // Group payments by vendor_id
         payments.forEach(payment => {
             // Skip if payment has neither order_id nor quote_id
@@ -237,7 +238,7 @@ export default function VendorPaymentsPage() {
                 console.warn('Skipping payment with missing order_id and quote_id:', payment);
                 return;
             }
-            
+
             if (!vendorGroups[payment.vendor_id]) {
                 vendorGroups[payment.vendor_id] = [];
             }
@@ -248,7 +249,7 @@ export default function VendorPaymentsPage() {
             const totalAmount = vendorPayments.reduce((sum, p) => sum + (p.vendor_amount || 0), 0);
             const firstPayment = vendorPayments[0];
             const vendorName = firstPayment?.vendor_info?.business_name || firstPayment?.vendor_info?.full_name || `Vendor ${vendorId}`;
-            
+
             return {
                 id: `vendor-${vendorId}`,
                 name: vendorName,
@@ -264,7 +265,7 @@ export default function VendorPaymentsPage() {
                         user_name: 'Unknown Customer',
                         total_amount: 0
                     };
-                    
+
                     const orderInfo: SafeOrderInfo = payment.order_id ? {
                         order_id: payment.order_id.order_id || 'N/A',
                         user_name: payment.order_id.user_name || 'Unknown Customer',
@@ -274,11 +275,33 @@ export default function VendorPaymentsPage() {
                         user_name: payment.quote_id.user_id?.name || payment.quote_id.user_id?.first_name || 'Unknown Customer',
                         total_amount: payment.quote_id.calculated_price || 0
                     } : defaultOrderInfo;
-                    
+
                     const orderId = orderInfo.order_id;
                     const userName = orderInfo.user_name;
                     const totalAmount = orderInfo.total_amount;
-                    
+
+                    // GST Calculations
+                    let gstRate = 18;
+                    let gstAmt = 0;
+                    if (payment.order_id) {
+                        const vendorItems = (payment.order_id as any).items?.filter((item: any) => item.vendor_id === payment.vendor_id) || [];
+                        gstAmt = vendorItems.reduce((sum: number, item: any) => sum + (item.gst_amount || 0), 0);
+                        const firstItem = vendorItems[0];
+                        if (firstItem && firstItem.subtotal > 0) {
+                            gstRate = Math.round((firstItem.gst_amount / firstItem.subtotal) * 100);
+                        }
+                    } else if (payment.quote_id) {
+                        gstRate = (payment.quote_id as any).product_id?.gst || 18;
+                        gstAmt = totalAmount * (gstRate / (100 + gstRate));
+                    }
+
+                    const razorpayFee = totalAmount * 0.02;
+                    const razorpayGst = razorpayFee * 0.18;
+                    const razorpayTotalCharge = razorpayFee + razorpayGst;
+
+                    const vendorBaseAmount = (payment.vendor_amount || 0) - gstAmt;
+                    const adminNetBalance = (payment.vendor_amount || 0) - razorpayTotalCharge;
+
                     return {
                         id: payment._id,
                         name: orderId,
@@ -289,6 +312,7 @@ export default function VendorPaymentsPage() {
                         customerName: userName,
                         totalAmount: totalAmount,
                         vendorAmount: payment.vendor_amount || 0,
+                        vendorBaseAmount: vendorBaseAmount,
                         paymentStatus: payment.payment_status,
                         deliveredAt: payment.delivered_at,
                         releaseDate: payment.release_date,
@@ -297,6 +321,20 @@ export default function VendorPaymentsPage() {
                         notes: payment.notes,
                         formattedAmount: `₹${totalAmount.toLocaleString('en-IN')}`,
                         formattedVendorAmount: `₹${(payment.vendor_amount || 0).toLocaleString('en-IN')}`,
+                        formattedVendorBaseAmount: `₹${vendorBaseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+
+                        gstAmt: gstAmt,
+                        productGst: `${gstRate}% (₹${gstAmt.toFixed(2)})`,
+                        razorpayFee: razorpayFee,
+                        razorpayGst: razorpayGst,
+                        razorpayTotalCharge: razorpayTotalCharge,
+                        adminNetBalance: adminNetBalance,
+                        formattedProductGst: `${gstRate}% (₹${gstAmt.toLocaleString('en-IN', { maximumFractionDigits: 2 })})`,
+                        formattedRazorpayFee: `₹${razorpayFee.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                        formattedRazorpayGst: `₹${razorpayGst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                        formattedRazorpayTotalCharge: `₹${razorpayTotalCharge.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                        formattedAdminNetBalance: `₹${adminNetBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+
                         originalData: payment,
                         path: [`vendor-${vendorId}`, payment._id]
                     };
@@ -305,28 +343,93 @@ export default function VendorPaymentsPage() {
         });
     }, [payments]);
 
+    const totalCalculations = React.useMemo(() => {
+        let targetPayments: VendorPaymentTreeData[] = [];
+        let label = 'Grand Total';
+
+        if (selectedRows && selectedRows.length > 0) {
+            // Selection takes highest priority
+            const selectedPayments = selectedRows.filter(row => row.type === 'payment');
+            if (selectedPayments.length > 0) {
+                targetPayments = selectedPayments;
+                label = `Selection Total (${selectedPayments.length})`;
+            } else {
+                const selectedVendorIds = selectedRows.filter(row => row.type === 'vendor').map(row => row.vendorId);
+                transformedData.forEach(vendor => {
+                    if (selectedVendorIds.includes(vendor.vendorId) && vendor.children) {
+                        targetPayments.push(...vendor.children);
+                    }
+                });
+                label = 'Selection Total';
+            }
+        } else if (expandedVendorIds.length === 1) {
+            // Exactly one vendor expanded → show that vendor's totals
+            const expandedVendor = transformedData.find(v => v.vendorId === expandedVendorIds[0]);
+            if (expandedVendor?.children) {
+                targetPayments = expandedVendor.children;
+                label = `${expandedVendor.name || 'Vendor'} Total`;
+            }
+        } else {
+            // No vendor expanded OR multiple expanded → grand total of ALL payments
+            transformedData.forEach(vendor => {
+                if (vendor.children) targetPayments.push(...vendor.children);
+            });
+        }
+
+        const totalVendorBase = targetPayments.reduce((sum, p) => sum + (p.vendorBaseAmount || 0), 0);
+        const totalGst = targetPayments.reduce((sum, p) => sum + (p.gstAmt || 0), 0);
+        const totalVendorAmount = targetPayments.reduce((sum, p) => sum + (p.vendorAmount || 0), 0);
+        const totalRazorpay = targetPayments.reduce((sum, p) => sum + (p.razorpayTotalCharge || 0), 0);
+        const totalAdminBalance = targetPayments.reduce((sum, p) => sum + (p.adminNetBalance || 0), 0);
+
+        return {
+            label,
+            count: targetPayments.length,
+            isFiltered: selectedRows && selectedRows.length > 0,
+            totalVendorBase,
+            totalGst,
+            totalVendorAmount,
+            totalRazorpay,
+            totalAdminBalance
+        };
+    }, [transformedData, selectedRows, expandedVendorIds]);
+
+    const pinnedBottomRowData = React.useMemo(() => {
+        const fmt = (n: number) => `₹${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const razorpayFee = totalCalculations.totalVendorAmount * 0.02;
+        return [{
+            id: 'pinned-total',
+            name: totalCalculations.label,
+            type: 'pinned' as const,
+            formattedVendorBaseAmount: fmt(totalCalculations.totalVendorBase),
+            formattedProductGst: fmt(totalCalculations.totalGst),
+            formattedVendorAmount: fmt(totalCalculations.totalVendorAmount),
+            formattedRazorpayTotalCharge: fmt(totalCalculations.totalRazorpay),
+            formattedAdminNetBalance: fmt(totalCalculations.totalAdminBalance),
+            adminNetBalance: totalCalculations.totalAdminBalance,
+        }];
+    }, [totalCalculations]);
+
     return (
-        <div className="space-y-3 animate-in fade-in duration-500">
+        <div className="space-y-3 animate-in fade-in duration-500 pb-10">
             {/* Tabs Switcher */}
             <div className="flex items-center p-1 bg-slate-100 rounded-2xl w-fit border border-slate-200">
                 <button
                     onClick={() => handleTabChange('sell')}
-                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${
-                        activeTab === 'sell'
+                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${activeTab === 'sell'
                             ? "bg-white text-indigo-600 shadow-md shadow-indigo-100 ring-1 ring-slate-200/50"
                             : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
-                    }`}
+                        }`}
                 >
                     <ShoppingBag size={16} className={activeTab === 'sell' ? "text-indigo-600" : "text-slate-400"} />
                     Sell
                 </button>
                 <button
                     onClick={() => handleTabChange('rent')}
-                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${
-                        activeTab === 'rent'
+                    className={`flex items-center gap-2 px-6 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 ${activeTab === 'rent'
                             ? "bg-white text-indigo-600 shadow-md shadow-indigo-100 ring-1 ring-slate-200/50"
                             : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
-                    }`}
+                        }`}
                 >
                     <FileText size={16} className={activeTab === 'rent' ? "text-indigo-600" : "text-slate-400"} />
                     Rent
@@ -349,6 +452,8 @@ export default function VendorPaymentsPage() {
                 activeTab={activeTab}
                 showCheckboxes={true}
                 onSelectionChange={(rows) => setSelectedRows(rows)}
+                onExpandedVendorsChange={(ids) => setExpandedVendorIds(ids)}
+                pinnedBottomRowData={pinnedBottomRowData}
             />
 
             {/* Vendor Payment Details Modal */}
