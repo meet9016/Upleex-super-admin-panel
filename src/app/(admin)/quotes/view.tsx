@@ -26,6 +26,8 @@ import {
     Download,
     Maximize2,
     CreditCard,
+    ChevronDown,
+    Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/utils/axiosInstance';
@@ -43,6 +45,12 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
     const [isVisible, setIsVisible] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
+    const [depositStatus, setDepositStatus] = useState(data?.deposit_status || 'pending');
+    const [isUpdatingDeposit, setIsUpdatingDeposit] = useState(false);
+
+    useEffect(() => {
+        setDepositStatus(data?.deposit_status || 'pending');
+    }, [data?.deposit_status]);
 
     useEffect(() => {
         if (open) {
@@ -58,25 +66,49 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
         };
     }, [open]);
 
+    const handleDepositStatusChange = async (newStatus: string) => {
+        if (!newStatus || newStatus === depositStatus || isUpdatingDeposit) return;
+        setIsUpdatingDeposit(true);
+        try {
+            const response = await api.post(endPointApi.updateDepositStatus, {
+                quote_id: data.id || data._id,
+                deposit_status: newStatus,
+            });
+            if (response.data.success || response.data.status === 200) {
+                setDepositStatus(newStatus);
+                toast.success(`Deposit status updated to ${newStatus.toUpperCase()}`);
+                if (onStatusUpdate) onStatusUpdate();
+            } else {
+                toast.error(response.data.message || "Failed to update deposit status");
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Failed to update deposit status");
+        } finally {
+            setIsUpdatingDeposit(false);
+        }
+    };
+
     if (!open || !data) return null;
 
     const handleStatusChange = async (newStatus: string) => {
         setIsUpdating(true);
+        const quoteId = data._id || data.id;
         try {
             const response = await api.post(endPointApi.changeQuoteStatus, {
-                id: data.id || data._id,
+                quote_id: quoteId,
+                id: quoteId,
                 status: newStatus,
             });
 
             if (response.data.success || response.data.status === 200) {
-                toast.success(`Quote status updated to ${newStatus}`);
+                toast.success(`Quote status updated to ${newStatus.toUpperCase()}`);
+                data.status = newStatus;
                 if (onStatusUpdate) onStatusUpdate();
-                onClose();
             } else {
                 toast.error(response.data.message || "Failed to update status");
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to update status");
+            toast.error(error.response?.data?.message || error.message || "Failed to update status");
         } finally {
             setIsUpdating(false);
         }
@@ -137,6 +169,18 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
 
     const product = data.product_id || {};
     const vendor = data.vendor_id || {};
+
+    const parseDeposit = (val: any) => {
+        if (!val && val !== 0) return 0;
+        if (typeof val === 'number') return val;
+        const cleaned = String(val).replace(/,/g, '').trim();
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+    };
+
+    const rawQuoteDeposit = parseDeposit(data.deposit_amount);
+    const rawProductDeposit = parseDeposit(product.deposit_amount);
+    const depositAmount = rawQuoteDeposit > 0 ? rawQuoteDeposit : rawProductDeposit;
 
     const vendorName = vendor.full_name || product.vendor_name || data.vendor_name || 'Unknown Vendor';
     const businessName = vendor.business_name || 'No Business Name';
@@ -271,7 +315,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                     <div className="h-full pt-36 pb-24 overflow-y-auto custom-scrollbar">
                         <div className="px-6 py-6 space-y-8">
                             {/* Quick Stats */}
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                 <StatBadge 
                                     icon={Package} 
                                     label="Quantity" 
@@ -281,21 +325,72 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                 <StatBadge 
                                     icon={IndianRupee} 
                                     label="Total Price" 
-                                    value={`₹${parseFloat(data.calculated_price || data.total_price || '0').toLocaleString('en-IN')}`}
+                                    value={`₹${parseFloat(data.calculated_price || data.total_price || '0').toLocaleString('en-IN')}`} 
                                     color="bg-gradient-to-br from-emerald-500 to-green-600"
+                                />
+                                <StatBadge 
+                                    icon={IndianRupee} 
+                                    label="Deposit Amount" 
+                                    value={`₹${Number(depositAmount).toLocaleString('en-IN')}`} 
+                                    color="bg-gradient-to-br from-indigo-500 to-violet-600"
                                 />
                                 <StatBadge 
                                     icon={CalendarDays} 
                                     label="Duration" 
-                                    value={`${data.number_of_days || '-'} days`}
+                                    value={`${data.number_of_days || '-'} days`} 
                                     color="bg-gradient-to-br from-purple-500 to-pink-600"
                                 />
                                 <StatBadge 
                                     icon={Layers} 
                                     label="Month" 
-                                    value={data.month_name || '-'}
+                                    value={data.month_name || '-'} 
                                     color="bg-gradient-to-br from-orange-500 to-amber-600"
                                 />
+                            </div>
+
+                            {/* Customer Information Section */}
+                            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                                <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-gradient-to-b from-blue-600 to-cyan-500 rounded-full"></div>
+                                    Customer Information
+                                </h3>
+                                <div className="grid lg:grid-cols-3 gap-3">
+                                    <DetailCard 
+                                        icon={User} 
+                                        label="Customer Name" 
+                                        value={
+                                            (typeof data.user_id === 'object' && (data.user_id?.name || data.user_id?.full_name || (data.user_id?.first_name ? `${data.user_id.first_name} ${data.user_id?.last_name || ''}`.trim() : null))) ||
+                                            data.customer_name ||
+                                            data.user_name ||
+                                            'N/A'
+                                        } 
+                                        gradient="from-blue-600 to-indigo-600"
+                                    />
+                                    <DetailCard 
+                                        icon={Phone} 
+                                        label="Contact Number" 
+                                        value={
+                                            (typeof data.user_id === 'object' && (data.user_id?.mobile || data.user_id?.phone || data.user_id?.contact_number)) ||
+                                            data.customer_mobile ||
+                                            data.customer_phone ||
+                                            data.mobile ||
+                                            data.phone ||
+                                            'N/A'
+                                        } 
+                                        gradient="from-emerald-600 to-teal-600"
+                                    />
+                                    <DetailCard 
+                                        icon={Mail} 
+                                        label="Email Address" 
+                                        value={
+                                            (typeof data.user_id === 'object' && data.user_id?.email) ||
+                                            data.customer_email ||
+                                            data.email ||
+                                            'N/A'
+                                        } 
+                                        gradient="from-purple-600 to-pink-600"
+                                    />
+                                </div>
                             </div>
 
                             {/* Product Details Section */}
@@ -412,6 +507,41 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                         value={data.payment_status || 'Pending'} 
                                         gradient="from-amber-500 to-orange-500"
                                     />
+                                    {/* Security Deposit Card */}
+                                    <div className="group relative bg-white rounded-xl border border-slate-100 p-4 hover:shadow-md transition-all duration-300 hover:border-slate-200">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex items-start gap-3">
+                                                <div className="p-2.5 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
+                                                    <IndianRupee size={16} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-slate-400">Security Deposit</p>
+                                                    <p className="text-sm font-semibold text-slate-800 mt-1">
+                                                        ₹{Number(depositAmount).toLocaleString('en-IN')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1.5">
+                                                <span className="text-[11px] font-medium text-slate-400">Deposit Status</span>
+                                                <div className="inline-flex items-center">
+                                                    <select
+                                                        value={depositStatus}
+                                                        disabled={isUpdatingDeposit}
+                                                        onChange={(e) => handleDepositStatusChange(e.target.value)}
+                                                        className={`text-xs font-semibold py-1 px-2.5 rounded-md border transition-colors cursor-pointer outline-none ${
+                                                            depositStatus === 'paid'
+                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                                                                : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100'
+                                                        } ${isUpdatingDeposit ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        <option value="pending">Pending</option>
+                                                        <option value="paid">Paid</option>
+                                                    </select>
+                                                    {isUpdatingDeposit && <Loader2 size={12} className="ml-1.5 animate-spin text-slate-500" />}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <DetailCard 
                                         icon={FileText} 
                                         label="Transaction ID" 
@@ -541,7 +671,7 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                 >
                                     Close
                                 </Button>
-                                {data.status?.toLowerCase() === 'pending' && (
+                                {data.status?.toLowerCase() === 'pending' ? (
                                     <>
                                         <Button
                                             variant="destructive"
@@ -559,6 +689,22 @@ export default function QuoteDetailsModal({ open, data, onClose, onStatusUpdate 
                                             {isUpdating ? 'Updating...' : 'Approve Quote'}
                                         </Button>
                                     </>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-slate-500">Change Status:</span>
+                                        <select
+                                            value={data.status || 'pending'}
+                                            disabled={isUpdating}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                            className="text-xs font-semibold py-2 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 shadow-sm outline-none cursor-pointer hover:border-slate-400 focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <option value="pending">Pending</option>
+                                            <option value="approval">Approved</option>
+                                            <option value="delivery">In Delivery</option>
+                                            <option value="complete">Completed</option>
+                                            <option value="reject">Rejected</option>
+                                        </select>
+                                    </div>
                                 )}
                             </div>
                         </div>

@@ -139,6 +139,7 @@ export interface EndPointApi {
     getQuoteById: string;
     updateQuote: string;
     changeQuoteStatus: string;
+    updateDepositStatus: string;
     getQuoteStatuses: string;
 
     // Vendor Payments
@@ -348,6 +349,7 @@ const endPointApi: EndPointApi = {
     getQuoteById: 'quote/getById',
     updateQuote: 'quote/update',
     changeQuoteStatus: 'quote/change-status',
+    updateDepositStatus: 'quote/update-deposit-status',
     getQuoteStatuses: 'quote/status-dropdown',
 
     // Vendor Payments

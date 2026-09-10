@@ -28,9 +28,15 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import PageLoader from "@/components/common/PageLoader";
+import { api } from "@/utils/axiosInstance";
+import endPointApi from "@/utils/endPointApi";
+import { toast } from "react-toastify";
+import StatusBadge from "@/components/common/StatusBadge";
 
 // Register only necessary modules
 ModuleRegistry.registerModules([
@@ -50,6 +56,16 @@ ModuleRegistry.registerModules([
 
 interface Quote {
   _id: string;
+  user_id?: {
+    _id?: string;
+    name?: string;
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
+    mobile?: string;
+    phone?: string;
+    email?: string;
+  };
   product_id?: {
     _id: string;
     product_name: string;
@@ -57,10 +73,13 @@ interface Quote {
     category_name?: string;
     sub_category_name?: string;
     product_type_name?: string;
+    deposit_amount?: string | number;
   };
   qty: number;
   calculated_price?: string;
   total_price?: string;
+  deposit_amount?: number | string;
+  deposit_status?: string;
   start_date?: string;
   end_date?: string;
   status: string;
@@ -81,9 +100,14 @@ interface TreeDataItem {
   type: 'vendor' | 'quote';
   vendorName?: string;
   productName?: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
   quantity?: number;
   price?: number;
   formattedPrice?: string;
+  deposit_amount?: number;
+  deposit_status?: string;
   status?: string;
   payment_status?: string;
   category_name?: string;
@@ -101,9 +125,93 @@ interface QuotesTreeTableProps {
   data: Quote[];
   onViewDetails: (quote: any) => void;
   loading?: boolean;
+  onDepositStatusChanged?: (quoteId: string, status: string) => void;
 }
 
-import StatusBadge from "@/components/common/StatusBadge";
+// Deposit cell renderer component with interactive status update
+const DepositCellRenderer = (props: ICellRendererParams) => {
+  if (props.data?.type === 'vendor') return null;
+
+  const quoteId = props.data?.originalData?._id || props.data?.originalData?.id || props.data?._id || props.data?.id;
+  const depositAmount = props.data?.deposit_amount ?? 0;
+  const initialStatus = props.data?.deposit_status || 'pending';
+
+  const [status, setStatus] = useState(initialStatus);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { onDepositStatusChanged } = props.context || {};
+
+  useEffect(() => {
+    setStatus(props.data?.deposit_status || 'pending');
+  }, [props.data?.deposit_status]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!newStatus || newStatus === status || isUpdating) return;
+    setIsUpdating(true);
+    try {
+      const res = await api.post(endPointApi.updateDepositStatus, {
+        quote_id: quoteId,
+        id: quoteId,
+        deposit_status: newStatus,
+      });
+      if (res?.data?.success || res?.data?.status === 200) {
+        setStatus(newStatus);
+        if (props.data) {
+          props.data.deposit_status = newStatus;
+          if (props.data.originalData) {
+            props.data.originalData.deposit_status = newStatus;
+          }
+        }
+        toast.success(`Deposit status updated to ${newStatus.toUpperCase()}`);
+        if (onDepositStatusChanged) {
+          onDepositStatusChanged(quoteId, newStatus);
+        }
+      } else {
+        toast.error(res?.data?.message || 'Failed to update deposit status');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to update deposit status');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const getStatusBadgeStyle = (st: string) => {
+    const s = String(st || '').toLowerCase();
+    switch (s) {
+      case 'paid':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100/80 focus:border-emerald-500';
+      default:
+        return 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100/80 focus:border-amber-500';
+    }
+  };
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="flex items-center gap-2 h-full py-1"
+    >
+      <span className="text-xs font-bold text-slate-800 whitespace-nowrap min-w-[32px]">
+        ₹{Number(depositAmount).toLocaleString('en-IN')}
+      </span>
+      <div className="inline-flex items-center">
+        <select
+          value={status}
+          disabled={isUpdating}
+          onChange={(e) => handleStatusChange(e.target.value)}
+          className={`text-xs font-semibold py-1 px-2.5 rounded-md border transition-colors cursor-pointer outline-none ${
+            status === 'paid'
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+              : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100'
+          } ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+        </select>
+        {isUpdating && <Loader2 size={12} className="ml-1.5 animate-spin text-slate-500" />}
+      </div>
+    </div>
+  );
+};
 
 // Status cell renderer component
 const StatusCellRenderer = (props: ICellRendererParams) => {
@@ -167,6 +275,7 @@ export default function QuotesTreeTable({
   data,
   onViewDetails,
   loading = false,
+  onDepositStatusChanged,
 }: QuotesTreeTableProps) {
   const gridRef = useRef<AgGridReact>(null);
   const [quickFilterText, setQuickFilterText] = useState('');
@@ -211,6 +320,24 @@ export default function QuotesTreeTable({
           const price = parseFloat(quote.calculated_price || quote.total_price || '0');
           const startDate = quote.start_date ? new Date(quote.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
           const endDate = quote.end_date ? new Date(quote.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+          
+          const parseDeposit = (val: any) => {
+            if (!val && val !== 0) return 0;
+            if (typeof val === 'number') return val;
+            const cleaned = String(val).replace(/,/g, '').trim();
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+          };
+
+          const rawQuoteDeposit = parseDeposit((quote as any).deposit_amount);
+          const rawProductDeposit = parseDeposit((quote.product_id as any)?.deposit_amount);
+          const depositAmount = rawQuoteDeposit > 0 ? rawQuoteDeposit : rawProductDeposit;
+          const depositStatus = (quote as any).deposit_status || (depositAmount > 0 ? 'pending' : 'not_applicable');
+
+          const customer = typeof quote.user_id === 'object' && quote.user_id !== null ? quote.user_id : null;
+          const customerName = customer?.name || customer?.full_name || (customer?.first_name ? `${customer.first_name} ${customer.last_name || ''}`.trim() : '') || '-';
+          const customerPhone = customer?.mobile || customer?.phone || '-';
+          const customerEmail = customer?.email || '';
 
           return {
             id: quote._id || `quote-${vendorIndex}-${quoteIndex}`,
@@ -218,9 +345,14 @@ export default function QuotesTreeTable({
             type: 'quote',
             vendorName: vendorName,
             productName: quote.product_id?.product_name || 'Unknown Product',
+            customerName: customerName,
+            customerPhone: customerPhone,
+            customerEmail: customerEmail,
             quantity: quote.qty || 0,
             price: price,
             formattedPrice: formatPrice(price),
+            deposit_amount: depositAmount,
+            deposit_status: depositStatus,
             status: quote.status || 'pending',
             payment_status: quote.payment_status || 'pending',
             category_name: quote.product_id?.category_name,
@@ -245,6 +377,28 @@ export default function QuotesTreeTable({
 
   // Column definitions (keeping existing)
   const columnDefs: ColDef<TreeDataItem>[] = useMemo(() => [
+    {
+      headerName: "Customer",
+      field: "customerName",
+      cellRenderer: (params: ICellRendererParams) => {
+        if (params.data?.type !== 'quote') return null;
+        const name = params.data?.customerName || '-';
+        const phone = params.data?.customerPhone;
+        return (
+          <div className="flex flex-col justify-center h-full py-0.5 leading-tight">
+            <span className="text-xs font-semibold text-slate-800 truncate" title={name}>
+              {name}
+            </span>
+            {phone && phone !== '-' && (
+              <span className="text-[11px] text-slate-500 font-normal">
+                {phone}
+              </span>
+            )}
+          </div>
+        );
+      },
+      minWidth: 160,
+    },
     {
       headerName: "Category",
       field: "category_name",
@@ -286,8 +440,14 @@ export default function QuotesTreeTable({
       valueGetter: (params: ValueGetterParams<TreeDataItem, string>) => {
         return params.data?.type === 'quote' ? params.data.formattedPrice : '';
       },
-      minWidth: 150,
+      minWidth: 130,
       cellStyle: () => ({ fontWeight: 'bold', color: '#059669', textAlign: 'left' }),
+    },
+    {
+      headerName: "Deposit",
+      field: "deposit_amount",
+      cellRenderer: DepositCellRenderer,
+      minWidth: 175,
     },
     {
       headerName: "Dates",
@@ -381,7 +541,8 @@ export default function QuotesTreeTable({
   // Context object for cell renderers
   const context = useMemo(() => ({
     onViewDetails,
-  }), [onViewDetails]);
+    onDepositStatusChanged,
+  }), [onViewDetails, onDepositStatusChanged]);
 
   return (
     <div className="space-y-2 h-full flex flex-col relative">
@@ -409,11 +570,9 @@ export default function QuotesTreeTable({
           groupDisplayType="singleColumn"
           treeDataChildrenField="children"
           quickFilterText={quickFilterText}
-          rowHeight={45}
+          rowHeight={46}
           headerHeight={48}
           overlayNoRowsTemplate="<span></span>"
-          
-          
         />
       </div>
     </div>
