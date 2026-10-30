@@ -23,10 +23,10 @@ import CommonDeleteModal from "@/components/common/CommonDeleteModal";
 import PageLoader from "@/components/common/PageLoader";
 
 const bannerSchema = z.object({
-  title: z.string().min(3, "Title is required"),
+  title: z.string().optional().default(""),
   subtitle: z.string().optional().default(""),
   description: z.string().optional().default(""),
-  color: z.string().optional().default("bg-blue-900"),
+  color: z.string().optional().default(""),
   link: z.string().optional().default(""),
   status: z.enum(["active", "inactive"]).optional().default("active"),
   image: z.any().refine((files) => files && (files === "existing" || files.length > 0), "Image is required"),
@@ -37,7 +37,7 @@ type BannerFormValues = z.infer<typeof bannerSchema>;
 interface BannerRow {
   id: string;
   _id: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   image: string;
@@ -122,7 +122,7 @@ export default function BannerPage() {
     resolver: zodResolver(bannerSchema) as any,
     defaultValues: {
       status: "active",
-      color: "bg-blue-900",
+      color: "",
     },
   });
 
@@ -142,7 +142,7 @@ export default function BannerPage() {
       if (acceptedFiles.length > 0) {
         const rawFile = acceptedFiles[0];
         const file = await compressImage(rawFile, 1024, 0.85);
-        
+
         // Basic check for image proportions (optional, can be more strict)
         const img = new Image();
         img.src = URL.createObjectURL(file);
@@ -180,7 +180,7 @@ export default function BannerPage() {
       setPreviewImage(objectUrl);
       return () => URL.revokeObjectURL(objectUrl);
     } else if (watchImage !== 'existing') {
-        setPreviewImage(null);
+      setPreviewImage(null);
     }
   }, [watchImage]);
 
@@ -228,10 +228,10 @@ export default function BannerPage() {
     try {
       setIsLoading(true);
       const formData = new FormData();
-      formData.append("title", data.title);
+      formData.append("title", data.title || "");
       formData.append("subtitle", data.subtitle || "");
       formData.append("description", data.description || "");
-      formData.append("color", data.color || "bg-blue-900");
+      formData.append("color", data.color || "");
       formData.append("link", data.link || "");
       formData.append("status", data.status);
 
@@ -258,7 +258,7 @@ export default function BannerPage() {
           title: "",
           subtitle: "",
           description: "",
-          color: "bg-blue-900",
+          color: "",
           link: "",
           status: "active",
           image: undefined
@@ -276,13 +276,13 @@ export default function BannerPage() {
 
   const handleEdit = (banner: BannerRow) => {
     setEditingId(banner._id || banner.id);
-    setValue("title", banner.title);
+    setValue("title", banner.title || "");
     setValue("subtitle", banner.subtitle || "");
     setValue("description", banner.description || "");
-    setValue("color", banner.color || "bg-blue-900");
+    setValue("color", banner.color || "");
     setValue("link", banner.link || "");
     setValue("status", banner.status);
-    setValue("image", "existing"); 
+    setValue("image", "existing");
     setPreviewImage(null);
     clearErrors();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -319,7 +319,7 @@ export default function BannerPage() {
       title: "",
       subtitle: "",
       description: "",
-      color: "bg-blue-900",
+      color: "",
       link: "",
       status: "active",
       image: undefined
@@ -339,13 +339,13 @@ export default function BannerPage() {
             <div className="flex-shrink-0">
               <img
                 src={imageUrl || ""}
-                alt={params.data.title}
+                alt={params.data.title || "Banner"}
                 className="w-12 h-8 rounded object-cover border border-slate-200 shadow-sm"
                 onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/120x50?text=No+Image'; }}
               />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-medium text-slate-700 text-sm truncate">{params.data.title}</span>
+              <span className="font-medium text-slate-700 text-sm truncate">{params.data.title || "—"}</span>
               {params.data.subtitle && <span className="text-xs text-slate-400 truncate">{params.data.subtitle}</span>}
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function BannerPage() {
           "px-2 py-1 rounded-full text-xs font-semibold",
           params.value === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
         )}>
-          {params.value.charAt(0).toUpperCase() + params.value.slice(1) }
+          {params.value.charAt(0).toUpperCase() + params.value.slice(1)}
         </span>
       ),
     },
@@ -378,176 +378,176 @@ export default function BannerPage() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
-  <div className="flex items-center justify-between">
-    <h2 className="text-3xl font-bold tracking-tight text-slate-900">Banner Management</h2>
-  </div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Banner Management</h2>
+      </div>
 
-  <div className="grid gap-4 lg:grid-cols-3">
-    <div className="lg:col-span-1">
-      <Card className="sticky top-16 border-slate-100 shadow-sm">
-        <CardHeader className="pb-2 pt-4">
-          <CardTitle className="text-base">{editingId ? 'Edit Banner' : 'New Banner'}</CardTitle>
-          {/* <CardDescription className="text-xs">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <Card className="sticky top-16 border-slate-100 shadow-sm">
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-base">{editingId ? 'Edit Banner' : 'New Banner'}</CardTitle>
+              {/* <CardDescription className="text-xs">
             {editingId ? 'Update banner details' : 'Add a new banner to the homepage carousel.'}
           </CardDescription> */}
-        </CardHeader>
-        <CardContent className="pt-0">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Banner Title <span className="text-red-500">*</span></label>
-              <Input {...register("title")} placeholder="Main title" error={errors.title?.message} className="h-9 text-sm" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Subtitle</label>
-              <Input {...register("subtitle")} placeholder="Secondary text" className="h-9 text-sm" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Description</label>
-              <textarea 
-                {...register("description")} 
-                className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[70px] transition-all" 
-                placeholder="Short description"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700">Background Color</label>
-                <Input {...register("color")} placeholder="bg-blue-900" className="h-9 text-sm" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-700">Status</label>
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <SearchableDropdown
-                      options={[
-                        { label: "Active", value: "active" },
-                        { label: "Inactive", value: "inactive" }
-                      ]}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select status"
-                      buttonClassName="h-9"
+            </CardHeader>
+            <CardContent className="pt-0">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Banner Title</label>
+                  <Input {...register("title")} placeholder="Main title" error={errors.title?.message} className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Subtitle</label>
+                  <Input {...register("subtitle")} placeholder="Secondary text" className="h-9 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Description</label>
+                  <textarea
+                    {...register("description")}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 ring-offset-background placeholder:text-muted-foreground focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[70px] transition-all"
+                    placeholder="Short description"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700">Background Color</label>
+                    <Input {...register("color")} placeholder="bg-blue-900" className="h-9 text-sm" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700">Status</label>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <SearchableDropdown
+                          options={[
+                            { label: "Active", value: "active" },
+                            { label: "Inactive", value: "inactive" }
+                          ]}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select status"
+                          buttonClassName="h-9"
+                        />
+                      )}
                     />
-                  )}
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Link URL</label>
-              <Input {...register("link")} placeholder="https://..." className="h-9 text-sm" />
-            </div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Link URL</label>
+                  <Input {...register("link")} placeholder="https://..." className="h-9 text-sm" />
+                </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700">Banner Image (1200x500) <span className="text-red-500">*</span></label>
-              <div
-                {...getRootProps()}
-                className={cn(
-                  "border-2 border-dotted rounded-lg relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[120px]",
-                  isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
-                  errors.image ? "border-red-500 bg-red-50" : ""
-                )}
-              >
-                <input {...getInputProps()} />
-                {(previewImage || (editingId && banners.find(b => (b._id || b.id) === editingId)?.image)) ? (
-                  <div className="absolute inset-0 w-full h-full group">
-                    <img
-                      src={previewImage || getImageUrl(banners.find(b => (b._id || b.id) === editingId)?.image || '') || ''}
-                      alt="Banner Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900">
-                        <Edit size={12} /> Change
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Banner Image (1200x500) <span className="text-red-500">*</span></label>
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      "border-2 border-dotted rounded-lg relative overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[120px]",
+                      isDragActive ? "border-primary bg-primary/5" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50",
+                      errors.image ? "border-red-500 bg-red-50" : ""
+                    )}
+                  >
+                    <input {...getInputProps()} />
+                    {(previewImage || (editingId && banners.find(b => (b._id || b.id) === editingId)?.image)) ? (
+                      <div className="absolute inset-0 w-full h-full group">
+                        <img
+                          src={previewImage || getImageUrl(banners.find(b => (b._id || b.id) === editingId)?.image || '') || ''}
+                          alt="Banner Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-white/90 p-1.5 rounded-lg flex items-center gap-1 text-xs font-medium text-slate-900">
+                            <Edit size={12} /> Change
+                          </div>
+                        </div>
+                        {previewImage && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewImage(null);
+                              setValue('image', undefined);
+                            }}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20"
+                          >
+                            <X size={10} />
+                          </button>
+                        )}
                       </div>
-                    </div>
-                    {previewImage && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreviewImage(null);
-                          setValue('image', undefined);
-                        }}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors z-20"
-                      >
-                        <X size={10} />
-                      </button>
+                    ) : (
+                      <div className="p-3">
+                        <Plus className="h-5 w-5 text-slate-400 mx-auto mb-1" />
+                        <p className="text-[11px] text-slate-500">Drag & drop or click</p>
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <div className="p-3">
-                    <Plus className="h-5 w-5 text-slate-400 mx-auto mb-1" />
-                    <p className="text-[11px] text-slate-500">Drag & drop or click</p>
-                  </div>
-                )}
+                  {errors.image && <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>}
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="animate-spin h-3 w-3" /> : (editingId ? 'Update' : 'Publish')}
+                  </Button>
+                  <Button type="button" variant="outline" className="flex-1 h-9 rounded-lg text-sm" onClick={handleCancelEdit}>Cancel</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-2">
+          <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base">Banners</CardTitle>
+                  {/* <CardDescription className="text-xs">Homepage carousel banners</CardDescription> */}
+                </div>
+                <div className="relative w-full sm:w-56">
+                  <Input
+                    placeholder="Search..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="pl-8 h-9 text-sm"
+                  />
+                  <MdSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  {searchText && (
+                    <button
+                      onClick={() => setSearchText("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
-              {errors.image && <p className="text-xs text-red-500 mt-0.5">{errors.image.message as string}</p>}
-            </div>
-
-            <div className="flex gap-2 pt-1">
-              <Button type="submit" className="flex-1 h-9 rounded-lg btn-primary text-sm" disabled={isLoading}>
-                {isLoading ? <Loader2 className="animate-spin h-3 w-3" /> : (editingId ? 'Update' : 'Publish')}
-              </Button>
-              <Button type="button" variant="outline" className="flex-1 h-9 rounded-lg text-sm" onClick={handleCancelEdit}>Cancel</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-
-    <div className="lg:col-span-2">
-      <Card className="border-slate-100 shadow-sm overflow-hidden flex flex-col">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-2 px-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-base">Banners</CardTitle>
-              {/* <CardDescription className="text-xs">Homepage carousel banners</CardDescription> */}
-            </div>
-            <div className="relative w-full sm:w-56">
-              <Input 
-                placeholder="Search..." 
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="pl-8 h-9 text-sm" 
+            </CardHeader>
+            <CardContent className="p-0 flex-1 relative">
+              <AgGridTable
+                loading={isFetching}
+                ref={gridRef}
+                rowData={banners}
+                columns={columnDefs as ColDef[]}
+                onSelectionChange={setSelectedRows}
+                gridHeight={550}
+                showCheckboxes={false}
+                noRowsMessage="No banner found"
               />
-              <MdSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              {searchText && (
-                <button
-                  onClick={() => setSearchText("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 flex-1 relative">
-          <AgGridTable
-            loading={isFetching}
-            ref={gridRef}
-            rowData={banners}
-            columns={columnDefs as ColDef[]}
-            onSelectionChange={setSelectedRows}
-            gridHeight={550}
-            showCheckboxes={false}
-            noRowsMessage="No banner found"
-          />
-        </CardContent>
-      </Card>
-    </div>
-  </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-  <CommonDeleteModal
-    open={showDeletePopup}
-    title="Delete Banner?"
-    description={`Are you sure you want to delete "${bannerToDelete?.title}"?`}
-    isLoading={isDeleting}
-    onCancel={() => setShowDeletePopup(false)}
-    onConfirm={handleConfirmDelete}
-  />
-</div>
+      <CommonDeleteModal
+        open={showDeletePopup}
+        title="Delete Banner?"
+        description={`Are you sure you want to delete ${bannerToDelete?.title ? `"${bannerToDelete.title}"` : 'this banner'}?`}
+        isLoading={isDeleting}
+        onCancel={() => setShowDeletePopup(false)}
+        onConfirm={handleConfirmDelete}
+      />
+    </div>
   );
 }
